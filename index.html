@@ -577,7 +577,7 @@ function update() {
     }
     
     for (let plat of platforms) {
-      if (plat.x>player.x+600) {continue;}
+      if (plat.x>player.x+200) {continue;}
         if (player.x < plat.x + plat.width &&
             player.x + player.width > plat.x &&
             player.y < plat.y + plat.height &&
@@ -614,6 +614,7 @@ function update() {
         }
     }
     for (let portal of portals) {
+      if (portal.x>player.x+300) {continue;}
         if (player.x < portal.x + 20 &&
             player.x + player.width > portal.x &&
             player.y < portal.y + 20 &&
@@ -625,6 +626,7 @@ function update() {
     }
     
     for (let dang of dangers) {
+      if (dang.x>player.x+300) {continue;}
         if (player.x < dang.x + dang.width &&
             player.x + player.width > dang.x &&
             player.y < dang.y + dang.height &&
@@ -660,7 +662,7 @@ function draw() {
     ctx.fillStyle = '#287271';
     nope = false
     platforms.forEach(plat => {
-        if (plat.x > player.x+600) {return;}
+        if (plat.x>player.x+800) {return;}
         if(plat.b){
           for (let b = 0; b < plat.width; b += 20) {
             ctx.drawImage(slime, plat.x + b, plat.y, 20, plat.height);
