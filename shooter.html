@@ -166,7 +166,7 @@ function update() {
       mobSpawnCooldown = 300 - 6*kills
       spawnEnemy("basic")
     } else if (kills > 20) {
-      mobSpawnCooldown = 250 - 3*(kills-20)
+      mobSpawnCooldown = 250 - 2*(kills-20)
       spawnEnemy("level2")
       let randomNum = Math.random()
       randomNum -= (kills-20)/10
