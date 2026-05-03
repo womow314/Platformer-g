@@ -24,11 +24,11 @@
 <script>
   
 let mostKills = 0;
-
-try {
-  mostKills = Number(localStorage.getItem("mostKills")) || 0;
-} catch (e) {
-  mostKills = 0;
+if (localStorage.getItem("mostKills")) {
+    mostKills = Number(localStorage.getItem("mostKills"));
+} else {
+    mostKills = 0;
+  localStorage.setItem("mostKills", "0")
 }
 
 
