@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" href="styles1.css" />
+</head>
+<body>
+  <img src="https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(8).png" width = 700px />
+  <div id="homeButtons">
+    <button onclick="launchPlatProc()" id="plat">Launch Platformer</button>
+    <button onclick="launchShooter()" id="shooter">Launch Shooter</button>
+    <button onclick="" id="maze">Launch Maze</button>
+    <button onclick="" id="clicker">Launch Clicker</button>
+  </div>
+  <script>
+    
+    function launchPlatProc() {
+      window.location.href = "platformer.html";
+    } 
+    
+    function launchShooter() {
+      window.location.href = "shooter.html";
+    } 
+    localStorage.setItem('mostKills', '0');
+    
+    window.addEventListener("keydown", function(e) {
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].indexOf(e.code) > -1) {
+        e.preventDefault();
+    }
+}, false);
+  </script>
+</body>
+</html>
