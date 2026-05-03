@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shooter</title>
+    <link rel="stylesheet" href="styles1.css" />
+</head>
+<body>
+<canvas id="gameCanvas" height="400" width="800"></canvas>
+<button onclick="home()" id="home">Home</button>
+<div id="stuff">
+  <p id="cord">x: 0, y: 0</p>
+  <select id="levelSelect">
+    <option>--</option>
+    <option id="cooldown" value="1">Decrease Cooldown: 0.1 second, 3 coins</option>
+  </select>
+  <button onclick="buy()">Buy</button>
+  
+  <details>
+    <summary>Show Stats</summary>
+    <p id="statsSpeed">Speed: 5</p>
+    <p id="statsCooldown">Bullet cooldown: 60</p>
+  </details>
+</div>
+<script>
+  
+let mostKills = 0;
+
+try {
+  mostKills = Number(localStorage.getItem("mostKills")) || 0;
+} catch (e) {
+  mostKills = 0;
+}
+
+
+const brick = new Image();
+brick.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(4).png";
+
+let sky = new Image();
+sky.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(10).png";
+
+
+let playerImg = new Image();
+playerImg.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(1).png";
+
+let enemyBasic = new Image();
+enemyBasic.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(12).png";
+
+let enemyLevel2 = new Image();
+enemyLevel2.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(14).png"
+
+const bulletIMG = new Image();
+bulletIMG.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%2012.49.21%20PM.png";
+
+let kills = 0;
+
+decreaseCooldownCost = 3;
+
+const player = {
+  x: 30,
+  y: 120,
+  dx: 0,
+  dy: 0,
+  speed: 5,
+  currentSpeed: 5,
+  direction: "e"
+};
+
+enemies = []
+
+function spawnEnemy(type="basic") {
+  px = Math.random()*1770-1000
+  py = Math.random()*1530 - 770
+  while ((px + 45-player.x)*(px+45 -player.x) +(py +45-player.y)*(py+45-player.y) < 16900) {
+    px = Math.random()*1770-1000
+    py = Math.random()*1530 - 770
+  }
+  let Ehealth;
+  let typeImage;
+  let enemySize
+  if(type === "basic") {
+    Ehealth = 1
+    enemySize = 90
+    typeImage = enemyBasic
+  } else if (type === "level2") {
+    Ehealth = 3
+    typeImage = enemyLevel2
+    enemySize = 30
+  }
+  enemies.push({x:px, y:py, health: Ehealth, image: typeImage, enemyType: type, size: enemySize})
+}
+
+spawnEnemy("basic")
+spawnEnemy("basic")
+spawnEnemy("basic")
+
+
+keys = {};
+
+let bulletCooldown = 0;
+let bulletCooldownMax = 60
+
+function home() {
+  window.location.href = "index.html";
+} 
+
+window.addEventListener('keydown', e => keys[e.code] = true);
+window.addEventListener('keyup', e => keys[e.code] = false);
+
+window.addEventListener("keydown", function(e) {
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].indexOf(e.code) > -1) {
+        e.preventDefault();
+    }
+}, false);
+
+let bullets = []
+let walls = []
+function addBullet (px, py, pdx, pdy) {
+  bullets.push({x:px, y:py, dx:pdx, dy:pdy})
+}
+function addWall(px, py, w, h) {
+  walls.push({x:px, y:py, width:w, height:h})
+}
+
+addWall(-1500, 800, 2500, 300)
+addWall(-1500, -1060, 2500, 300)
+addWall(-1500, -800, 500, 1600)
+addWall(800, -1000, 500, 2000)
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const bulletSpeed = 10
+
+let mobSpawnCooldown = 300
+let MobsOnBoard = 3
+let coins = 0
+
+const MobSpeed = 1
+
+function buy() {
+  if (document.querySelector('#levelSelect').value === "1" && coins >= decreaseCooldownCost) {
+    bulletCooldownMax -= 5
+    coins -= decreaseCooldownCost
+    decreaseCooldownCost += 1
+    document.querySelector('#cooldown').innerText = `Decrease Cooldown: 0.1 second, ${decreaseCooldownCost} coins`
+    document.querySelector('#statsCooldown').innerText = `Bullet cooldown: ${bulletCooldownMax}`
+  }
+}
+
+function update() {
+  player.dx = 0; player.dy = 0;
+  player.currentSpeed = player.speed
+  if(keys['ShiftRight']||keys['ShiftLeft']) player.currentSpeed = player.speed *1.5;
+  if (keys['KeyW']||keys['ArrowUp']) {player.dy = -player.currentSpeed; player.direction = "n"}
+  if (keys['KeyS']||keys['ArrowDown']) {player.dy = player.currentSpeed; player.direction = "s"}
+  if (keys['KeyA']||keys['ArrowLeft']) {player.dx = -player.currentSpeed; player.direction = "e"}
+  if (keys['KeyD']||keys['ArrowRight']) {player.dx = player.currentSpeed; player.direction = "w"}
+  
+  MobsOnBoard = enemies.length
+  bulletCooldown -= 1
+  mobSpawnCooldown -= 1
+  
+  if (MobsOnBoard  <= 0) mobSpawnCooldown = 0
+  if (mobSpawnCooldown <=0) {
+    if (kills <= 20){
+      mobSpawnCooldown = 300 - 6*kills
+      spawnEnemy("basic")
+    } else if (kills > 20) {
+      mobSpawnCooldown = 250 - 3*(kills-20)
+      spawnEnemy("level2")
+      let randomNum = Math.random()
+      randomNum -= (kills-20)/10
+      if(randomNum < 0.2) spawnEnemy("basic");
+      if(randomNum <0.05) spawnEnemy("basic");
+    }
+  }
+  
+  if (keys['Space'] && bulletCooldown <= 0) {
+    bulletCooldown = bulletCooldownMax
+    let pdx;
+    let pdy;
+    if (player.direction === "e") {
+      pdx = 1;
+      pdy = 0;
+    } else if (player.direction === "n") {
+      pdx = 0;
+      pdy = -1;
+    } else if (player.direction === "s") {
+      pdx = 0;
+      pdy = 1;
+    } else if (player.direction === "w") {
+      pdx = -1;
+      pdy = 0;
+    }
+    addBullet(player.x, player.y, pdx, pdy)
+  }
+  
+  for (let enemy of enemies) {
+    if (player.x > enemy.x +enemy.size/2) enemy.x += MobSpeed
+    if (player.x < enemy.x+enemy.size/2) enemy.x -= MobSpeed
+    
+    if (player.y > enemy.y+enemy.size/2) enemy.y += MobSpeed
+    if (player.y < enemy.y+enemy.size/2) enemy.y -= MobSpeed
+  }
+  
+  for (let i = 0; i < bullets.length; i ++){
+    bullet = bullets[i]
+    bullet.x -= bullet.dx * bulletSpeed
+    bullet.y += bullet.dy * bulletSpeed
+    for (let e = 0; e < enemies.length; e ++) {
+      enemy = enemies[e]
+      if ((enemy.x + enemy.size/2-bullet.x)*(enemy.x+enemy.size/2 -bullet.x) +(enemy.y +enemy.size/2-bullet.y)*(enemy.y+enemy.size/2-bullet.y) < (enemy.size/2)*(enemy.size/2)-200) {
+        bullets.splice(i, 1)
+        enemy.health -= 1
+        if (enemy.health <= 0) {
+          enemies.splice(e, 1);
+          kills +=1
+          coins += 1
+        }
+      }
+    }
+  }
+  
+  for (let e = 0; e < enemies.length; e ++) {
+    enemy = enemies[e]
+    if (player.x < enemy.x + enemy.size && player.x + 30 > enemy.x && player.y < enemy.y + enemy.size && player.y + 30 > enemy.y) {
+      home()
+    }
+  }
+  
+  
+  player.x += player.dx
+  for (let wall of walls) {
+    if (player.x < wall.x + wall.width && player.x + 30 > wall.x && player.y < wall.y + wall.height && player.y + 30 > wall.y) {
+      player.x -= player.dx;
+    }
+  }
+  
+  player.y += player.dy
+  for (let wall of walls) {
+    if (player.x < wall.x + wall.width && player.x + 30 > wall.x && player.y < wall.y + wall.height && player.y + 30 > wall.y) {
+      player.y -= player.dy;
+    }
+  }
+  
+  scrollX = player.x - 400;
+  scrollY = player.y - 0.5*canvas.height;
+  if (kills > mostKills) {
+    mostKills = kills;
+    localStorage.setItem("mostKills", mostKills);
+  }
+  document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-(player.y/10))}, Mobs on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}, Most Kills: ${mostKills}`
+}
+
+
+function draw() {
+    
+    ctx.save();
+    
+    ctx.translate(
+      Math.min(-scrollX),
+      Math.max(-scrollY)
+    );
+    
+    for (let b = -2000; b < 2000; b += 20) {
+      for (let d = -2000; d < 2000; d += 20) {
+        if (player.x > b+500 || player.x <b-500) { continue}
+        if (player.y > d+500 || player.y <d-500) { continue}
+        ctx.drawImage(sky, b, d, 20, 20);
+      }
+    }
+  
+    ctx.drawImage(playerImg, player.x, player.y, 30, 30);
+
+    
+    //ctx.fillStyle = '#287271';
+    //ctx.fillRect(20, 20, 40, 40);
+    
+    walls.forEach(wall => {
+      for (let b = 0; b < wall.width; b += 10) {
+        for (let d = 0; d < wall.height; d += 10) {
+          ctx.drawImage(brick, wall.x + b, wall.y+d, 10, 10);
+        }
+      }
+    });
+    
+    bullets.forEach(bullet => {
+        ctx.drawImage(bulletIMG, bullet.x, bullet.y, 10, 10);
+    });
+    
+    enemies.forEach(enemy => {
+        ctx.drawImage(enemy.image, enemy.x, enemy.y, enemy.size, enemy.size);
+    });
+    
+    
+    
+    ctx.restore(); 
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+    
+}
+
+loop();
+</script>
+</body>
+</html>
