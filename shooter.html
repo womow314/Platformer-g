@@ -152,7 +152,7 @@ function buy() {
     bulletPower += 1
     coins -= increasePowerCost
     increasePowerCost += 1
-    document.querySelector('#power').innerText = `Increase Bullet Power: +1 damage, 5 coins`
+    document.querySelector('#power').innerText = `Increase Bullet Power: +1 damage, ${increasePowerCost} coins`
     document.querySelector('#statsPower').innerText = `Bullet power: ${bulletPower}`
   }
 }
