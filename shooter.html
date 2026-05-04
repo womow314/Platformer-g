@@ -12,6 +12,7 @@
   <select id="levelSelect">
     <option>--</option>
     <option id="cooldown" value="1">Decrease Cooldown: 0.1 second, 3 coins</option>
+    <option id="power" value="2">Increase Bullet Power: +1 damage, 5 coins</option>
   </select>
   <button onclick="buy()">Buy</button>
   
@@ -19,16 +20,17 @@
     <summary>Show Stats</summary>
     <p id="statsSpeed">Speed: 5</p>
     <p id="statsCooldown">Bullet cooldown: 60</p>
+    <p id="statsPower">Bullet power: 1</p>
   </details>
 </div>
 <script>
   
 let mostKills = 0;
-if (localStorage.getItem("mostKills")) {
-    mostKills = Number(localStorage.getItem("mostKills"));
-} else {
-    mostKills = 0;
-  localStorage.setItem("mostKills", "0")
+
+try {
+  mostKills = Number(localStorage.getItem("mostKills")) || 0;
+} catch (e) {
+  mostKills = 0;
 }
 
 
@@ -130,10 +132,11 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 const bulletSpeed = 10
-
+let increasePowerCost = 5
 let mobSpawnCooldown = 300
 let MobsOnBoard = 3
 let coins = 0
+let bulletPower = 1
 
 const MobSpeed = 1
 
@@ -144,6 +147,13 @@ function buy() {
     decreaseCooldownCost += 1
     document.querySelector('#cooldown').innerText = `Decrease Cooldown: 0.1 second, ${decreaseCooldownCost} coins`
     document.querySelector('#statsCooldown').innerText = `Bullet cooldown: ${bulletCooldownMax}`
+  }
+  if (document.querySelector('#levelSelect').value === "2" && coins >= increasePowerCost) {
+    bulletPower += 1
+    coins -= increasePowerCost
+    increasePowerCost += 1
+    document.querySelector('#power').innerText = `Increase Bullet Power: +1 damage, 5 coins`
+    document.querySelector('#statsPower').innerText = `Bullet power: ${bulletPower}`
   }
 }
 
@@ -166,10 +176,10 @@ function update() {
       mobSpawnCooldown = 300 - 6*kills
       spawnEnemy("basic")
     } else if (kills > 20) {
-      mobSpawnCooldown = 250 - 2*(kills-20)
+      mobSpawnCooldown = Math.max(250 - 2*(kills-20), 120)
       spawnEnemy("level2")
       let randomNum = Math.random()
-      randomNum -= (kills-20)/10
+      randomNum -= (kills-20)/13
       if(randomNum < 0.2) spawnEnemy("basic");
       if(randomNum <0.05) spawnEnemy("basic");
     }
@@ -211,7 +221,7 @@ function update() {
       enemy = enemies[e]
       if ((enemy.x + enemy.size/2-bullet.x)*(enemy.x+enemy.size/2 -bullet.x) +(enemy.y +enemy.size/2-bullet.y)*(enemy.y+enemy.size/2-bullet.y) < (enemy.size/2)*(enemy.size/2)-200) {
         bullets.splice(i, 1)
-        enemy.health -= 1
+        enemy.health -= bulletPower
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
           kills +=1
@@ -249,7 +259,7 @@ function update() {
     mostKills = kills;
     localStorage.setItem("mostKills", mostKills);
   }
-  document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-(player.y/10))}, Mobs on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}, Most Kills: ${mostKills}`
+  document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-(player.y/10))}, Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}, Most Kills: ${mostKills}`
 }
 
 
