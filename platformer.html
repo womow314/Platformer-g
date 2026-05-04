@@ -100,58 +100,58 @@ const brick = new Image();
 //old brick
 //brick.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%2010.19.17%20AM.png";
 //new brick
-brick.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(4).png";
+brick.src = pixil-frame-0%20(4).png";
 
 let playerImg = new Image();
-playerImg.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(1).png";
+playerImg.src = "pixil-frame-0%20(1).png";
 //playerImg.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/astronought%20(1).png";
 
 const death = new Image();
 //old
 //death.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%209.58.46%20AM.png";
 //new
-death.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(5).png";
+death.src = "pixil-frame-0%20(5).png";
 
 const water = new Image();
 //old
 //water.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%204.26.43%20PM.png";
 //new
-water.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(6).png";
+water.src = "pixil-frame-0%20(6).png";
 
 
 const slime = new Image();
 //old
 //slime.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%2010.08.56%20AM.png";
 //new
-slime.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(11).png"
+slime.src = "pixil-frame-0%20(11).png"
 
 let sky = new Image();
 //sky
 //sky.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%2012.34.40%20PM.png";
 //cave
-sky.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(3).png";
+sky.src = "pixil-frame-0%20(3).png";
 
 let isCaveBackground = true
 
 const cannon = new Image();
-cannon.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(2).png";
+cannon.src = "pixil-frame-0%20(2).png";
 
 const portalIMG = new Image();
-portalIMG.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0-2.png";
+portalIMG.src = "pixil-frame-0-2.png";
 
 //https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0-2.png
 
 const bulletIMG = new Image();
-bulletIMG.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%2012.49.21%20PM.png";
+bulletIMG.src = "Screen%20Shot%202026-04-24%20at%2012.49.21%20PM.png";
 
 function changeBackground() {
   if (isCaveBackground) {
-    sky.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%2012.34.40%20PM.png";
+    sky.src = "Screen%20Shot%202026-04-24%20at%2012.34.40%20PM.png";
     isCaveBackground = false
     document.querySelector('#background').innerText = 'Cave'
   }
   else {
-    sky.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(3).png";
+    sky.src = "pixil-frame-0%20(3).png";
     isCaveBackground = true
     document.querySelector('#background').innerText = 'Sky'
   }
