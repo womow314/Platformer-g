@@ -15,7 +15,7 @@
     <option id="power" value="2">Increase Bullet Power: +1 damage, 5 coins</option>
   </select>
   <button onclick="buy()">Buy</button>
-  <button onclick="pause()">Pause</button>
+  <button onclick="pause()" id="pauseButton">Pause</button>
   
   <details>
     <summary>Show Stats</summary>
@@ -36,6 +36,8 @@ try {
 
 function pause() {
   isPaused = !isPaused;
+  document.querySelector('#pauseButton').innerText = "Pause"
+  if (isPaused) document.querySelector('#pauseButton').innerText = "Paused"
 }
 let isPaused = false
 
