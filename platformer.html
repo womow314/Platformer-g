@@ -313,7 +313,7 @@ function generateWorld() {
         currentX += 30
         currentY -= 80
         addPlatform(currentX, currentY, width,4000, false, false, true); 
-        addPlatform(currentX, currentY -20, width,thickness); 
+        addPlatform(currentX, currentY -20, width,thickness, false, isBouncy); 
         addPlatform(currentX, currentY -40, width,thickness, true); 
         const height = Math.floor(Math.random()*5) +1
           for (let i = 0; i <= height; i ++){
@@ -331,7 +331,7 @@ function generateWorld() {
         addPlatform(currentX, currentY-2000, 2000,4000, false, false, true); 
         
       } else if (roll === 10){ //Level 11
-        addPlatform(currentX, currentY, width, thickness);
+        addPlatform(currentX, currentY, width, thickness, false, isBouncy);
         SpawnEnemy(currentX, currentY-30);
         
       } else if (roll === 11){ //Level 12
@@ -359,17 +359,17 @@ function generateWorld() {
       } else if (roll === 13) { //Level 14
         let dir = 1;
         for (let j = 0; j < 6; j++) {
-          addPlatform(currentX + dir*80, currentY - j*70, 80, thickness);
+          addPlatform(currentX + dir*80, currentY - j*70, 80, thickness, false, isBouncy);
           dir *= -1;
         }
-        addPlatform(currentX + dir*80, currentY - 6*70, 200, thickness);
+        addPlatform(currentX + dir*80, currentY - 6*70, 200, thickness, false, isBouncy);
         addPlatform(currentX,currentY, 200, thickness);
         currentY -= 420;
       
       } else if (roll === 14) { //Level 15
         width = 0
         for (let j = 0; j < 6; j++) {
-          addPlatform(currentX + j*60, currentY - j*50, 30, thickness);
+          addPlatform(currentX + j*60, currentY - j*50, 30, thickness, false, isBouncy);
         }
         currentX += 250;
         currentY -= 300;
@@ -377,9 +377,9 @@ function generateWorld() {
       } else if (roll === 15) { // Level 16
         addPlatform(currentX, currentY + 40, 400, 40, true);
         for (let j = 0; j < 5; j++) {
-          addPlatform(currentX + j*80, currentY - j*40, 60, thickness);
+          addPlatform(currentX + j*80, currentY - j*40, 60, thickness, false, isBouncy);
         }
-        addPlatform(currentX, currentY -250, 400, thickness);
+        addPlatform(currentX, currentY -250, 400, thickness, false, isBouncy);
         currentX += 300;
         currentY -= 200;
       
@@ -388,14 +388,14 @@ function generateWorld() {
           addPlatform(currentX, currentY - j*160, 100, thickness, false, true);
           if (j % 2 === 0) addPlatform(currentX, currentY - j*160 + 20, 50, thickness, true);
           else addPlatform(currentX+50, currentY - j*160 + 20, 50, thickness, true);
-          addPlatform(currentX, currentY -600, 400, thickness);
+          addPlatform(currentX, currentY -600, 400, thickness, false, isBouncy);
         }
         currentX +=120
         currentY -= 600;
       
       } else if (roll === 17) { //Level 18
         for (let j = 0; j < 4; j++) {
-          addPlatform(currentX + j*120, currentY - j*40, 100, thickness);
+          addPlatform(currentX + j*120, currentY - j*40, 100, thickness, false, isBouncy);
           SpawnEnemy(currentX + j*120 + 50, currentY - j*40 - 30);
         }
         currentX += 200;
@@ -403,7 +403,7 @@ function generateWorld() {
       
       } else if (roll === 18) { //Level 19
         width = 200
-        addPlatform(currentX, currentY+60, 200, thickness);
+        addPlatform(currentX, currentY+60, 200, thickness, false, isBouncy);
         addPlatform(currentX, currentY - 250, 200, 250, false, false, true);
         currentX += 50;
         currentY -= 150;
@@ -418,7 +418,7 @@ function generateWorld() {
       
       }  else if (roll === 20) { // Level 21
         for (let j = 0; j < 5; j++) {
-          addPlatform(currentX + j*100, currentY - j*40, 20, thickness);
+          addPlatform(currentX + j*100, currentY - j*40, 20, thickness, false, isBouncy);
         }
         currentX += 300;
         currentY -= 200;
@@ -427,7 +427,7 @@ function generateWorld() {
         width = 240
         addPlatform(currentX, currentY, 180, thickness);
         addPortal(currentX+80, currentY-20, 0, -200);
-        addPlatform(currentX, currentY-160, 240, thickness);
+        addPlatform(currentX, currentY-160, 240, thickness, false, isBouncy);
         addPlatform(currentX+160, currentY-180, 20, thickness, true);
         currentY -= 180
     
