@@ -15,6 +15,7 @@
     <option id="power" value="2">Increase Bullet Power: +1 damage, 5 coins</option>
   </select>
   <button onclick="buy()">Buy</button>
+  <button onclick="pause()">Pause</button>
   
   <details>
     <summary>Show Stats</summary>
@@ -33,6 +34,10 @@ try {
   mostKills = 0;
 }
 
+function pause() {
+  isPaused = !isPaused;
+}
+let isPaused = false
 
 const brick = new Image();
 brick.src = "pixil-frame-0%20(4).png";
@@ -114,6 +119,12 @@ window.addEventListener("keydown", function(e) {
     }
 }, false);
 
+window.addEventListener("keydown", function(e) {
+    if (["KeyQ"].indexOf(e.code) > -1) {
+        pause()
+    }
+}, false);
+
 let bullets = []
 let walls = []
 function addBullet (px, py, pdx, pdy) {
@@ -158,6 +169,7 @@ function buy() {
 }
 
 function update() {
+  if (isPaused) return;
   player.dx = 0; player.dy = 0;
   player.currentSpeed = player.speed
   if(keys['ShiftRight']||keys['ShiftLeft']) player.currentSpeed = player.speed *1.5;
