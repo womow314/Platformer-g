@@ -13,6 +13,7 @@
     <option>--</option>
     <option id="cooldown" value="1">Decrease Cooldown: 0.1 second, 3 coins</option>
     <option id="power" value="2">Increase Bullet Power: +1 damage, 5 coins</option>
+    <option id="speed" value="3">Increase Speed: +1 speed, 5 coins</option>
   </select>
   <button onclick="buy()">Buy</button>
   <button onclick="pause()" id="pauseButton">Pause</button>
@@ -148,6 +149,7 @@ const bulletSpeed = 10
 let increasePowerCost = 5
 let mobSpawnCooldown = 300
 let MobsOnBoard = 3
+let increaseSpeedCost = 5
 let coins = 0
 let bulletPower = 1
 
@@ -167,6 +169,13 @@ function buy() {
     increasePowerCost += 1
     document.querySelector('#power').innerText = `Increase Bullet Power: +1 damage, ${increasePowerCost} coins`
     document.querySelector('#statsPower').innerText = `Bullet power: ${bulletPower}`
+  }
+  if (document.querySelector('#levelSelect').value === "3" && coins >= increaseSpeedCost) {
+    player.speed += 1
+    coins -= increaseSpeedCost
+    increaseSpeedCost += 1
+    document.querySelector('#speed').innerText = `Increase Speed: +1 speed, ${increaseSpeedCost} coins`
+    document.querySelector('#statsSpeed').innerText = `Speed: ${player.speed}`
   }
 }
 
