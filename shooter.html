@@ -180,6 +180,7 @@ function buy() {
 }
 
 function update() {
+  document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-(player.y/10))}, Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}, Most Kills: ${mostKills}`
   if (isPaused) return;
   player.dx = 0; player.dy = 0;
   player.currentSpeed = player.speed
@@ -282,7 +283,7 @@ function update() {
     mostKills = kills;
     localStorage.setItem("mostKills", mostKills);
   }
-  document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-(player.y/10))}, Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}, Most Kills: ${mostKills}`
+  
 }
 
 
