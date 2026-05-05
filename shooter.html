@@ -308,7 +308,7 @@ function draw() {
       for (let d = -2000; d < 2000; d += 20) {
         if (player.x > b+500 || player.x <b-500) { continue}
         if (player.y > d+500 || player.y <d-500) { continue}
-        ctx.drawImage(sky, b, d, 20, 20);
+        ctx.drawImage(sky, b, d, 21, 21);
       }
     }
   
@@ -344,7 +344,7 @@ function loop() {
     draw();
     setTimeout(() => {
     requestAnimationFrame(loop);
-  }, 10);
+  }, 5);
     
 }
 
