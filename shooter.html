@@ -218,13 +218,21 @@ function update() {
       randomNum -= (kills-20)/13
       if(randomNum < 0.2) spawnEnemy("basic");
       if(randomNum <0.05) spawnEnemy("basic");
-    } else if (kills > 60) {
+    } else if (kills > 60 && kills < 100) {
       mobSpawnCooldown = Math.max(250 - 2*(kills-60), 120)
       spawnEnemy("level3")
       let randomNum = Math.random()
       randomNum -= (kills-60)/13
       if(randomNum < 0.2) spawnEnemy("basic");
       if(randomNum <0.05) spawnEnemy("level2");
+    } else if (kills > 100) {
+      mobSpawnCooldown = Math.max(200 - 2*(kills-100), 120)
+      spawnEnemy("basic")
+      spawnEnemy("basic")
+      let randomNum = Math.random()
+      randomNum -= (kills-100)/20
+      if(randomNum < 0.4) spawnEnemy("level2");
+      if(randomNum <0.1) spawnEnemy("level3");
     }
   }
   
