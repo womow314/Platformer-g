@@ -61,6 +61,9 @@ enemyBasic.src = "pixil-frame-0%20(12).png";
 let enemyLevel2 = new Image();
 enemyLevel2.src = "pixil-frame-0%20(14).png"
 
+let enemyLevel3 = new Image();
+enemyLevel3.src = "pixil-frame-0%20(15).png"
+
 const bulletIMG = new Image();
 bulletIMG.src = "Screen Shot 2026-05-04 at 2.50.58 PM.png";
 
@@ -101,6 +104,10 @@ function spawnEnemy(type="basic") {
     Ehealth = 3
     typeImage = enemyLevel2
     enemySize = 30
+  } else if (type === "level3") {
+    Ehealth = 8
+    typeImage = enemyLevel3
+    enemySize = 50
   }
   enemies.push({x:px, y:py, health: Ehealth, image: typeImage, enemyType: type, size: enemySize})
 }
@@ -204,13 +211,20 @@ function update() {
     if (kills <= 20){
       mobSpawnCooldown = 300 - 6*kills
       spawnEnemy("basic")
-    } else if (kills > 20) {
+    } else if (kills > 20 && kills <= 60) {
       mobSpawnCooldown = Math.max(250 - 2*(kills-20), 120)
       spawnEnemy("level2")
       let randomNum = Math.random()
       randomNum -= (kills-20)/13
       if(randomNum < 0.2) spawnEnemy("basic");
       if(randomNum <0.05) spawnEnemy("basic");
+    } else if (kills > 60) {
+      mobSpawnCooldown = Math.max(250 - 2*(kills-60), 120)
+      spawnEnemy("level3")
+      let randomNum = Math.random()
+      randomNum -= (kills-60)/13
+      if(randomNum < 0.2) spawnEnemy("basic");
+      if(randomNum <0.05) spawnEnemy("level2");
     }
   }
   
