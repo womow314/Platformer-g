@@ -26,6 +26,8 @@
   </details>
 </div>
 <script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
   
 let mostKills = 0;
 
@@ -37,6 +39,7 @@ try {
 
 function pause() {
   isPaused = !isPaused;
+  ctx.style.opacity = '60%'
   document.querySelector('#pauseButton').innerText = "Pause"
   if (isPaused) document.querySelector('#pauseButton').innerText = "Paused"
 }
@@ -60,6 +63,9 @@ enemyLevel2.src = "pixil-frame-0%20(14).png"
 
 const bulletIMG = new Image();
 bulletIMG.src = "Screen Shot 2026-05-04 at 2.50.58 PM.png";
+
+const pausedIMG = new Image();
+pausedIMG.src = "Screen Shot 2026-05-05 at 8.37.53 AM.png"
 
 let kills = 0;
 
@@ -142,8 +148,7 @@ addWall(-1500, -1060, 2500, 300)
 addWall(-1500, -800, 500, 1600)
 addWall(800, -1000, 500, 2000)
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+
 
 const bulletSpeed = 10
 let increasePowerCost = 5
@@ -289,7 +294,10 @@ function update() {
 
 function draw() {
     
+    ctx.drawImage(pausedIMG, 0, 0, canvas.width, canvas.height)
+
     ctx.save();
+    if (isPaused) return;
     
     ctx.translate(
       Math.min(-scrollX),
