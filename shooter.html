@@ -342,7 +342,9 @@ function draw() {
 function loop() {
     update();
     draw();
+    setTimeout(() => {
     requestAnimationFrame(loop);
+  }, 10);
     
 }
 
