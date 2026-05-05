@@ -97,38 +97,27 @@ bindButton("dash", "ShiftLeft");
 
 const keys = {};
 const brick = new Image();
-//old brick
-//brick.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%2010.19.17%20AM.png";
-//new brick
+
 brick.src = "pixil-frame-0%20(4).png";
 
 let playerImg = new Image();
 playerImg.src = "pixil-frame-0%20(1).png";
-//playerImg.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/astronought%20(1).png";
 
 const death = new Image();
-//old
-//death.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%209.58.46%20AM.png";
-//new
+
 death.src = "pixil-frame-0%20(5).png";
 
 const water = new Image();
-//old
-//water.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%204.26.43%20PM.png";
-//new
+
 water.src = "pixil-frame-0%20(6).png";
 
 
 const slime = new Image();
-//old
-//slime.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%2010.08.56%20AM.png";
-//new
+
 slime.src = "pixil-frame-0%20(11).png"
 
 let sky = new Image();
-//sky
-//sky.src = "https://uploads.onecompiler.io/44hquga6n/44m32pxhz/Screen%20Shot%202026-04-24%20at%2012.34.40%20PM.png";
-//cave
+
 sky.src = "pixil-frame-0%20(3).png";
 
 let isCaveBackground = true
@@ -139,7 +128,7 @@ cannon.src = "pixil-frame-0%20(2).png";
 const portalIMG = new Image();
 portalIMG.src = "pixil-frame-0-2.png";
 
-//https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0-2.png
+
 
 const bulletIMG = new Image();
 bulletIMG.src = "Screen Shot 2026-05-04 at 2.50.58 PM.png";
@@ -696,7 +685,9 @@ function draw() {
 function loop() {
     update();
     draw();
+    setTimeout(() => {
     requestAnimationFrame(loop);
+  }, 10);
     
 }
 
