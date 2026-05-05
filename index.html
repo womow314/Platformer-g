@@ -12,8 +12,11 @@
     <button onclick="" id="maze">Launch Maze</button>
     <button onclick="" id="clicker">Launch Clicker</button>
   </div>
+   <div id="stuff" onclick="wipe()">Destroy user data</div>
   <script>
-    
+    function wipe() {
+      localStorage.clear()
+    }
     function launchPlatProc() {
       window.location.href = "platformer.html";
     } 
