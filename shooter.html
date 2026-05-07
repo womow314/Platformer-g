@@ -237,7 +237,7 @@ function update() {
   }
   
   if (keys['Space'] && bulletCooldown <= 0) {
-    bulletCooldown = bulletCooldownMax
+    bulletCooldown = Math.max(bulletCooldownMax, 2)
     let pdx;
     let pdy;
     if (player.direction === "e") {
