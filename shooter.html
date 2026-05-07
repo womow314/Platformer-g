@@ -229,6 +229,7 @@ function update() {
       mobSpawnCooldown = Math.max(200 - 2*(kills-100), 120)
       spawnEnemy("basic")
       spawnEnemy("basic")
+      spawnEnemy("basic")
       let randomNum = Math.random()
       randomNum -= (kills-100)/20
       if(randomNum < 0.4) spawnEnemy("level2");
