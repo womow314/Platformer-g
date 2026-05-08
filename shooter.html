@@ -198,6 +198,31 @@ function buy() {
   }
 }
 
+function particleExplosion() {
+  for (let i = 0; i < 20; i++) {
+    let size = Math.random()*5 + 2
+    let dx = (Math.random()-0.5)*10
+    let dy = (Math.random()-0.5)*10
+    let life = Math.random()*30 + 30
+    let x = enemy.x + 15
+    let y = enemy.y + 15
+    let particle = {x, y, dx, dy, size, life}
+    let particleInterval = setInterval(() => {
+      particle.x += particle.dx
+      particle.y += particle.dy
+      particle.life -= 1
+      if (particle.life <= 0) {
+        clearInterval(particleInterval)
+      }
+      ctx.fillStyle = `rgba(255, 0, 0, ${particle.life/60})`
+      ctx.beginPath();
+      ctx.arc(particle.x - scrollX, particle.y - scrollY, particle.size, 0, Math.PI * 2);
+      ctx.fill();
+    }, 16);
+  }
+}
+
+
 function update() {
   document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-(player.y/10))}, Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}, Most Kills: ${mostKills}`
   if (isPaused) return;
@@ -286,6 +311,7 @@ function update() {
           enemies.splice(e, 1);
           kills +=1
           coins += 1
+          particleExplosion();
         }
       }
     }
