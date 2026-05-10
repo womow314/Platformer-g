@@ -123,7 +123,7 @@ function displayUpgrades() {
 
   randomChoice = Math.floor(Math.random()*upgradeArray.length)
   let upgrade2 = upgradeArray[randomChoice]
-  while (upgrade1 === upgrade2 && upgrades.upgrade2 >5) {
+  while (upgrade1 === upgrade2 || upgrades.upgrade2 >5) {
     randomChoice = Math.floor(Math.random()*upgradeArray.length)
     upgrade2 = upgradeArray[randomChoice]
   }
@@ -133,7 +133,7 @@ function displayUpgrades() {
 
   randomChoice = Math.floor(Math.random()*upgradeArray.length)
   let upgrade3 = upgradeArray[randomChoice]
-  while ((upgrade1 === upgrade3 || upgrade2 === upgrade3)&& upgrades.upgrade3 >5) {
+  while (upgrade1 === upgrade3 || upgrade2 === upgrade3 || upgrades.upgrade3 >5) {
     randomChoice = Math.floor(Math.random()*upgradeArray.length)
     upgrade3 = upgradeArray[randomChoice]
   }
