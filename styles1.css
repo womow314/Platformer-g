@@ -114,3 +114,9 @@ details {
   background-color: grey;
   opacity: 25%;
 }
+#shop {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
