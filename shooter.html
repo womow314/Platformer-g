@@ -9,13 +9,7 @@
 <button onclick="home()" id="home">Home</button>
 <div id="stuff">
   <p id="cord">x: 0, y: 0</p>
-  <select id="levelSelect">
-    <option>--</option>
-    <option id="cooldown" value="1">Decrease Cooldown: 0.1 second, 3 coins</option>
-    <option id="power" value="2">Increase Bullet Power: +1 damage, 5 coins</option>
-    <option id="speed" value="3">Increase Speed: +1 speed, 5 coins</option>
-  </select>
-  <button onclick="buy()">Buy</button>
+
   <button onclick="pause()" id="pauseButton">Pause</button>
   
   <details>
@@ -23,13 +17,23 @@
     <p id="statsSpeed">Speed: 5</p>
     <p id="statsCooldown">Bullet cooldown: 60</p>
     <p id="statsPower">Bullet power: 1</p>
+    <p id="statsSize">Bullet size: 10</p>
+    <p id="statsBulletSpeed">Bullet speed: 10</p>
+    <p id="statsMagnet">Magnet range: 30</p>
   </details>
+</div>
+<div id="shop">
+  <button id="buy1" onclick="buy(1)">Wait for upgrade</button>
+  <button id="buy2" onclick="buy(2)">Wait for upgrade</button>
+  <button id="buy3" onclick="buy(3)">Wait for upgrade</button>
 </div>
 <script>
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
   
 let mostKills = 0;
+let magnetRange = 30;
+
 
 try {
   mostKills = Number(localStorage.getItem("mostKills")) || 0;
@@ -39,9 +43,10 @@ try {
 
 function pause() {
   isPaused = !isPaused;
-  ctx.style.opacity = '60%'
-  document.querySelector('#pauseButton').innerText = "Pause"
-  if (isPaused) document.querySelector('#pauseButton').innerText = "Paused"
+  canvas.style.opacity = '1';
+  document.querySelector('#pauseButton').innerText = "Pause";
+  if (isPaused) canvas.style.opacity = '0.3';
+  if (isPaused) document.querySelector('#pauseButton').innerText = "Paused";
 }
 let isPaused = false
 
@@ -73,7 +78,75 @@ bulletIMG.src = "Screen Shot 2026-05-04 at 2.50.58 PM.png";
 const pausedIMG = new Image();
 pausedIMG.src = "Screen Shot 2026-05-05 at 8.37.53 AM.png"
 
+const coinImg = new Image();
+coinImg.src = "pixil-frame-0%20(17).png"
+
 let kills = 0;
+let CoinsOnGround = []
+
+let coinsToUpgrade = 2;
+
+
+let upgrades = {
+    power: 1,
+    speed: 1,
+    size: 1,
+    cooldown: 1,
+    playerSpeed: 1,
+    magnet: 1
+
+}
+
+let upgradeText = {
+    power: ['Increase power +1', 'Increase power +2', 'Increase power +3', 'Increase power +4', 'Increase power +5'],
+    speed: ['Increase bullet speed 10%', 'Increase bullet speed 20%', 'Increase bullet speed 30%', 'Increase bullet speed 40%', 'Increase bullet speed 50%'],
+    size: ['Increase bullet size 10 => 12', 'Increase bullet size 12 => 14', 'Increase bullet size 14 => 16', 'Increase bullet size 16 => 18', 'Increase bullet size 18 => 20' ],
+    cooldown: ['Decrease bullet cooldown 10 ticks', 'Decrease bullet cooldown 20 ticks', 'Decrease bullet cooldown 30 ticks', 'Decrease bullet cooldown 40 ticks', 'Decrease bullet cooldown 50 ticks'],
+    playerSpeed: ['Player Speed 5 => 6', 'Player Speed 6 => 7', 'Player Speed 7 => 8', 'Player Speed 8 => 9', 'Player Speed 9 => 10'],
+    magnet: ['Increase magnet range 30 => 50', 'Increase magnet range 50 => 70', 'Increase magnet range 70 => 90', 'Increase magnet range 90 => 110', 'Increase magnet range 110 => 130']
+
+}
+
+let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet']
+let avaibleUpgrades = []
+
+function displayUpgrades() {
+  let randomChoice = Math.floor(Math.random()*upgradeArray.length)
+  let upgrade1 = upgradeArray[randomChoice]
+  while (upgrades.upgrade1 >5){
+    let randomChoice = Math.floor(Math.random()*upgradeArray.length)
+    let upgrade1 = upgradeArray[randomChoice]
+  }
+  let upgrade1Text = upgradeText[upgrade1][upgrades[upgrade1]-1]
+  document.getElementById('buy1').innerText = `${upgrade1Text}`
+
+
+  randomChoice = Math.floor(Math.random()*upgradeArray.length)
+  let upgrade2 = upgradeArray[randomChoice]
+  while (upgrade1 === upgrade2 && upgrades.upgrade2 >5) {
+    randomChoice = Math.floor(Math.random()*upgradeArray.length)
+    upgrade2 = upgradeArray[randomChoice]
+  }
+  let upgrade2Text = upgradeText[upgrade2][upgrades[upgrade2]-1]
+  document.getElementById('buy2').innerText = `${upgrade2Text}`
+
+
+  randomChoice = Math.floor(Math.random()*upgradeArray.length)
+  let upgrade3 = upgradeArray[randomChoice]
+  while ((upgrade1 === upgrade3 || upgrade2 === upgrade3)&& upgrades.upgrade3 >5) {
+    randomChoice = Math.floor(Math.random()*upgradeArray.length)
+    upgrade3 = upgradeArray[randomChoice]
+  }
+  let upgrade3Text = upgradeText[upgrade3][upgrades[upgrade3]-1]
+  document.getElementById('buy3').innerText = `${upgrade3Text}`
+
+  avaibleUpgrades.push(upgrade1)
+  avaibleUpgrades.push(upgrade2)
+  avaibleUpgrades.push(upgrade3)
+
+  isPaused = true
+  canvas.style.opacity = '0.3'
+}
 
 decreaseCooldownCost = 3;
 
@@ -92,7 +165,7 @@ enemies = []
 function spawnEnemy(type="basic") {
   px = Math.random()*1770-1000
   py = Math.random()*1530 - 770
-  while ((px + 45-player.x)*(px+45 -player.x) +(py +45-player.y)*(py+45-player.y) < 16900) {
+  while ((px + 45-player.x)*(px+45 -player.x) +(py +45-player.y)*(py+45-player.y) < 40000) {
     px = Math.random()*1770-1000
     py = Math.random()*1530 - 770
   }
@@ -133,6 +206,56 @@ function home() {
   window.location.href = "index.html";
 } 
 
+function buy(choice) {
+
+  let selectedUpgrade = avaibleUpgrades[choice - 1];
+
+  if (!selectedUpgrade) return;
+
+  switch (selectedUpgrade) {
+
+    case "power":
+      bulletPower = 1
+      bulletPower += upgrades.power;
+      document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
+      break;
+
+    case "speed":
+      bulletSpeed *= 1.1;
+      document.getElementById('statsBulletSpeed').innerText = `Bullet speed: ${Math.round(bulletSpeed)}`
+      break;
+
+    case "size":
+      bulletSize += 2;
+      document.getElementById('statsSize').innerText = `Bullet Size: ${bulletSize}`
+      break;
+
+    case "cooldown":
+      bulletCooldownMax = Math.max(5, bulletCooldownMax - 10);
+      document.getElementById('statsCooldown').innerText = `Bullet cooldown: ${bulletCooldownMax}`
+      break;
+
+    case "playerSpeed":
+      player.speed += 1;
+      document.getElementById('statsSpeed').innerText = `Speed: ${player.speed}`
+      break;
+
+    case "magnet":
+      magnetRange += 20;
+      document.getElementById('statsMagnet').innerText = `Magnet range: ${magnetRange}`
+      break;
+  }
+  document.querySelector('#buy1').innerText = 'Wait for upgrade'
+  document.querySelector('#buy2').innerText = 'Wait for upgrade'
+  document.querySelector('#buy3').innerText = 'Wait for upgrade'
+
+  upgrades[selectedUpgrade] += 1;
+  avaibleUpgrades = []
+
+  isPaused = false
+  canvas.style.opacity = '1'
+}
+
 window.addEventListener('keydown', e => keys[e.code] = true);
 window.addEventListener('keyup', e => keys[e.code] = false);
 
@@ -164,7 +287,8 @@ addWall(800, -1000, 500, 2000)
 
 
 
-const bulletSpeed = 10
+let bulletSpeed = 10
+let bulletSize = 10
 let increasePowerCost = 5
 let mobSpawnCooldown = 300
 let MobsOnBoard = 3
@@ -174,32 +298,10 @@ let bulletPower = 1
 
 const MobSpeed = 1
 
-function buy() {
-  if (document.querySelector('#levelSelect').value === "1" && coins >= decreaseCooldownCost) {
-    bulletCooldownMax -= 5
-    coins -= decreaseCooldownCost
-    decreaseCooldownCost += 1
-    document.querySelector('#cooldown').innerText = `Decrease Cooldown: 0.1 second, ${decreaseCooldownCost} coins`
-    document.querySelector('#statsCooldown').innerText = `Bullet cooldown: ${bulletCooldownMax}`
-  }
-  if (document.querySelector('#levelSelect').value === "2" && coins >= increasePowerCost) {
-    bulletPower += 1
-    coins -= increasePowerCost
-    increasePowerCost += 1
-    document.querySelector('#power').innerText = `Increase Bullet Power: +1 damage, ${increasePowerCost} coins`
-    document.querySelector('#statsPower').innerText = `Bullet power: ${bulletPower}`
-  }
-  if (document.querySelector('#levelSelect').value === "3" && coins >= increaseSpeedCost) {
-    player.speed += 1
-    coins -= increaseSpeedCost
-    increaseSpeedCost += 1
-    document.querySelector('#speed').innerText = `Increase Speed: +1 speed, ${increaseSpeedCost} coins`
-    document.querySelector('#statsSpeed').innerText = `Speed: ${player.speed}`
-  }
-}
+
 
 function update() {
-  document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-(player.y/10))}, Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}, Most Kills: ${mostKills}`
+  document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-(player.y/10))}, Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}/${coinsToUpgrade}, Most Kills: ${mostKills}`
   if (isPaused) return;
   player.dx = 0; player.dy = 0;
   player.currentSpeed = player.speed
@@ -227,7 +329,7 @@ function update() {
       if(randomNum <0.05) spawnEnemy("basic");
     } else if (kills > 60 && kills < 100) {
       mobSpawnCooldown = Math.max(250 - 2*(kills-60), 120)
-      spawnEnemy("level3")
+      spawnEnemy("level3") 
       let randomNum = Math.random()
       randomNum -= (kills-60)/13
       if(randomNum < 0.2) spawnEnemy("basic");
@@ -279,13 +381,13 @@ function update() {
     bullet.y += bullet.dy * bulletSpeed
     for (let e = 0; e < enemies.length; e ++) {
       enemy = enemies[e]
-      if ((enemy.x + enemy.size/2-bullet.x)*(enemy.x+enemy.size/2 -bullet.x) +(enemy.y +enemy.size/2-bullet.y)*(enemy.y+enemy.size/2-bullet.y) < (enemy.size/2)*(enemy.size/2)-200) {
+      if ((enemy.x + enemy.size/2-bullet.x+bulletSize/2)*(enemy.x+enemy.size/2 -bullet.x+bulletSize/2) +(enemy.y +enemy.size/2-bullet.y+bulletSize/2)*(enemy.y+enemy.size/2-bullet.y+bulletSize/2) < (enemy.size/2)*(enemy.size/2)-100) {
         bullets.splice(i, 1)
         enemy.health -= bulletPower
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
           kills +=1
-          coins += 1
+          CoinsOnGround.push({x: enemy.x+enemy.size/2, y: enemy.y+enemy.size/2, value: Math.max(1, Math.round(enemy.health/5))})
         }
       }
     }
@@ -297,7 +399,20 @@ function update() {
       home()
     }
   }
-  
+  for (let i = 0; i < CoinsOnGround.length; i ++){
+    coin = CoinsOnGround[i]
+    if ((coin.x - player.x)*(coin.x - player.x)+(coin.y - player.y)*(coin.y - player.y) < magnetRange*magnetRange) {
+      CoinsOnGround.splice(i, 1)
+      coins+= coin.value
+      if (coins >= coinsToUpgrade) {
+        coins = 0
+        coinsToUpgrade += 1
+        displayUpgrades()
+      }
+
+    }
+
+  }
   
   player.x += player.dx
   for (let wall of walls) {
@@ -325,7 +440,7 @@ function update() {
 
 function draw() {
     
-    ctx.drawImage(pausedIMG, 0, 0, canvas.width, canvas.height)
+    //ctx.drawImage(pausedIMG, 0, 0, canvas.width, canvas.height)
 
     ctx.save();
     if (isPaused) return;
@@ -358,11 +473,15 @@ function draw() {
     });
     
     bullets.forEach(bullet => {
-        ctx.drawImage(bulletIMG, bullet.x, bullet.y, 10, 10);
+        ctx.drawImage(bulletIMG, bullet.x, bullet.y, bulletSize, bulletSize);
     });
     
     enemies.forEach(enemy => {
         ctx.drawImage(enemy.image, enemy.x, enemy.y, enemy.size, enemy.size);
+    });
+
+    CoinsOnGround.forEach(coin => {
+        ctx.drawImage(coinImg, coin.x, coin.y, 8,8);
     });
     
     
