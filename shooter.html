@@ -300,6 +300,7 @@ const MobSpeed = 1
 
 
 
+
 function update() {
   document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-(player.y/10))}, Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}/${coinsToUpgrade}, Most Kills: ${mostKills}`
   if (isPaused) return;
