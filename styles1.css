@@ -13,6 +13,13 @@ canvas {
   box-shadow: 0 0 20px rgba(0,0,0,0.5); 
   
 }
+h1 {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  color: rgb(148, 232, 148);
+}
 
 img {
   position: fixed; 
