@@ -15,7 +15,7 @@ canvas {
 }
 h1 {
   position: absolute;
-  top: 5px;
+  top: 15px;
   left: 50%;
   transform: translate(-50%,-50%);
   color: rgb(148, 232, 148);

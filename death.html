@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>You died!</title>
+    <link rel="stylesheet" href="styles1.css" />
+</head>
+<body>
+ <h1>
+    Deaths
+ </h1>
+ <button onclick="home()" id="home">Home</button>
+  <script>
+    let score = Number(localStorage.getItem('currentScore'))
+    document.querySelector('h1').innerText = `YOU DIED ☠️ Kills: ${score}`
+
+    function home() {
+        window.location.href = "index.html";
+    } 
+    
+  </script>
+</body>
+</html>
