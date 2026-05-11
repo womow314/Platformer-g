@@ -113,7 +113,7 @@ let avaibleUpgrades = []
 function displayUpgrades() {
   let randomChoice = Math.floor(Math.random()*upgradeArray.length)
   let upgrade1 = upgradeArray[randomChoice]
-  while (upgrades.upgrade1 >5){
+  while (upgrades[upgrade1] >5){
     let randomChoice = Math.floor(Math.random()*upgradeArray.length)
     let upgrade1 = upgradeArray[randomChoice]
   }
@@ -123,7 +123,7 @@ function displayUpgrades() {
 
   randomChoice = Math.floor(Math.random()*upgradeArray.length)
   let upgrade2 = upgradeArray[randomChoice]
-  while (upgrade1 === upgrade2 || upgrades.upgrade2 >5) {
+  while (upgrade1 === upgrade2 || upgrades[upgrade2] >5) {
     randomChoice = Math.floor(Math.random()*upgradeArray.length)
     upgrade2 = upgradeArray[randomChoice]
   }
@@ -133,7 +133,7 @@ function displayUpgrades() {
 
   randomChoice = Math.floor(Math.random()*upgradeArray.length)
   let upgrade3 = upgradeArray[randomChoice]
-  while (upgrade1 === upgrade3 || upgrade2 === upgrade3 || upgrades.upgrade3 >5) {
+  while (upgrade1 === upgrade3 || upgrade2 === upgrade3 || upgrades[upgrade3] >5) {
     randomChoice = Math.floor(Math.random()*upgradeArray.length)
     upgrade3 = upgradeArray[randomChoice]
   }
@@ -192,6 +192,8 @@ function spawnEnemy(type="basic") {
   enemies.push({x:px, y:py, health: Ehealth, image: typeImage, enemyType: type, size: enemySize})
 }
 
+spawnEnemy("basic")
+spawnEnemy("basic")
 spawnEnemy("basic")
 spawnEnemy("basic")
 spawnEnemy("basic")
@@ -319,7 +321,7 @@ function update() {
   if (MobsOnBoard  <= 0) mobSpawnCooldown = 0
   if (mobSpawnCooldown <=0) {
     if (kills <= 20){
-      mobSpawnCooldown = 300 - 6*kills
+      mobSpawnCooldown = 250 - 6*kills
       spawnEnemy("basic")
     } else if (kills > 20 && kills <= 60) {
       mobSpawnCooldown = Math.max(250 - 2*(kills-20), 120)
@@ -388,18 +390,18 @@ function update() {
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
           kills +=1
-          CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
-          if (enemy.type === "level2") {
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
+          CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+          if (enemy.enemyType === "level2") {
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
           }
-          if (enemy.type === "level3"){
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
+          if (enemy.enemyType === "level3"){
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
           }
-          if (enemy.type === "level4"){
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
+          if (enemy.enemyType === "level4"){
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
           }
         }
       }
