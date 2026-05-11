@@ -33,6 +33,7 @@ const ctx = canvas.getContext('2d');
   
 let mostKills = 0;
 let magnetRange = 30;
+const MAX_UPGRADE = 6;
 
 
 try {
@@ -111,41 +112,33 @@ let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet
 let avaibleUpgrades = []
 
 function displayUpgrades() {
-  let randomChoice = Math.floor(Math.random()*upgradeArray.length)
-  let upgrade1 = upgradeArray[randomChoice]
-  while (upgrades[upgrade1] >5){
-    let randomChoice = Math.floor(Math.random()*upgradeArray.length)
-    let upgrade1 = upgradeArray[randomChoice]
+
+  avaibleUpgrades = [];
+
+  let possibleUpgrades = upgradeArray.filter(
+    upgrade => upgrades[upgrade] < MAX_UPGRADE
+  );
+
+  if (possibleUpgrades.length === 0) {
+    return;
   }
-  let upgrade1Text = upgradeText[upgrade1][upgrades[upgrade1]-1]
-  document.getElementById('buy1').innerText = `${upgrade1Text}`
 
+  possibleUpgrades.sort(() => Math.random() - 0.5);
 
-  randomChoice = Math.floor(Math.random()*upgradeArray.length)
-  let upgrade2 = upgradeArray[randomChoice]
-  while (upgrade1 === upgrade2 || upgrades[upgrade2] >5) {
-    randomChoice = Math.floor(Math.random()*upgradeArray.length)
-    upgrade2 = upgradeArray[randomChoice]
+  let selected = possibleUpgrades.slice(0, 3);
+
+  for (let i = 0; i < selected.length; i++) {
+
+    let upgrade = selected[i];
+
+    document.getElementById(`buy${i+1}`).innerText =
+      upgradeText[upgrade][upgrades[upgrade]-1];
+
+    avaibleUpgrades.push(upgrade);
   }
-  let upgrade2Text = upgradeText[upgrade2][upgrades[upgrade2]-1]
-  document.getElementById('buy2').innerText = `${upgrade2Text}`
 
-
-  randomChoice = Math.floor(Math.random()*upgradeArray.length)
-  let upgrade3 = upgradeArray[randomChoice]
-  while (upgrade1 === upgrade3 || upgrade2 === upgrade3 || upgrades[upgrade3] >5) {
-    randomChoice = Math.floor(Math.random()*upgradeArray.length)
-    upgrade3 = upgradeArray[randomChoice]
-  }
-  let upgrade3Text = upgradeText[upgrade3][upgrades[upgrade3]-1]
-  document.getElementById('buy3').innerText = `${upgrade3Text}`
-
-  avaibleUpgrades.push(upgrade1)
-  avaibleUpgrades.push(upgrade2)
-  avaibleUpgrades.push(upgrade3)
-
-  isPaused = true
-  canvas.style.opacity = '0.3'
+  isPaused = true;
+  canvas.style.opacity = '0.3';
 }
 
 decreaseCooldownCost = 3;
@@ -165,7 +158,7 @@ enemies = []
 function spawnEnemy(type="basic") {
   px = Math.random()*1770-1000
   py = Math.random()*1530 - 770
-  while ((px + 45-player.x)*(px+45 -player.x) +(py +45-player.y)*(py+45-player.y) < 40000) {
+  while ((px + 45-player.x)*(px+45 -player.x) +(py +45-player.y)*(py+45-player.y) < 60000) {
     px = Math.random()*1770-1000
     py = Math.random()*1530 - 770
   }
@@ -200,6 +193,15 @@ spawnEnemy("basic")
 
 
 keys = {};
+
+function inRange(obj1, obj2, pixels) {
+
+  if (!obj1 || !obj2) return false;
+
+  return (
+    (obj1.x - obj2.x) * (obj1.x - obj2.x) + (obj1.y - obj2.y) * (obj1.y - obj2.y) > pixels * pixels
+  )
+}
 
 let bulletCooldown = 0;
 let bulletCooldownMax = 60
@@ -251,7 +253,9 @@ function buy(choice) {
   document.querySelector('#buy2').innerText = 'Wait for upgrade'
   document.querySelector('#buy3').innerText = 'Wait for upgrade'
 
-  upgrades[selectedUpgrade] += 1;
+  if (upgrades[selectedUpgrade] < 6) {
+    upgrades[selectedUpgrade] += 1;
+  }
   avaibleUpgrades = []
 
   isPaused = false
@@ -376,6 +380,10 @@ function update() {
     
     if (player.y > enemy.y+enemy.size/2) enemy.y += MobSpeed
     if (player.y < enemy.y+enemy.size/2) enemy.y -= MobSpeed
+
+    if (player.x < enemy.x + enemy.size && player.x + 30 > enemy.x && player.y < enemy.y + enemy.size && player.y + 30 > enemy.y) {
+      home()
+    }
   }
   
   for (let i = 0; i < bullets.length; i ++){
@@ -407,13 +415,7 @@ function update() {
       }
     }
   }
-  
-  for (let e = 0; e < enemies.length; e ++) {
-    enemy = enemies[e]
-    if (player.x < enemy.x + enemy.size && player.x + 30 > enemy.x && player.y < enemy.y + enemy.size && player.y + 30 > enemy.y) {
-      home()
-    }
-  }
+
   for (let i = 0; i < CoinsOnGround.length; i ++){
     coin = CoinsOnGround[i]
     if ((coin.x - player.x)*(coin.x - player.x)+(coin.y - player.y)*(coin.y - player.y) < magnetRange*magnetRange) {
@@ -492,10 +494,12 @@ function draw() {
     });
     
     enemies.forEach(enemy => {
+        if (inRange(player, enemy, 800)) return;
         ctx.drawImage(enemy.image, enemy.x, enemy.y, enemy.size, enemy.size);
     });
 
     CoinsOnGround.forEach(coin => {
+        if (inRange(player, coin, 800)) return;
         ctx.drawImage(coinImg, coin.x, coin.y, 8,8);
     });
     
