@@ -37,6 +37,7 @@ let mostKills = 0;
 let magnetRange = 30;
 const MAX_UPGRADE = 6;
 let health = 100;
+localStorage.setItem('currentScore', '0')
 
 try {
   mostKills = Number(localStorage.getItem("mostKills")) || 0;
@@ -92,7 +93,7 @@ let CoinsOnGround = []
 
 let coinsToUpgrade = 2;
 forceFieldRange = 0;
-
+let forcePower = 0.05
 
 let upgrades = {
     power: 1,
@@ -101,7 +102,8 @@ let upgrades = {
     cooldown: 1,
     playerSpeed: 1,
     magnet: 1,
-    forceField: 1
+    forceField: 1,
+    wave: 1
 }
 
 let upgradeText = {
@@ -111,11 +113,12 @@ let upgradeText = {
     cooldown: ['Decrease bullet cooldown 10 ticks', 'Decrease bullet cooldown 20 ticks', 'Decrease bullet cooldown 30 ticks', 'Decrease bullet cooldown 40 ticks', 'Decrease bullet cooldown 50 ticks'],
     playerSpeed: ['Player Speed 5 => 6', 'Player Speed 6 => 7', 'Player Speed 7 => 8', 'Player Speed 8 => 9', 'Player Speed 9 => 10'],
     magnet: ['Increase magnet range 30 => 50', 'Increase magnet range 50 => 70', 'Increase magnet range 70 => 90', 'Increase magnet range 90 => 110', 'Increase magnet range 110 => 130'],
-    forceField: ['Add force field', 'Increased force Field range', 'Increased force Field range', 'Increased force Field range', 'Increased force Field range' ]
+    forceField: ['Add force field', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power' ],
+    wave: ['Added bullet wave (back)', 'Partial upgrade: Wave sides: 1/4', 'Partial upgrade: Wave sides: 2/4', 'Partial upgrade: Wave sides: 3/4', 'Added bullet wave (sides)', ]
 
 }
 
-let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField']
+let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'wave']
 let avaibleUpgrades = []
 
 function displayUpgrades() {
@@ -200,6 +203,8 @@ spawnEnemy("basic")
 
 
 keys = {};
+let backWave = false;
+let sideWaves = false;
 
 function inRange(obj1, obj2, range) {
   if (!obj1 || !obj2) return false;
@@ -213,7 +218,7 @@ function inRange(obj1, obj2, range) {
   const dx = x1 - x2;
   const dy = y1 - y2;
 
-  return dx * dx + dy * dy < range * range;
+  return dx * dx + dy * dy < (range / 2) * (range / 2);
 }
 
 let bulletCooldown = 0;
@@ -265,8 +270,15 @@ function buy(choice) {
     case "forceField":
       if (upgrades.forceField === 1) forceFieldRange += 40;
       forceFieldRange += 30;
+      forcePower += 0.02
       document.getElementById('statsForce').innerText = `Force Field range: ${forceFieldRange}`
       break;
+
+    case "wave":
+      if (upgrades.wave === 1) backWave = true;
+      if (upgrades.wave === 5) sideWaves = true;
+      break;
+
   }
   document.querySelector('#buy1').innerText = 'Wait for upgrade'
   document.querySelector('#buy2').innerText = 'Wait for upgrade'
@@ -328,6 +340,7 @@ const MobSpeed = 1
 
 function update() {
   document.querySelector(('h1')).innerText = `HEALTH: ${health}`
+  document.querySelector('h1').style.color = `rgb(${255 - (health * 2.55)}, ${health * 2.55}, 0)`
   document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-(player.y/10))}, Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}/${coinsToUpgrade}, Most Kills: ${mostKills}`
   if (isPaused) return;
   player.dx = 0; player.dy = 0;
@@ -392,6 +405,39 @@ function update() {
       pdy = 0;
     }
     addBullet(player.x, player.y, pdx, pdy)
+    if(backWave){
+      if (player.direction === "e") {
+        pdx = -1;
+        pdy = 0;
+      } else if (player.direction === "n") {
+        pdx = 0;
+        pdy = 1;
+      } else if (player.direction === "s") {
+        pdx = 0;
+        pdy = -1;
+      } else if (player.direction === "w") {
+        pdx = 1;
+        pdy = 0;
+      }
+      addBullet(player.x, player.y, pdx, pdy)
+    }
+    if(sideWaves){
+      if (player.direction === "e") {
+        pdx = 0;
+        pdy = 1;
+      } else if (player.direction === "n") {
+        pdx = 1;
+        pdy = 0;
+      } else if (player.direction === "s") {
+        pdx = 1;
+        pdy = 0;
+      } else if (player.direction === "w") {
+        pdx = 0;
+        pdy = 1;
+      }
+      addBullet(player.x, player.y, pdx, pdy)
+      addBullet(player.x, player.y, -pdx, -pdy)
+    }
   }
   
   for (let enemy of enemies) {
@@ -402,7 +448,7 @@ function update() {
     if (player.y < enemy.y+enemy.size/2) enemy.y -= MobSpeed
 
    if (inRange(player, enemy, forceFieldRange)) {
-    enemy.health -= 0.06;
+    enemy.health -= forcePower;
 
     if (enemy.health <= 0) {
       enemies.splice(enemies.indexOf(enemy), 1);
@@ -419,7 +465,8 @@ function update() {
     if (player.x < enemy.x + enemy.size && player.x + 30 > enemy.x && player.y < enemy.y + enemy.size && player.y + 30 > enemy.y) {
       health -= 1
       if (health <= 0) {
-        home()
+        localStorage.setItem('currentScore', kills)
+        window.location.href = "death.html";
       }
     }
   }
@@ -532,7 +579,7 @@ function draw() {
     });
     
     enemies.forEach(enemy => {
-        if (!inRange(player, enemy, 800)) return;
+        if (!inRange(player, enemy, 1000)) return;
         ctx.drawImage(enemy.image, enemy.x, enemy.y, enemy.size, enemy.size);
     });
 
