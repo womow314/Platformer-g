@@ -93,7 +93,7 @@ let CoinsOnGround = []
 
 let coinsToUpgrade = 2;
 forceFieldRange = 0;
-let forcePower = 0.05
+let forcePower = 0.07
 
 let upgrades = {
     power: 1,
@@ -270,7 +270,7 @@ function buy(choice) {
     case "forceField":
       if (upgrades.forceField === 1) forceFieldRange += 40;
       forceFieldRange += 30;
-      forcePower += 0.02
+      forcePower += 0.03
       document.getElementById('statsForce').innerText = `Force Field range: ${forceFieldRange}`
       break;
 
