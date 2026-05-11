@@ -51,35 +51,35 @@ function pause() {
 let isPaused = false
 
 const brick = new Image();
-brick.src = "pixil-frame-0%20(4).png";
+brick.src = "images/pixil-frame-0%20(4).png";
 
 let sky = new Image();
-sky.src = "pixil-frame-0%20(10).png";
+sky.src = "images/pixil-frame-0%20(10).png";
 
 
 let playerImg = new Image();
-playerImg.src = "pixil-frame-0%20(1).png";
+playerImg.src = "images/pixil-frame-0%20(1).png";
 
 let enemyBasic = new Image();
-enemyBasic.src = "pixil-frame-0%20(12).png";
+enemyBasic.src = "images/pixil-frame-0%20(12).png";
 
 let enemyLevel2 = new Image();
-enemyLevel2.src = "pixil-frame-0%20(14).png"
+enemyLevel2.src = "images/pixil-frame-0%20(14).png"
 
 let enemyLevel3 = new Image();
-enemyLevel3.src = "pixil-frame-0%20(15).png"
+enemyLevel3.src = "images/pixil-frame-0%20(15).png"
 
 let enemyLevel4 = new Image();
-enemyLevel4.src = "pixil-frame-0%20(16).png"
+enemyLevel4.src = "images/pixil-frame-0%20(16).png"
 
 const bulletIMG = new Image();
-bulletIMG.src = "Screen Shot 2026-05-04 at 2.50.58 PM.png";
+bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
 
 const pausedIMG = new Image();
-pausedIMG.src = "Screen Shot 2026-05-05 at 8.37.53 AM.png"
+pausedIMG.src = "images/Screen Shot 2026-05-05 at 8.37.53 AM.png"
 
 const coinImg = new Image();
-coinImg.src = "pixil-frame-0%20(17).png"
+coinImg.src = "images/pixil-frame-0%20(17).png"
 
 let kills = 0;
 let CoinsOnGround = []
@@ -388,7 +388,19 @@ function update() {
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
           kills +=1
-          CoinsOnGround.push({x: enemy.x+enemy.size/2, y: enemy.y+enemy.size/2, value: Math.max(1, Math.round(enemy.health/5))})
+          CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
+          if (enemy.type === "level2") {
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
+          }
+          if (enemy.type === "level3"){
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
+          }
+          if (enemy.type === "level4"){
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*8, y: enemy.y+enemy.size/2+ Math.random()*8, value: 1})
+          }
         }
       }
     }

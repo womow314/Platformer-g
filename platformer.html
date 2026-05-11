@@ -98,52 +98,52 @@ bindButton("dash", "ShiftLeft");
 const keys = {};
 const brick = new Image();
 
-brick.src = "pixil-frame-0%20(4).png";
+brick.src = "images/pixil-frame-0%20(4).png";
 
 let playerImg = new Image();
-playerImg.src = "pixil-frame-0%20(1).png";
+playerImg.src = "images/pixil-frame-0%20(1).png";
 
 const death = new Image();
 
-death.src = "pixil-frame-0%20(5).png";
+death.src = "images/pixil-frame-0%20(5).png";
 
 const water = new Image();
 
-water.src = "pixil-frame-0%20(6).png";
+water.src = "images/pixil-frame-0%20(6).png";
 
 
 const slime = new Image();
 
-slime.src = "pixil-frame-0%20(11).png"
+slime.src = "images/pixil-frame-0%20(11).png"
 
 let sky = new Image();
 
-sky.src = "pixil-frame-0%20(3).png";
+sky.src = "images/pixil-frame-0%20(3).png";
 
 let isCaveBackground = true
 
 const cannon = new Image();
-cannon.src = "pixil-frame-0%20(2).png";
+cannon.src = "images/pixil-frame-0%20(2).png";
 
 const playerLauncher = new Image();
-playerLauncher.src = "pixil-frame-0 (18).png";
+playerLauncher.src = "images/pixil-frame-0 (18).png";
 
 const portalIMG = new Image();
-portalIMG.src = "pixil-frame-0-2.png";
+portalIMG.src = "images/pixil-frame-0-2.png";
 
 
 
 const bulletIMG = new Image();
-bulletIMG.src = "Screen Shot 2026-05-04 at 2.50.58 PM.png";
+bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
 
 function changeBackground() {
   if (isCaveBackground) {
-    sky.src = "Screen%20Shot%202026-04-24%20at%2012.34.40%20PM.png";
+    sky.src = "images/Screen%20Shot%202026-04-24%20at%2012.34.40%20PM.png";
     isCaveBackground = false
     document.querySelector('#background').innerText = 'Cave'
   }
   else {
-    sky.src = "pixil-frame-0%20(3).png";
+    sky.src = "images/pixil-frame-0%20(3).png";
     isCaveBackground = true
     document.querySelector('#background').innerText = 'Sky'
   }
