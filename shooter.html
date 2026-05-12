@@ -94,6 +94,9 @@ coinImg.src = "images/pixil-frame-0%20(17).png"
 const forceField = new Image();
 forceField.src = "images/pixil-frame-0%20(18).png"
 
+const boss1 = new Image();
+boss1.src = "images/BOSS.png" 
+
 let kills = 0;
 let CoinsOnGround = []
 
@@ -156,6 +159,7 @@ function displayUpgrades() {
   isPaused = true;
   canvas.style.opacity = '0.3';
 }
+let bossSpawned = false;
 
 decreaseCooldownCost = 3;
 
@@ -201,6 +205,10 @@ function spawnEnemy(type="basic") {
     Ehealth = 0.5
     typeImage = enemyLevel5
     enemySize = 20
+  } else if (type === "boss1") {
+    Ehealth = 300
+    typeImage = boss1
+    enemySize = 200
   }
   enemies.push({x:px, y:py, health: Ehealth, image: typeImage, enemyType: type, size: enemySize})
 }
@@ -352,6 +360,7 @@ const MobSpeed = 1
 
 
 function update() {
+  if (kills === 251) mobSpawnCooldown = 0;
   document.querySelector(('h1')).innerText = `HEALTH: ${health}`
   document.querySelector('h1').style.color = `rgb(${255 - (health * 2.55)}, ${health * 2.55}, 0)`
   document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}/${coinsToUpgrade}, Most Kills: ${mostKills}`
@@ -399,11 +408,20 @@ function update() {
       if(randomNum < 0.4) spawnEnemy("level2");
       if(randomNum <0.1) spawnEnemy("level3");
       if (kills >= 120) spawnEnemy("level4")
-    } else if (kills > 160) {
+    } else if (kills > 160 && kills <= 250) {
       mobSpawnCooldown = 15
       spawnEnemy("level5")
       let randomNum = Math.random()
       if(randomNum < 0.1) spawnEnemy("level4");
+    } else if (kills === 251 && !bossSpawned) {
+      enemies = []
+      bossSpawned = true
+      spawnEnemy('boss1')
+      mobSpawnCooldown = Infinity;
+      
+    } else if (kills >= 252) {
+      mobSpawnCooldown = 60
+      spawnEnemy("level4")
     }
   }
   
@@ -478,7 +496,7 @@ function update() {
     }
   }
   
-  for (let i = 0; i < bullets.length; i ++){
+  for (let i = bullets.length - 1; i >= 0; i--) {
     bullet = bullets[i]
     bullet.x -= bullet.dx * bulletSpeed
     bullet.y += bullet.dy * bulletSpeed
@@ -502,6 +520,12 @@ function update() {
             CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
             CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
             CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+          }
+          if(enemy.enemyType === "boss1"){
+            for (let i = 0; i <= coinsToUpgrade; i ++) {
+              CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: 1})
+            }
+            mobSpawnCooldown = 0
           }
         }
       }
