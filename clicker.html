@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clicker | Games.io</title>
+    <link rel="stylesheet" href="styles1.css" />
+</head>
+<body>
+    <h1 id="clicks">0 clicks</h1>
+    <button onclick="home()" id="home">Home</button>
+
+    <button onclick="clicker()" id="clickButton">Click me</button>
+    <div id="shop">
+        <button onclick="buy(1)">15 clicks: 0.1 CPS</button>
+    </div>
+
+    <script>
+        let clicks = 0;
+        let clickPower = 1;
+        let shopcosts = {
+            "1": 15
+        }
+        function clicker() {
+            clicks += clickPower
+            update()
+        }
+
+        function update() {
+            document.querySelector('#clicks').innerText = `${clicks} clicks`
+        }
+
+
+        
+        function home() {
+            window.location.href = "index.html";
+        }  
+    </script>
+</body>
+</html>

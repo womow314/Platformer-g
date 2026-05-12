@@ -118,8 +118,11 @@ details {
 }
 
 #clicker {
-  background-color: grey;
-  opacity: 25%;
+  background-color: green;
+  cursor: pointer;
+}
+#clicker:hover {
+  transform: scale(1.03);
 }
 #shop {
   position: absolute;
@@ -147,4 +150,18 @@ details {
   height: 100%;
   background: limegreen;
   transition: width 0.1s;
+}
+
+#clickButton {
+  position: absolute;
+  left: 10%;
+  top: 50%;
+  transform: translate(-50%, -50% );
+  font-size: 70px;
+  padding: 15px;
+}
+
+#clicks{
+  color: beige;
+  font-size: 100px;
 }
