@@ -25,6 +25,7 @@
     <p id="statsBulletSpeed">Bullet speed: 10</p>
     <p id="statsMagnet">Magnet range: 30</p>
     <p id="statsForce">Force Field: Inactive</p>
+    <p id="statsEnergy">Energy drink: Inactive</p>
   </details>
 </div>
 <div id="shop">
@@ -112,7 +113,8 @@ let upgrades = {
     playerSpeed: 1,
     magnet: 1,
     forceField: 1,
-    wave: 1
+    wave: 1,
+    energy: 1
 }
 
 let upgradeText = {
@@ -123,11 +125,12 @@ let upgradeText = {
     playerSpeed: ['Player Speed 5 => 6', 'Player Speed 6 => 7', 'Player Speed 7 => 8', 'Player Speed 8 => 9', 'Player Speed 9 => 10'],
     magnet: ['Increase magnet range 30 => 50', 'Increase magnet range 50 => 70', 'Increase magnet range 70 => 90', 'Increase magnet range 90 => 110', 'Increase magnet range 110 => 130'],
     forceField: ['Add force field', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power' ],
-    wave: ['Added bullet wave (back)', 'Partial upgrade: Wave sides: 1/4', 'Partial upgrade: Wave sides: 2/4', 'Partial upgrade: Wave sides: 3/4', 'Added bullet wave (sides)', ]
+    wave: ['Added bullet wave (back)', 'Partial upgrade: Wave sides: 1/4', 'Partial upgrade: Wave sides: 2/4', 'Partial upgrade: Wave sides: 3/4', 'Added bullet wave (sides)' ],
+    energy: ['+1 hp 10/sec', '+2 hp 10/sec', '+3 hp 10/sec', '+4 hp 10/sec', '+5 hp 10/sec']
 
 }
 
-let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'wave']
+let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'wave', 'energy']
 let avaibleUpgrades = []
 
 function displayUpgrades() {
@@ -173,6 +176,7 @@ const player = {
   direction: "e"
 };
 
+let energyDrinkCooldown = 800
 enemies = []
 
 function spawnEnemy(type="basic") {
@@ -223,6 +227,7 @@ spawnEnemy("basic")
 keys = {};
 let backWave = false;
 let sideWaves = false;
+let energyDrinkEffect = 0;
 
 function inRange(obj1, obj2, range) {
   if (!obj1 || !obj2) return false;
@@ -299,6 +304,12 @@ function buy(choice) {
       if (upgrades.wave === 1) backWave = true;
       if (upgrades.wave === 5) sideWaves = true;
       break;
+
+    case "energy":
+      energyDrinkEffect += 1;
+      document.getElementById('statsEnergy').innerText = `+${energyDrinkEffect} hp 10/sec`
+      break;
+
 
   }
   document.querySelector('#buy1').innerText = 'Wait for upgrade'
@@ -378,6 +389,11 @@ function update() {
   MobsOnBoard = enemies.length
   bulletCooldown -= 1
   mobSpawnCooldown -= 1
+  energyDrinkCooldown -= 1
+  if (energyDrinkCooldown <=0) {
+    health += energyDrinkEffect
+    energyDrinkCooldown = 800
+  }
   
   if (MobsOnBoard  <= 0) mobSpawnCooldown = 0
   if (mobSpawnCooldown <=0) {
