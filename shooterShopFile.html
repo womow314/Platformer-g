@@ -5,17 +5,115 @@
     <link rel="stylesheet" href="styles1.css" />
 </head>
 <body>
+
 <button onclick="home()" id="home">Home</button>
- <h3 id="shopHealth">Base health: 100 <br></h3>
- <h3 id="shopPower">Base power: 1 <br></h3>
- <h3 id="coins">You have: x coins <br></h3>
-  <script>
-    document.querySelector('#coins').innerText = `You have: ${localStorage.getItem('killCoins') || 0} coins`
+
+<div id="shooterShopDiv">
+
+    <h3 id="coins"></h3>
+
+    <h3 id="shopHealth"></h3>
+    <button id="healthBtn" onclick="buy(1)">
+    </button>
+
+    <h3 id="shopPower"></h3>
+    <button id="powerBtn" onclick="buy(2)">
+    </button>
+
+</div>
+
+<script>
+    localStorage.setItem('localPower',
+        localStorage.getItem('localPower') || "1");
+
+    localStorage.setItem('localHealth',
+        localStorage.getItem('localHealth') || "100");
+
+    localStorage.setItem('localPowerCost',
+        localStorage.getItem('localPowerCost') || "10");
+
+    localStorage.setItem('localHealthCost',
+        localStorage.getItem('localHealthCost') || "10");
+
+    localStorage.setItem('killCoins',
+        localStorage.getItem('killCoins') || "0");
+
+    updateUI();
+
+    function updateUI() {
+
+        document.querySelector('#coins').innerText =
+            `You have: ${localStorage.getItem('killCoins')} KC`;
+
+        document.querySelector('#shopHealth').innerText =
+            `Base health: ${localStorage.getItem('localHealth')}`;
+
+        document.querySelector('#shopPower').innerText =
+            `Base power: ${localStorage.getItem('localPower')}`;
+
+        document.querySelector('#healthBtn').innerText =
+            `Upgrade health ${localStorage.getItem('localHealth')} => ${Number(localStorage.getItem('localHealth')) + 10}. ${localStorage.getItem('localHealthCost')} KC`;
+
+        document.querySelector('#powerBtn').innerText =
+            `Upgrade power ${localStorage.getItem('localPower')} => ${Number(localStorage.getItem('localPower')) + 1}. ${localStorage.getItem('localPowerCost')} KC`;
+    }
 
     function home() {
         window.location.href = "index.html";
-    } 
-    
-  </script>
+    }
+
+    function buy(x) {
+
+        if (x === 1) {
+
+            if (
+                Number(localStorage.getItem('killCoins')) >=
+                Number(localStorage.getItem('localHealthCost'))
+            ) {
+
+                localStorage.setItem(
+                    'localHealth',
+                    String(Number(localStorage.getItem('localHealth')) + 10)
+                );
+
+                localStorage.setItem(
+                    'killCoins',
+                    String(
+                        Number(localStorage.getItem('killCoins')) -
+                        Number(localStorage.getItem('localHealthCost'))
+                    )
+                );
+
+                updateUI();
+            }
+        }
+
+        if (x === 2) {
+
+            if (
+                Number(localStorage.getItem('killCoins')) >=
+                Number(localStorage.getItem('localPowerCost'))
+            ) {
+
+                localStorage.setItem(
+                    'localPower',
+                    String(Number(localStorage.getItem('localPower')) + 1)
+                );
+
+                localStorage.setItem(
+                    'killCoins',
+                    String(
+                        Number(localStorage.getItem('killCoins')) -
+                        Number(localStorage.getItem('localPowerCost'))
+                    )
+                );
+
+                updateUI();
+            }
+        }
+    }
+
+</script>
+
 </body>
 </html>
