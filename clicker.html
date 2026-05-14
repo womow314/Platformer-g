@@ -19,6 +19,10 @@
         <source src = "clicker-click.mp3" type = "audio/mp3">
         <source src = "clicker-click.ogg" type = "audio/ogg">
     </audio>
+    <audio id = "upgradeSound" preload="auto">
+        <source src = "upgrade.mp3" type = "audio/mp3">
+        <source src = "upgrade.ogg" type="audio/ogg">
+    </audio>
 
     <script>
         let clicks = 0;
@@ -48,7 +52,13 @@
             clickerSound.currentTime = 0;
             clickerSound.play();
         }
+        const upgradeSound = document.getElementById("upgradeSound")
+        function playUpgradeSound() {
+            upgradeSound.currentTime = 0;
+            upgradeSound.play();
+        }
         function buy(x) {
+            playUpgradeSound();
             if (clicks >= shopcosts[x]) {cps += shopCPS[x]; clicks -= shopcosts[x]}
         }
 
