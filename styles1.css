@@ -134,7 +134,7 @@ details {
 }
 #shop {
   position: absolute;
-  bottom: 5%;
+  bottom: 15%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
