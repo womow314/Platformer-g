@@ -33,6 +33,14 @@
   <button id="buy2" onclick="buy(2)">Wait for upgrade</button>
   <button id="buy3" onclick="buy(3)">Wait for upgrade</button>
 </div>
+<div id="mobileControls">
+  <button id="left">←</button>
+  <button id="right">→</button>
+  <button id="up">ꜛ</button>
+  <button id="down">↓</button>
+  <button id="shoot">𒒕</button>
+
+</div>
 <script>
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -48,7 +56,28 @@ try {
 } catch (e) {
   mostKills = 0;
 }
+function bindButton(id, key) {
+  const btn = document.getElementById(id);
 
+  btn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    keys[key] = true;
+  }, { passive: false });
+
+  btn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    keys[key] = false;
+  });
+
+  btn.addEventListener('mousedown', () => keys[key] = true);
+  btn.addEventListener('mouseup', () => keys[key] = false);
+}
+
+bindButton("left", "ArrowLeft");
+bindButton("right", "ArrowRight");
+bindButton("up", "ArrowUp");
+bindButton("down", "ArrowDown");
+bindButton("shoot", "Space");
 function pause() {
   isPaused = !isPaused;
   canvas.style.opacity = '1';

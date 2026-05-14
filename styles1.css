@@ -21,6 +21,14 @@ h1 {
   color: rgb(148, 232, 148);
 }
 
+h2 {
+  position: absolute;
+  top: 130px;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  color: rgb(148, 232, 148);
+}
+
 img {
   position: fixed; 
   top: 50px; 
@@ -126,7 +134,7 @@ details {
 }
 #shop {
   position: absolute;
-  bottom: 5%;
+  bottom: 15%;
   left: 50%;
   transform: translate(-50%, -50%);
 }

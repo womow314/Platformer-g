@@ -6,30 +6,48 @@
 </head>
 <body>
     <h1 id="clicks">0 clicks</h1>
+    <h2 id="cps">0 CPS</h2>
     <button onclick="home()" id="home">Home</button>
 
     <button onclick="clicker()" id="clickButton">Click me</button>
     <div id="shop">
-        <button onclick="buy(1)">15 clicks: 0.1 CPS</button>
+        <button onclick="buy('1')">15 clicks: 0.1 CPS</button>
+        <button onclick="buy('2')">100 clicks: 1 CPS</button>
     </div>
 
     <script>
         let clicks = 0;
         let clickPower = 1;
+        let cps = 0
+
+        setInterval(() => {
+            clicks += cps/100
+            update()
+        }, 10)
+
         let shopcosts = {
-            "1": 15
+            "1": 15,
+            "2": 100
+        }
+        let shopCPS = {
+            "1": 0.1,
+            "2": 1
         }
         function clicker() {
             clicks += clickPower
             update()
         }
+        function buy(x) {
+            if (clicks >= shopcosts[x]) {cps += shopCPS[x]; clicks -= shopcosts[x]}
+        }
 
         function update() {
-            document.querySelector('#clicks').innerText = `${clicks} clicks`
+            document.querySelector('#clicks').innerText = `${Math.floor(clicks)} clicks`
+            document.querySelector('#cps').innerText = `${cps.toFixed(1)} CPS`
         }
 
 
-        
+
         function home() {
             window.location.href = "index.html";
         }  
