@@ -7,6 +7,7 @@
 <body>
 <canvas id="gameCanvas" height="400" width="800"></canvas>
 <button onclick="home()" id="home">Home</button>
+<button onclick="shop()" id="shooterShop">Shop</button>
 <h1>HEALTH: 100%</h1>
 <div id="progressContainer">
   <div id="progressBar"></div>
@@ -26,6 +27,7 @@
     <p id="statsMagnet">Magnet range: 30</p>
     <p id="statsForce">Force Field: Inactive</p>
     <p id="statsEnergy">Energy drink: Inactive</p>
+    <p id="statsHealth">Max Health: 100</p>
   </details>
 </div>
 <div id="shop">
@@ -42,14 +44,20 @@
 
 </div>
 <script>
+localStorage.setItem('localPower', localStorage.getItem('localPower') || "1")
+localStorage.setItem('localHealth', localStorage.getItem('localHealth') || "100")
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
   
 let mostKills = 0;
+let killCoins = localStorage.getItem('killCoins') || 0
 let magnetRange = 30;
 const MAX_UPGRADE = 6;
-let health = 100;
+let health = Number(localStorage.getItem('localHealth'));
+let MaxHealth = health
 localStorage.setItem('currentScore', '0')
+document.getElementById('statsHealth').innerText = `Max Health: ${health}`
 
 try {
   mostKills = Number(localStorage.getItem("mostKills")) || 0;
@@ -72,6 +80,7 @@ function bindButton(id, key) {
   btn.addEventListener('mousedown', () => keys[key] = true);
   btn.addEventListener('mouseup', () => keys[key] = false);
 }
+
 
 bindButton("left", "ArrowLeft");
 bindButton("right", "ArrowRight");
@@ -279,8 +288,21 @@ function inRange(obj1, obj2, range) {
 let bulletCooldown = 0;
 let bulletCooldownMax = 60
 
+
+
+
 function home() {
   window.location.href = "index.html";
+} 
+function shop() {
+    
+  let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
+  
+  let earnedCoins = Math.round(kills / 10);
+  let totalCoins = currentCoins + earnedCoins;
+  
+  localStorage.setItem('killCoins', String(totalCoins));
+  window.location.href = "shooterShopFile.html";
 } 
 
 function buy(choice) {
@@ -292,8 +314,7 @@ function buy(choice) {
   switch (selectedUpgrade) {
 
     case "power":
-      bulletPower = 1
-      bulletPower += upgrades.power;
+      bulletPower += 1;
       document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
       break;
 
@@ -354,6 +375,7 @@ function buy(choice) {
   canvas.style.opacity = '1'
 }
 
+
 window.addEventListener('keydown', e => keys[e.code] = true);
 window.addEventListener('keyup', e => keys[e.code] = false);
 
@@ -383,6 +405,25 @@ addWall(-1500, -1060, 2500, 300)
 addWall(-1500, -800, 500, 1600)
 addWall(800, -1000, 500, 2000)
 
+function bulletHitsEnemy(bullet, enemy) {
+  const bulletRadius = bullet.size / 2;
+  const enemyRadius = enemy.size / 2;
+
+  const bulletCenterX = bullet.x + bulletRadius;
+  const bulletCenterY = bullet.y + bulletRadius;
+
+  const enemyCenterX = enemy.x + enemyRadius;
+  const enemyCenterY = enemy.y + enemyRadius;
+
+  const dx = bulletCenterX - enemyCenterX;
+  const dy = bulletCenterY - enemyCenterY;
+
+  const distanceSquared = dx * dx + dy * dy;
+  const radiusSum = bulletRadius + enemyRadius;
+
+  return distanceSquared <= radiusSum * radiusSum;
+}
+
 
 
 let bulletSpeed = 10
@@ -392,17 +433,23 @@ let mobSpawnCooldown = 300
 let MobsOnBoard = 3
 let increaseSpeedCost = 5
 let coins = 0
-let bulletPower = 1
+let bulletPower = Number(localStorage.getItem('localPower'))
 
 const MobSpeed = 1
 
 
+document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
 
+function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-function update() {
   if (kills === 251) mobSpawnCooldown = 0;
   document.querySelector(('h1')).innerText = `HEALTH: ${health}`
-  document.querySelector('h1').style.color = `rgb(${255 - (health * 2.55)}, ${health * 2.55}, 0)`
+  document.querySelector('h1').style.color = `rgb(${255 - (health * (255/MaxHealth))}, ${health * (255/MaxHealth)}, 0)`
   document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}/${coinsToUpgrade}, Most Kills: ${mostKills}`
   let progressPercent = (coins / coinsToUpgrade) * 100;
   document.getElementById("progressBar").style.width = `${progressPercent}%`;
@@ -419,7 +466,7 @@ function update() {
   bulletCooldown -= 1
   mobSpawnCooldown -= 1
   energyDrinkCooldown -= 1
-  if (energyDrinkCooldown <=0) {
+  if (energyDrinkCooldown <=0 && health <= MaxHealth - energyDrinkEffect) {
     health += energyDrinkEffect
     energyDrinkCooldown = 800
   }
@@ -547,7 +594,7 @@ function update() {
     bullet.y += bullet.dy * bulletSpeed
     for (let e = 0; e < enemies.length; e ++) {
       enemy = enemies[e]
-      if (inRange(enemy, bullet, enemy.size)) {
+      if (bulletHitsEnemy(bullet, enemy)) {
         bullets.splice(i, 1)
         enemy.health -= bulletPower
         if (enemy.health <= 0) {
