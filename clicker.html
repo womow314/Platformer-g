@@ -16,6 +16,11 @@
         <button onclick="buy('2')">100 clicks: 1 CPS</button>
     </div>
 
+    <audio id ="clickSound" preload="auto">
+        <source src = "clicker-click.mp3" type = "audio/mp3">
+        <source src = "clicker-click.ogg" type = "audio/ogg">
+    </audio>
+
     <script>
         let clicks = 0;
         let clickPower = 1;
@@ -36,7 +41,13 @@
         }
         function clicker() {
             clicks += clickPower
+            playClickSound();
             update()
+        }
+        const clickerSound = document.getElementById("clickSound")
+        function playClickSound() {
+            clickerSound.currentTime = 0;
+            clickerSound.play();
         }
         function buy(x) {
             if (clicks >= shopcosts[x]) {cps += shopCPS[x]; clicks -= shopcosts[x]}
