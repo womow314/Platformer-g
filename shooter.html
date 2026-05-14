@@ -288,6 +288,9 @@ function inRange(obj1, obj2, range) {
 let bulletCooldown = 0;
 let bulletCooldownMax = 60
 
+
+
+
 function home() {
   window.location.href = "index.html";
 } 
@@ -311,8 +314,7 @@ function buy(choice) {
   switch (selectedUpgrade) {
 
     case "power":
-      bulletPower = 1
-      bulletPower += upgrades.power;
+      bulletPower += 1;
       document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
       break;
 
@@ -372,6 +374,7 @@ function buy(choice) {
   isPaused = false
   canvas.style.opacity = '1'
 }
+
 
 window.addEventListener('keydown', e => keys[e.code] = true);
 window.addEventListener('keyup', e => keys[e.code] = false);
@@ -435,7 +438,7 @@ let bulletPower = Number(localStorage.getItem('localPower'))
 const MobSpeed = 1
 
 
-
+document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
 
 function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
