@@ -49,6 +49,18 @@
     <button id="dash">⚡</button>
   </div>
 </div>
+<audio id ="deathSound" preload="auto">
+  <source src="death.mp3" type="audio/mp3">
+  <source src="death.ogg" type="audio/ogg">
+</audio>
+<audio id ="bounceSound" preload="auto">
+  <source src ="slime-bounce.mp3" type="audio/mp3">
+  <source src="slime-bounce.ogg" type="audio/ogg">
+</audio>
+<audio id = "checkpointSound" preload="auto">
+  <source src = "checkpoint-sound.mp3" type="audio/mp3">
+  <source src = "checkpoint-sound.ogg" type="audio/ogg">
+</audio>
 <script>
 
 
@@ -133,6 +145,23 @@ playerLauncher.src = "images/pixil-frame-0 (playerLauncher).png"
 const portalIMG = new Image();
 portalIMG.src = "images/pixil-frame-0-2.png";
 
+const deathSound = document.getElementById("deathSound");
+function playDeathSound() {
+  deathSound.currentTime = 0;
+  deathSound.play();
+}
+
+const bounceSound = document.getElementById("bounceSound");
+function playBounceSound() {
+  bounceSound.currentTime = 0;
+  bounceSound.play();
+}
+
+const checkpointSound = document.getElementById("checkpointSound");
+function playCheckpointSound() {
+  checkpointSound.currentTime = 0;
+  checkpointSound.play();
+}
 
 
 const bulletIMG = new Image();
@@ -499,7 +528,7 @@ function update() {
           player.y = save.y; 
           deathNum+=1
           player.dy = 0;
-          bullets.splice(i, 1); 
+          bullets.splice(i, 1);
           continue;
       }
       if (b.x > player.x + 1600) {
@@ -554,16 +583,18 @@ function update() {
               if (gravity > 0){
                 if (player.dy > 0 ) {
                   player.dy = -20; 
+                  playBounceSound();
                   continue;
                 }
                 continue;
               }
               player.dy = 15; 
+                playBounceSound();
               continue;
               
             }
             if (plat.water) {gravity = -0.5; continue;};
-            if (plat.check) {printLevel += 1; plat.check = false; save.x = player.x+10; save.y = player.y;};
+            if (plat.check) {printLevel += 1; plat.check = false; save.x = player.x+10; save.y = player.y; playCheckpointSound();};
             if (gravity > 0){
 
               if (player.dy > 0 && player.y + player.height - player.dy <= plat.y +5) {
@@ -599,6 +630,8 @@ function update() {
             player.x + player.width > dang.x &&
             player.y < dang.y + dang.height &&
             player.y + player.height > dang.y) {
+
+            playDeathSound();
             
             player.x = save.x;
             player.y = save.y;
