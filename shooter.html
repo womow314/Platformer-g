@@ -7,6 +7,7 @@
 <body>
 <canvas id="gameCanvas" height="400" width="800"></canvas>
 <button onclick="home()" id="home">Home</button>
+<button onclick="shop()" id="shooterShop">Shop</button>
 <h1>HEALTH: 100%</h1>
 <div id="progressContainer">
   <div id="progressBar"></div>
@@ -46,6 +47,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
   
 let mostKills = 0;
+let killCoins = localStorage.getItem('killCoins') || 0
 let magnetRange = 30;
 const MAX_UPGRADE = 6;
 let health = 100;
@@ -72,6 +74,7 @@ function bindButton(id, key) {
   btn.addEventListener('mousedown', () => keys[key] = true);
   btn.addEventListener('mouseup', () => keys[key] = false);
 }
+
 
 bindButton("left", "ArrowLeft");
 bindButton("right", "ArrowRight");
@@ -281,6 +284,16 @@ let bulletCooldownMax = 60
 
 function home() {
   window.location.href = "index.html";
+} 
+function shop() {
+    
+  let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
+  
+  let earnedCoins = Math.round(kills / 10);
+  let totalCoins = currentCoins + earnedCoins;
+  
+  localStorage.setItem('killCoins', String(totalCoins));
+  window.location.href = "shooterShopFile.html";
 } 
 
 function buy(choice) {

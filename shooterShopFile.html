@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shooter shop | Games.io</title>
+    <link rel="stylesheet" href="styles1.css" />
+</head>
+<body>
+<button onclick="home()" id="home">Home</button>
+ <h3 id="shopHealth">Base health: 100 <br></h3>
+ <h3 id="shopPower">Base power: 1 <br></h3>
+ <h3 id="coins">You have: x coins <br></h3>
+  <script>
+    document.querySelector('#coins').innerText = `You have: ${localStorage.getItem('killCoins') || 0} coins`
+
+    function home() {
+        window.location.href = "index.html";
+    } 
+    
+  </script>
+</body>
+</html>
