@@ -45,6 +45,7 @@
 </div>
 <script>
 localStorage.setItem('localPower', localStorage.getItem('localPower') || "1")
+localStorage.setItem('killModifyer', localStorage.getItem('killModifyer') || "0")
 localStorage.setItem('localHealth', localStorage.getItem('localHealth') || "100")
 
 const canvas = document.getElementById('gameCanvas');
@@ -174,6 +175,9 @@ let avaibleUpgrades = []
 function displayUpgrades() {
 
   avaibleUpgrades = [];
+
+  document.querySelector('#shop').style.display = 'flex !important'
+  document.querySelector('#mobileControls').style.display = 'none'
 
   let possibleUpgrades = upgradeArray.filter(
     upgrade => upgrades[upgrade] < MAX_UPGRADE
@@ -372,6 +376,8 @@ function buy(choice) {
   avaibleUpgrades = []
 
   isPaused = false
+  document.querySelector('#shop').style.display = 'none'
+  document.querySelector('#mobileControls').style.display = 'block'
   canvas.style.opacity = '1'
 }
 
@@ -450,7 +456,7 @@ function update() { //----------------------------------------------------------
   if (kills === 251) mobSpawnCooldown = 0;
   document.querySelector(('h1')).innerText = `HEALTH: ${health}`
   document.querySelector('h1').style.color = `rgb(${255 - (health * (255/MaxHealth))}, ${health * (255/MaxHealth)}, 0)`
-  document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}/${coinsToUpgrade}, Most Kills: ${mostKills}`
+  document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills} + ${localStorage.getItem('killModifyer')} Modifier, Coins: ${coins}/${coinsToUpgrade}, Most Kills: ${mostKills}`
   let progressPercent = (coins / coinsToUpgrade) * 100;
   document.getElementById("progressBar").style.width = `${progressPercent}%`;
   if (isPaused) return;
@@ -473,45 +479,46 @@ function update() { //----------------------------------------------------------
   
   if (MobsOnBoard  <= 0) mobSpawnCooldown = 0
   if (mobSpawnCooldown <=0) {
-    if (kills <= 20){
-      mobSpawnCooldown = 250 - 6*kills
+    let killsWithMod = kills + Number(localStorage.getItem('killModifyer'))
+    if (killsWithMod <= 20){
+      mobSpawnCooldown = 250 - 6*killsWithMod
       spawnEnemy("basic")
-    } else if (kills > 20 && kills <= 60) {
-      mobSpawnCooldown = Math.max(250 - 2*(kills-20), 120)
+    } else if (killsWithMod > 20 && killsWithMod <= 60) {
+      mobSpawnCooldown = Math.max(250 - 2*(killsWithMod-20), 120)
       spawnEnemy("level2")
       let randomNum = Math.random()
-      randomNum -= (kills-20)/13
+      randomNum -= (killsWithMod-20)/13
       if(randomNum < 0.2) spawnEnemy("basic");
       if(randomNum <0.05) spawnEnemy("basic");
-    } else if (kills > 60 && kills < 100) {
-      mobSpawnCooldown = Math.max(250 - 2*(kills-60), 120)
+    } else if (killsWithMod > 60 && killsWithMod < 100) {
+      mobSpawnCooldown = Math.max(250 - 2*(killsWithMod-60), 120)
       spawnEnemy("level3") 
       let randomNum = Math.random()
-      randomNum -= (kills-60)/13
+      randomNum -= (killsWithMod-60)/13
       if(randomNum < 0.2) spawnEnemy("basic");
       if(randomNum <0.05) spawnEnemy("level2");
-    } else if (kills > 100 && kills <= 160) {
-      mobSpawnCooldown = Math.max(200 - 2*(kills-100), 120)
+    } else if (killsWithMod > 100 && killsWithMod <= 160) {
+      mobSpawnCooldown = Math.max(200 - 2*(killsWithMod-100), 120)
       spawnEnemy("basic")
       spawnEnemy("basic")
       spawnEnemy("basic")
       let randomNum = Math.random()
-      randomNum -= (kills-100)/20
+      randomNum -= (killsWithMod-100)/20
       if(randomNum < 0.4) spawnEnemy("level2");
       if(randomNum <0.1) spawnEnemy("level3");
-      if (kills >= 120) spawnEnemy("level4")
-    } else if (kills > 160 && kills <= 250) {
+      if (killsWithMod >= 120) spawnEnemy("level4")
+    } else if (killsWithMod > 160 && killsWithMod <= 250) {
       mobSpawnCooldown = 15
       spawnEnemy("level5")
       let randomNum = Math.random()
       if(randomNum < 0.1) spawnEnemy("level4");
-    } else if (kills === 251 && !bossSpawned) {
+    } else if (killsWithMod === 251 && !bossSpawned) {
       enemies = []
       bossSpawned = true
       spawnEnemy('boss1')
       mobSpawnCooldown = Infinity;
       
-    } else if (kills >= 252) {
+    } else if (killsWithMod >= 252) {
       mobSpawnCooldown = 60
       spawnEnemy("level4")
     }
