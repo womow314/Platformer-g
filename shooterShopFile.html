@@ -136,6 +136,13 @@
         if (x === 3) {
             if (Number(localStorage.getItem('killCoins')) >= 1) {
                 localStorage.setItem('killModifyer', String(Number(localStorage.getItem('killModifyer')) + 3))
+
+                localStorage.setItem(
+                    'killCoins',
+                    String(
+                        Number(localStorage.getItem('killCoins')) - 1
+                    )
+                );
             }
         }
         updateUI();
