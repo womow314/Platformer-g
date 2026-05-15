@@ -20,6 +20,10 @@
     <button id="powerBtn" onclick="buy(2)">
     </button>
 
+    <h3 id="killMOD"></h3>
+    <button id="killMODBTN" onclick="buy(3)"> +3 kill at start 1 KC
+    </button>
+
 </div>
 
 <script>
@@ -37,6 +41,9 @@
 
     localStorage.setItem('killCoins',
         localStorage.getItem('killCoins') || "0");
+
+    localStorage.setItem('killModifyer',
+        localStorage.getItem('killModifyer') || "0");
 
     updateUI();
 
@@ -56,6 +63,8 @@
 
         document.querySelector('#powerBtn').innerText =
             `Upgrade power ${localStorage.getItem('localPower')} => ${Number(localStorage.getItem('localPower')) + 1}. ${localStorage.getItem('localPowerCost')} KC`;
+
+        document.querySelector('#killMOD').innerText = `+${localStorage.getItem('killModifyer')} kills at start`
     }
 
     function home() {
@@ -90,8 +99,6 @@
                         Number(localStorage.getItem('localHealthCost')) + 1
                     )
                 );
-
-                updateUI();
             }
         }
 
@@ -121,9 +128,17 @@
                     )
                 );
 
-                updateUI();
+                
+
+                
             }
         }
+        if (x === 3) {
+            if (Number(localStorage.getItem('killCoins')) >= 1) {
+                localStorage.setItem('killModifyer', String(Number(localStorage.getItem('killModifyer')) + 3))
+            }
+        }
+        updateUI();
     }
 
 </script>
