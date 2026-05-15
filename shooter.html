@@ -458,8 +458,8 @@ function update() { //----------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-  if (kills === 251) mobSpawnCooldown = 0;
+  let killsWithMod = kills + Number(localStorage.getItem('killModifyer'))
+  if (killsWithMod === 251) mobSpawnCooldown = 0;
   document.querySelector(('h1')).innerText = `HEALTH: ${health}`
   document.querySelector('h1').style.color = `rgb(${255 - (health * (255/MaxHealth))}, ${health * (255/MaxHealth)}, 0)`
   document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills} + ${localStorage.getItem('killModifyer')} Modifier, Coins: ${coins}/${coinsToUpgrade}, Most Kills: ${mostKills}`
@@ -485,7 +485,7 @@ function update() { //----------------------------------------------------------
   
   if (MobsOnBoard  <= 0) mobSpawnCooldown = 0
   if (mobSpawnCooldown <=0) {
-    let killsWithMod = kills + Number(localStorage.getItem('killModifyer'))
+     killsWithMod = kills + Number(localStorage.getItem('killModifyer'))
     if (killsWithMod <= 20){
       mobSpawnCooldown = 250 - 6*killsWithMod
       spawnEnemy("basic")
