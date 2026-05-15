@@ -5,8 +5,9 @@
     <link rel="stylesheet" href="styles1.css" />
 </head>
 <body>
-<canvas id="gameCanvas" height="400" width="800"></canvas>
+<canvas id="gameCanvas" height="600" width="1200"></canvas>
 <button onclick="home()" id="home">Home</button>
+<button onclick="shop()" id="shooterShop">Shop</button>
 <h1>HEALTH: 100%</h1>
 <div id="progressContainer">
   <div id="progressBar"></div>
@@ -26,6 +27,7 @@
     <p id="statsMagnet">Magnet range: 30</p>
     <p id="statsForce">Force Field: Inactive</p>
     <p id="statsEnergy">Energy drink: Inactive</p>
+    <p id="statsHealth">Max Health: 100</p>
   </details>
 </div>
 <div id="shop">
@@ -60,14 +62,21 @@
 </audio>
 
 <script>
+localStorage.setItem('localPower', localStorage.getItem('localPower') || "1")
+localStorage.setItem('killModifyer', localStorage.getItem('killModifyer') || "0")
+localStorage.setItem('localHealth', localStorage.getItem('localHealth') || "100")
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
   
 let mostKills = 0;
+let killCoins = localStorage.getItem('killCoins') || 0
 let magnetRange = 30;
 const MAX_UPGRADE = 6;
-let health = 100;
+let health = Number(localStorage.getItem('localHealth'));
+let MaxHealth = health
 localStorage.setItem('currentScore', '0')
+document.getElementById('statsHealth').innerText = `Max Health: ${health}`
 
 try {
   mostKills = Number(localStorage.getItem("mostKills")) || 0;
@@ -90,6 +99,7 @@ function bindButton(id, key) {
   btn.addEventListener('mousedown', () => keys[key] = true);
   btn.addEventListener('mouseup', () => keys[key] = false);
 }
+
 
 bindButton("left", "ArrowLeft");
 bindButton("right", "ArrowRight");
@@ -129,6 +139,9 @@ enemyLevel4.src = "images/pixil-frame-0%20(16).png"
 
 let enemyLevel5 = new Image();
 enemyLevel5.src = "images/pixil-frame-0%20(19).png"
+
+let enemyLevel6 = new Image();
+enemyLevel6.src = "images/pixil-frame-0%20(20).png"
 
 const bulletIMG = new Image();
 bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
@@ -205,8 +218,11 @@ let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet
 let avaibleUpgrades = []
 
 function displayUpgrades() {
+  document.querySelector('#shop').style.opacity = '0.95'
 
   avaibleUpgrades = [];
+
+  document.querySelector('#mobileControls').style.display = 'none'
 
   let possibleUpgrades = upgradeArray.filter(
     upgrade => upgrades[upgrade] < MAX_UPGRADE
@@ -284,6 +300,10 @@ function spawnEnemy(type="basic") {
     Ehealth = 300
     typeImage = boss1
     enemySize = 200
+  } else if (type === "level6") {
+    Ehealth = 40
+    typeImage = enemyLevel6
+    enemySize = 40
   }
   enemies.push({x:px, y:py, health: Ehealth, image: typeImage, enemyType: type, size: enemySize})
 }
@@ -321,8 +341,21 @@ function inRange(obj1, obj2, range) {
 let bulletCooldown = 0;
 let bulletCooldownMax = 60
 
+
+
+
 function home() {
   window.location.href = "index.html";
+} 
+function shop() {
+    
+  let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
+  
+  let earnedCoins = Math.round(kills / 10);
+  let totalCoins = currentCoins + earnedCoins;
+  
+  localStorage.setItem('killCoins', String(totalCoins));
+  window.location.href = "shooterShopFile.html";
 } 
 
 function buy(choice) {
@@ -336,8 +369,7 @@ function buy(choice) {
   switch (selectedUpgrade) {
 
     case "power":
-      bulletPower = 1
-      bulletPower += upgrades.power;
+      bulletPower += 1;
       document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
       break;
 
@@ -395,8 +427,11 @@ function buy(choice) {
   avaibleUpgrades = []
 
   isPaused = false
+  document.querySelector('#mobileControls').style.display = 'block'
   canvas.style.opacity = '1'
+  document.querySelector('#shop').style.opacity = '0'
 }
+
 
 window.addEventListener('keydown', e => keys[e.code] = true);
 window.addEventListener('keyup', e => keys[e.code] = false);
@@ -427,6 +462,25 @@ addWall(-1500, -1060, 2500, 300)
 addWall(-1500, -800, 500, 1600)
 addWall(800, -1000, 500, 2000)
 
+function bulletHitsEnemy(bullet, enemy) {
+  const bulletRadius = bullet.size / 2;
+  const enemyRadius = enemy.size / 2;
+
+  const bulletCenterX = bullet.x + bulletRadius;
+  const bulletCenterY = bullet.y + bulletRadius;
+
+  const enemyCenterX = enemy.x + enemyRadius;
+  const enemyCenterY = enemy.y + enemyRadius;
+
+  const dx = bulletCenterX - enemyCenterX;
+  const dy = bulletCenterY - enemyCenterY;
+
+  const distanceSquared = dx * dx + dy * dy;
+  const radiusSum = bulletRadius + enemyRadius;
+
+  return distanceSquared <= radiusSum * radiusSum;
+}
+
 
 
 let bulletSpeed = 10
@@ -436,18 +490,23 @@ let mobSpawnCooldown = 300
 let MobsOnBoard = 3
 let increaseSpeedCost = 5
 let coins = 0
-let bulletPower = 1
+let bulletPower = Number(localStorage.getItem('localPower'))
 
 const MobSpeed = 1
 
+document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
 
+function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-function update() {
   if (kills === 251) mobSpawnCooldown = 0;
   document.querySelector(('h1')).innerText = `HEALTH: ${health}`
-  document.querySelector('h1').style.color = `rgb(${255 - (health * 2.55)}, ${health * 2.55}, 0)`
-  document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills}, Coins: ${coins}/${coinsToUpgrade}, Most Kills: ${mostKills}`
+  document.querySelector('h1').style.color = `rgb(${255 - (health * (255/MaxHealth))}, ${health * (255/MaxHealth)}, 0)`
+  document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills} + ${localStorage.getItem('killModifyer')} Modifier, Coins: ${coins}/${coinsToUpgrade}, Most Kills: ${mostKills}`
   let progressPercent = (coins / coinsToUpgrade) * 100;
   document.getElementById("progressBar").style.width = `${progressPercent}%`;
   if (isPaused) return;
@@ -463,54 +522,63 @@ function update() {
   bulletCooldown -= 1
   mobSpawnCooldown -= 1
   energyDrinkCooldown -= 1
-  if (energyDrinkCooldown <=0) {
+  if (energyDrinkCooldown <=0 && health <= MaxHealth - energyDrinkEffect) {
     health += energyDrinkEffect
-    energyDrinkCooldown = 800
+    energyDrinkCooldown = 700
   }
   
   if (MobsOnBoard  <= 0) mobSpawnCooldown = 0
   if (mobSpawnCooldown <=0) {
-    if (kills <= 20){
-      mobSpawnCooldown = 250 - 6*kills
+    let killsWithMod = kills + Number(localStorage.getItem('killModifyer'))
+    if (killsWithMod <= 20){
+      mobSpawnCooldown = 250 - 6*killsWithMod
       spawnEnemy("basic")
-    } else if (kills > 20 && kills <= 60) {
-      mobSpawnCooldown = Math.max(250 - 2*(kills-20), 120)
+    } else if (killsWithMod > 20 && killsWithMod <= 60) {
+      mobSpawnCooldown = Math.max(250 - 2*(killsWithMod-20), 120)
       spawnEnemy("level2")
       let randomNum = Math.random()
-      randomNum -= (kills-20)/13
+      randomNum -= (killsWithMod-20)/13
       if(randomNum < 0.2) spawnEnemy("basic");
       if(randomNum <0.05) spawnEnemy("basic");
-    } else if (kills > 60 && kills < 100) {
-      mobSpawnCooldown = Math.max(250 - 2*(kills-60), 120)
+    } else if (killsWithMod > 60 && killsWithMod < 100) {
+      mobSpawnCooldown = Math.max(250 - 2*(killsWithMod-60), 120)
       spawnEnemy("level3") 
       let randomNum = Math.random()
-      randomNum -= (kills-60)/13
+      randomNum -= (killsWithMod-60)/13
       if(randomNum < 0.2) spawnEnemy("basic");
       if(randomNum <0.05) spawnEnemy("level2");
-    } else if (kills > 100 && kills <= 160) {
-      mobSpawnCooldown = Math.max(200 - 2*(kills-100), 120)
+    } else if (killsWithMod > 100 && killsWithMod <= 160) {
+      mobSpawnCooldown = Math.max(200 - 2*(killsWithMod-100), 120)
       spawnEnemy("basic")
       spawnEnemy("basic")
       spawnEnemy("basic")
       let randomNum = Math.random()
-      randomNum -= (kills-100)/20
+      randomNum -= (killsWithMod-100)/20
       if(randomNum < 0.4) spawnEnemy("level2");
       if(randomNum <0.1) spawnEnemy("level3");
-      if (kills >= 120) spawnEnemy("level4")
-    } else if (kills > 160 && kills <= 250) {
+      if (killsWithMod >= 120) spawnEnemy("level4")
+    } else if (killsWithMod > 160 && killsWithMod <= 250) {
       mobSpawnCooldown = 15
       spawnEnemy("level5")
       let randomNum = Math.random()
       if(randomNum < 0.1) spawnEnemy("level4");
-    } else if (kills === 251 && !bossSpawned) {
+    } else if (killsWithMod === 251 && !bossSpawned) {
       enemies = []
       bossSpawned = true
       spawnEnemy('boss1')
       mobSpawnCooldown = Infinity;
       
-    } else if (kills >= 252) {
+    } else if (killsWithMod >= 252 && killsWithMod < 300) {
       mobSpawnCooldown = 60
       spawnEnemy("level4")
+    } else if(killsWithMod >= 300) {
+      mobSpawnCooldown = 200
+      spawnEnemy('basic')
+      spawnEnemy('level2')
+      spawnEnemy('level3')
+      spawnEnemy('level4')
+      spawnEnemy('level5')
+      spawnEnemy('level6')
     }
   }
   
@@ -555,33 +623,51 @@ function update() {
     }
   }
   
-  for (let enemy of enemies) {
-    if (player.x > enemy.x +enemy.size/2) enemy.x += MobSpeed
-    if (player.x < enemy.x+enemy.size/2) enemy.x -= MobSpeed
-    
-    if (player.y > enemy.y+enemy.size/2) enemy.y += MobSpeed
-    if (player.y < enemy.y+enemy.size/2) enemy.y -= MobSpeed
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    let enemy = enemies[i];
 
-   if (inRange(player, enemy, forceFieldRange)) {
-    enemy.health -= forcePower;
+    let dx = player.x - enemy.x;
+    let dy = player.y - enemy.y;
 
-    if (enemy.health <= 0) {
-      enemies.splice(enemies.indexOf(enemy), 1);
-      playKillSound();
-      kills += 1;
+    let dist = Math.sqrt(dx * dx + dy * dy);
 
-      CoinsOnGround.push({
-        x: enemy.x + enemy.size/2 + Math.random()*10,
-        y: enemy.y + enemy.size/2 + Math.random()*10,
-        value: 1
-      });
+    if (dist > 0) {
+      dx /= dist;
+      dy /= dist;
+
+      enemy.x += dx * MobSpeed;
+      enemy.y += dy * MobSpeed;
     }
-  }
 
-    if (player.x < enemy.x + enemy.size && player.x + 30 > enemy.x && player.y < enemy.y + enemy.size && player.y + 30 > enemy.y) {
-      health -= 1
+    if (inRange(player, enemy, forceFieldRange)) {
+      enemy.health -= forcePower;
+
+      if (enemy.health <= 0) {
+        enemies.splice(i, 1);
+        playKillSound();
+        kills += 1;
+
+        CoinsOnGround.push({
+          x: enemy.x + enemy.size / 2 + Math.random() * 10,
+          y: enemy.y + enemy.size / 2 + Math.random() * 10,
+          value: 1
+        });
+
+        continue;
+      }
+    }
+
+    // ---- player collision ----
+    if (
+      player.x < enemy.x + enemy.size &&
+      player.x + 30 > enemy.x &&
+      player.y < enemy.y + enemy.size &&
+      player.y + 30 > enemy.y
+    ) {
+      health -= 1;
+
       if (health <= 0) {
-        localStorage.setItem('currentScore', kills)
+        localStorage.setItem('currentScore', kills);
         window.location.href = "death.html";
       }
     }
@@ -591,9 +677,12 @@ function update() {
     bullet = bullets[i]
     bullet.x -= bullet.dx * bulletSpeed
     bullet.y += bullet.dy * bulletSpeed
+    if (Math.abs(player.x - bullet.x) > 2000 || Math.abs(player.y - bullet.y) > 2000) {
+      bullets.splice(i, 1)
+    }
     for (let e = 0; e < enemies.length; e ++) {
       enemy = enemies[e]
-      if (inRange(enemy, bullet, enemy.size)) {
+      if (bulletHitsEnemy(bullet, enemy)) {
         bullets.splice(i, 1)
         enemy.health -= bulletPower
         playMobHurtSound();
@@ -654,7 +743,7 @@ function update() {
     }
   }
   
-  scrollX = player.x - 400;
+  scrollX = player.x - 0.5*canvas.width;
   scrollY = player.y - 0.5*canvas.height;
   if (kills > mostKills) {
     mostKills = kills;
@@ -662,6 +751,20 @@ function update() {
   }
   
 }
+let pattern;
+
+sky.onload = () => {
+
+    const patternCanvas = document.createElement('canvas');
+    patternCanvas.width = 21;
+    patternCanvas.height = 21;
+
+    const patternCtx = patternCanvas.getContext('2d');
+
+    patternCtx.drawImage(sky, 0, 0, 21, 21);
+
+    pattern = ctx.createPattern(patternCanvas, 'repeat');
+};
 
 
 function draw() {
@@ -671,18 +774,11 @@ function draw() {
     ctx.save();
     if (isPaused) return;
     
-    ctx.translate(
-      Math.min(-scrollX),
-      Math.max(-scrollY)
-    );
+    ctx.translate(-scrollX, -scrollY);
     
-    for (let b = -2000; b < 2000; b += 20) {
-      for (let d = -2000; d < 2000; d += 20) {
-        if (player.x > b+500 || player.x <b-500) { continue}
-        if (player.y > d+500 || player.y <d-500) { continue}
-        ctx.drawImage(sky, b, d, 21, 21);
-      }
-    }
+    ctx.fillStyle = pattern;
+    ctx.fillRect(scrollX, scrollY, canvas.width, canvas.height);
+
     ctx.drawImage(forceField, player.x-forceFieldRange/2+15, player.y-forceFieldRange/2+15, forceFieldRange, forceFieldRange);
     ctx.drawImage(playerImg, player.x, player.y, 30, 30);
 
@@ -703,7 +799,7 @@ function draw() {
     });
     
     enemies.forEach(enemy => {
-        if (!inRange(player, enemy, 1000)) return;
+        if (!inRange(player, enemy, canvas.width+100)) return;
         ctx.drawImage(enemy.image, enemy.x, enemy.y, enemy.size, enemy.size);
     });
 
@@ -719,9 +815,7 @@ function draw() {
 function loop() {
     update();
     draw();
-    setTimeout(() => {
     requestAnimationFrame(loop);
-  }, 5);
     
 }
 

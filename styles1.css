@@ -65,6 +65,11 @@ details {
   right: 15px;
   top: 10px;
 }
+#shooterShop {
+  position: absolute;
+  right: 15px;
+  top: 40px;
+}
 
 #instructions {
   position: fixed;
@@ -133,10 +138,32 @@ details {
   transform: scale(1.03);
 }
 #shop {
-  position: absolute;
-  bottom: 15%;
+  position: fixed;
+  bottom: 20%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
+  display: flex !important;
+  flex-direction: row;
+  gap: 10px;
+  z-index: 1000;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-wrap: nowrap;
+  opacity: 0;
+}
+
+#shop button {
+  width: 120px;
+  height: 60px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  white-space: normal;
+  
 }
 
 #progressContainer {
@@ -172,4 +199,18 @@ details {
 #clicks{
   color: beige;
   font-size: 100px;
+}
+h3 {
+  color: beige;
+}
+
+#shooterShopDiv {
+  text-align: center;
+  position: absolute;
+  top: 15px;
+}
+
+#gameCanvas {
+  width: 100%;
+  aspect-ratio: 2/1;
 }
