@@ -43,6 +43,24 @@
   <button id="shoot">𒒕</button>
 
 </div>
+
+<audio id = "collectSound" preload="auto">
+  <source src = "audio/shooter/collect.mp3" type="audio/mp3">
+  <source src = "audio/shooter/collect.ogg" type="audio/ogg">
+</audio>
+<audio id = "shootSound" preload="auto">
+  <source src = "audio/shooter/shoot.mp3" type="audio/mp3">
+  <source src = "audio/shooter/shoot.ogg" type="audio/mp3">
+</audio>
+<audio id = "mobHurt" preload="auto">
+  <source src = "audio/shooter/mob-hurt.mp3" type="audio/mp3">
+  <source src = "audio/shooter/mob-hurt.ogg" type="audio/ogg">
+</audio>
+<audio id = "buySound" preload="auto">
+  <source src = "audio/shooter/upgrade.mp3" type="audio/mp3">
+  <source src = "audio/shooter/upgrade.ogg" type="audio/ogg">
+</audio>
+
 <script>
 localStorage.setItem('localPower', localStorage.getItem('localPower') || "1")
 localStorage.setItem('killModifyer', localStorage.getItem('killModifyer') || "0")
@@ -136,6 +154,30 @@ coinImg.src = "images/pixil-frame-0%20(17).png"
 
 const forceField = new Image();
 forceField.src = "images/pixil-frame-0%20(18).png"
+
+const collectSound = document.getElementById("collectSound");
+function playCollectSound() {
+  collectSound.currentTime = 0;
+  collectSound.play();
+}
+
+const shootSound = document.getElementById("shootSound");
+function playShootSound() {
+  shootSound.currentTime = 0;
+  shootSound.play();
+}
+
+const mobHurtSound = document.getElementById("mobHurt");
+function playMobHurtSound() {
+  mobHurtSound.currentTime = 0;
+  mobHurtSound.play();
+}
+
+const buySound = document.getElementById("buySound")
+function playBuySound() {
+  buySound.currentTime = 0;
+  buySound.play();
+}
 
 const boss1 = new Image();
 boss1.src = "images/BOSS.png" 
@@ -317,6 +359,8 @@ function shop() {
 } 
 
 function buy(choice) {
+
+  playBuySound();
 
   let selectedUpgrade = avaibleUpgrades[choice - 1];
 
@@ -540,6 +584,7 @@ function update() { //----------------------------------------------------------
   
   if (keys['Space'] && bulletCooldown <= 0) {
     bulletCooldown = Math.max(bulletCooldownMax, 2)
+    playShootSound();
     let pdx;
     let pdy;
     if (player.direction === "e") {
@@ -599,6 +644,7 @@ function update() { //----------------------------------------------------------
 
       if (enemy.health <= 0) {
         enemies.splice(i, 1);
+        playKillSound();
         kills += 1;
 
         CoinsOnGround.push({
@@ -639,6 +685,7 @@ function update() { //----------------------------------------------------------
       if (bulletHitsEnemy(bullet, enemy)) {
         bullets.splice(i, 1)
         enemy.health -= bulletPower
+        playMobHurtSound();
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
           kills +=1
@@ -670,6 +717,7 @@ function update() { //----------------------------------------------------------
     coin = CoinsOnGround[i]
     if ((coin.x - player.x)*(coin.x - player.x)+(coin.y - player.y)*(coin.y - player.y) < magnetRange*magnetRange) {
       CoinsOnGround.splice(i, 1)
+      playCollectSound();
       coins+= coin.value
       if (coins >= coinsToUpgrade) {
         coins = 0
