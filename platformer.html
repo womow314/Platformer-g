@@ -50,16 +50,20 @@
   </div>
 </div>
 <audio id ="deathSound" preload="auto">
-  <source src="death.mp3" type="audio/mp3">
-  <source src="death.ogg" type="audio/ogg">
+  <source src="audio/platformer/death.mp3" type="audio/mp3">
+  <source src="audio/platformer/death.ogg" type="audio/ogg">
 </audio>
 <audio id ="bounceSound" preload="auto">
-  <source src ="slime-bounce.mp3" type="audio/mp3">
-  <source src="slime-bounce.ogg" type="audio/ogg">
+  <source src ="audio/platformer/slime-bounce.mp3" type="audio/mp3">
+  <source src="audio/platformer/slime-bounce.ogg" type="audio/ogg">
 </audio>
 <audio id = "checkpointSound" preload="auto">
-  <source src = "checkpoint-sound.mp3" type="audio/mp3">
-  <source src = "checkpoint-sound.ogg" type="audio/ogg">
+  <source src = "audio/platformer/checkpoint-sound.mp3" type="audio/mp3">
+  <source src = "audio/platformer/checkpoint-sound.ogg" type="audio/ogg">
+</audio>
+<audio id = "finishSound" preload="auto">
+  <source src="audio/platformer/finish-sound.mp3" type="audio/mp3">
+  <source src="audio/platformer/finish-sound.ogg" type="audio/ogg">
 </audio>
 <script>
   
@@ -72,10 +76,15 @@ window.addEventListener("keydown", function(e) {
     }
 }, false);
 
+function finish() {
+  window.location.href = "end.html"
+}
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 let gravity = 1;
+let isGameOver = false;
 let highScore = 0;
 let imagesLoaded = 0;
 const totalImages = 2;
@@ -161,6 +170,13 @@ function playCheckpointSound() {
   checkpointSound.play();
 }
 
+const finishSound = document.getElementById("finishSound");
+function playFinishSound() {
+  finishSound.currentTime = 0;
+  finishSound.play();
+}
+let playedFinishSound = false;
+let hadSetTimeout = false;
 
 const bulletIMG = new Image();
 bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
@@ -524,6 +540,7 @@ function update() {
       if (player.x < b.x + 10 && player.x + player.width > b.x && player.y < b.y + 10 && player.y + player.height > b.y) {
           player.x = save.x; 
           player.y = save.y; 
+          playDeathSound();
           deathNum+=1
           player.dy = 0;
           bullets.splice(i, 1);
@@ -539,7 +556,7 @@ function update() {
     if (keys['ArrowRight'] || keys['KeyD']) moveDir = 1;
     else if (keys['ArrowLeft'] || keys['KeyA']) moveDir = -1;
     else player.dx = 0;
-    
+
     
     if ((keys['ShiftLeft'] || keys['ShiftRight']) && dashCooldown === 0 ) {
       let dashDir = moveDir === 0 ? 1 : moveDir;
@@ -554,8 +571,12 @@ function update() {
         player.grounded = false;
     }
 
+    if (!isGameOver) {
     player.dy += gravity;
-    
+    } else {
+      player.dy = 0;
+      player.dx = 0;
+    }
     player.x += player.dx;
     player.y += player.dy;
 
@@ -566,9 +587,21 @@ function update() {
       player.x + player.width > end.x &&
       player.y < end.y + 50 &&
       player.y + player.height > end.y) {
+        isGameOver = true;
+        player.dy = 0;
+        player.dx = 0;
       document.getElementById('levelSelect').value = 1
       deathNum = 0
-      home()
+      if (!playedFinishSound) {
+      playFinishSound();
+      playedFinishSound = true;
+      }
+      if (!hadSetTimeout) {
+        hadSetTimeout = true
+      setTimeout ( () => {
+        finish();
+      }, 3000)
+    }
     }
     
     for (let plat of platforms) {
