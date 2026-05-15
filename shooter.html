@@ -122,6 +122,9 @@ enemyLevel4.src = "images/pixil-frame-0%20(16).png"
 let enemyLevel5 = new Image();
 enemyLevel5.src = "images/pixil-frame-0%20(19).png"
 
+let enemyLevel6 = new Image();
+enemyLevel6.src = "images/pixil-frame-0%20(20).png"
+
 const bulletIMG = new Image();
 bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
 
@@ -255,6 +258,10 @@ function spawnEnemy(type="basic") {
     Ehealth = 300
     typeImage = boss1
     enemySize = 200
+  } else if (type === "enemy6") {
+    Ehealth = 40
+    typeImage = enemyLevel6
+    enemySize = 40
   }
   enemies.push({x:px, y:py, health: Ehealth, image: typeImage, enemyType: type, size: enemySize})
 }
@@ -517,9 +524,17 @@ function update() { //----------------------------------------------------------
       spawnEnemy('boss1')
       mobSpawnCooldown = Infinity;
       
-    } else if (killsWithMod >= 252) {
+    } else if (killsWithMod >= 252 && killsWithMod < 300) {
       mobSpawnCooldown = 60
       spawnEnemy("level4")
+    } else if(killsWithMod >= 300) {
+      mobSpawnCooldown = 200
+      spawnEnemy('level1')
+      spawnEnemy('level2')
+      spawnEnemy('level3')
+      spawnEnemy('level4')
+      spawnEnemy('level5')
+      spawnEnemy('level6')
     }
   }
   
