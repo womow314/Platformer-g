@@ -443,16 +443,6 @@ let bulletPower = Number(localStorage.getItem('localPower'))
 
 const MobSpeed = 1
 
-window.addEventListener("beforeunload", () => {
-  let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
-  
-  let earnedCoins = Math.round(kills / 10);
-  let totalCoins = currentCoins + earnedCoins;
-  
-  localStorage.setItem('killCoins', String(totalCoins));
-});
-
-
 document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
 
 function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -483,7 +473,7 @@ function update() { //----------------------------------------------------------
   energyDrinkCooldown -= 1
   if (energyDrinkCooldown <=0 && health <= MaxHealth - energyDrinkEffect) {
     health += energyDrinkEffect
-    energyDrinkCooldown = 800
+    energyDrinkCooldown = 700
   }
   
   if (MobsOnBoard  <= 0) mobSpawnCooldown = 0
@@ -573,32 +563,50 @@ function update() { //----------------------------------------------------------
     }
   }
   
-  for (let enemy of enemies) {
-    if (player.x > enemy.x +enemy.size/2) enemy.x += MobSpeed
-    if (player.x < enemy.x+enemy.size/2) enemy.x -= MobSpeed
-    
-    if (player.y > enemy.y+enemy.size/2) enemy.y += MobSpeed
-    if (player.y < enemy.y+enemy.size/2) enemy.y -= MobSpeed
+  for (let i = enemies.length - 1; i >= 0; i--) {
+    let enemy = enemies[i];
 
-   if (inRange(player, enemy, forceFieldRange)) {
-    enemy.health -= forcePower;
+    let dx = player.x - enemy.x;
+    let dy = player.y - enemy.y;
 
-    if (enemy.health <= 0) {
-      enemies.splice(enemies.indexOf(enemy), 1);
-      kills += 1;
+    let dist = Math.sqrt(dx * dx + dy * dy);
 
-      CoinsOnGround.push({
-        x: enemy.x + enemy.size/2 + Math.random()*10,
-        y: enemy.y + enemy.size/2 + Math.random()*10,
-        value: 1
-      });
+    if (dist > 0) {
+      dx /= dist;
+      dy /= dist;
+
+      enemy.x += dx * MobSpeed;
+      enemy.y += dy * MobSpeed;
     }
-  }
 
-    if (player.x < enemy.x + enemy.size && player.x + 30 > enemy.x && player.y < enemy.y + enemy.size && player.y + 30 > enemy.y) {
-      health -= 1
+    if (inRange(player, enemy, forceFieldRange)) {
+      enemy.health -= forcePower;
+
+      if (enemy.health <= 0) {
+        enemies.splice(i, 1);
+        kills += 1;
+
+        CoinsOnGround.push({
+          x: enemy.x + enemy.size / 2 + Math.random() * 10,
+          y: enemy.y + enemy.size / 2 + Math.random() * 10,
+          value: 1
+        });
+
+        continue;
+      }
+    }
+
+    // ---- player collision ----
+    if (
+      player.x < enemy.x + enemy.size &&
+      player.x + 30 > enemy.x &&
+      player.y < enemy.y + enemy.size &&
+      player.y + 30 > enemy.y
+    ) {
+      health -= 1;
+
       if (health <= 0) {
-        localStorage.setItem('currentScore', kills)
+        localStorage.setItem('currentScore', kills);
         window.location.href = "death.html";
       }
     }
@@ -728,7 +736,7 @@ function draw() {
     });
     
     enemies.forEach(enemy => {
-        if (!inRange(player, enemy, canvas.width)) return;
+        if (!inRange(player, enemy, canvas.width+100)) return;
         ctx.drawImage(enemy.image, enemy.x, enemy.y, enemy.size, enemy.size);
     });
 
