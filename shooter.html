@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="styles1.css" />
 </head>
 <body>
-<canvas id="gameCanvas" height="1600" width="3200"></canvas>
+<canvas id="gameCanvas" height="600" width="1200"></canvas>
 <button onclick="home()" id="home">Home</button>
 <button onclick="shop()" id="shooterShop">Shop</button>
 <h1>HEALTH: 100%</h1>
@@ -173,6 +173,7 @@ let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet
 let avaibleUpgrades = []
 
 function displayUpgrades() {
+  document.querySelector('#shop').style.opacity = '0.95'
 
   avaibleUpgrades = [];
 
@@ -377,6 +378,7 @@ function buy(choice) {
   isPaused = false
   document.querySelector('#mobileControls').style.display = 'block'
   canvas.style.opacity = '1'
+  document.querySelector('#shop').style.opacity = '0'
 }
 
 
@@ -597,6 +599,9 @@ function update() { //----------------------------------------------------------
     bullet = bullets[i]
     bullet.x -= bullet.dx * bulletSpeed
     bullet.y += bullet.dy * bulletSpeed
+    if (Math.abs(player.x - bullet.x) > 2000 || Math.abs(player.y - bullet.y) > 2000) {
+      bullets.splice(i, 1)
+    }
     for (let e = 0; e < enemies.length; e ++) {
       enemy = enemies[e]
       if (bulletHitsEnemy(bullet, enemy)) {
@@ -666,6 +671,20 @@ function update() { //----------------------------------------------------------
   }
   
 }
+let pattern;
+
+sky.onload = () => {
+
+    const patternCanvas = document.createElement('canvas');
+    patternCanvas.width = 21;
+    patternCanvas.height = 21;
+
+    const patternCtx = patternCanvas.getContext('2d');
+
+    patternCtx.drawImage(sky, 0, 0, 21, 21);
+
+    pattern = ctx.createPattern(patternCanvas, 'repeat');
+};
 
 
 function draw() {
@@ -675,18 +694,11 @@ function draw() {
     ctx.save();
     if (isPaused) return;
     
-    ctx.translate(
-      Math.min(-scrollX),
-      Math.max(-scrollY)
-    );
+    ctx.translate(-scrollX, -scrollY);
     
-    for (let b = -2000; b < 2000; b += 20) {
-      for (let d = -2000; d < 2000; d += 20) {
-        if (player.x > b+500 || player.x <b-500) { continue}
-        if (player.y > d+500 || player.y <d-500) { continue}
-        ctx.drawImage(sky, b, d, 21, 21);
-      }
-    }
+    ctx.fillStyle = pattern;
+    ctx.fillRect(scrollX, scrollY, canvas.width, canvas.height);
+
     ctx.drawImage(forceField, player.x-forceFieldRange/2+15, player.y-forceFieldRange/2+15, forceFieldRange, forceFieldRange);
     ctx.drawImage(playerImg, player.x, player.y, 30, 30);
 
@@ -707,7 +719,7 @@ function draw() {
     });
     
     enemies.forEach(enemy => {
-        if (!inRange(player, enemy, 1000)) return;
+        if (!inRange(player, enemy, canvas.width)) return;
         ctx.drawImage(enemy.image, enemy.x, enemy.y, enemy.size, enemy.size);
     });
 
@@ -723,9 +735,7 @@ function draw() {
 function loop() {
     update();
     draw();
-    setTimeout(() => {
     requestAnimationFrame(loop);
-  }, 5);
     
 }
 

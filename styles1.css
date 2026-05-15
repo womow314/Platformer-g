@@ -145,11 +145,13 @@ details {
   display: flex !important;
   flex-direction: row;
   gap: 10px;
+  z-index: 1000;
 
   align-items: center;
   justify-content: center;
 
   flex-wrap: nowrap;
+  opacity: 0;
 }
 
 #shop button {
@@ -161,6 +163,7 @@ details {
   justify-content: center;
 
   white-space: normal;
+  
 }
 
 #progressContainer {
