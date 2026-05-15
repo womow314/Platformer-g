@@ -443,6 +443,15 @@ let bulletPower = Number(localStorage.getItem('localPower'))
 
 const MobSpeed = 1
 
+window.addEventListener("beforeunload", () => {
+  let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
+  
+  let earnedCoins = Math.round(kills / 10);
+  let totalCoins = currentCoins + earnedCoins;
+  
+  localStorage.setItem('killCoins', String(totalCoins));
+});
+
 
 document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
 
