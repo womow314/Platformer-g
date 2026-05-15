@@ -176,7 +176,6 @@ function displayUpgrades() {
 
   avaibleUpgrades = [];
 
-  document.querySelector('#shop').style.display = 'flex !important'
   document.querySelector('#mobileControls').style.display = 'none'
 
   let possibleUpgrades = upgradeArray.filter(
@@ -376,7 +375,6 @@ function buy(choice) {
   avaibleUpgrades = []
 
   isPaused = false
-  document.querySelector('#shop').style.display = 'none'
   document.querySelector('#mobileControls').style.display = 'block'
   canvas.style.opacity = '1'
 }
