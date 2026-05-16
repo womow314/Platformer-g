@@ -143,6 +143,9 @@ enemyLevel5.src = "images/pixil-frame-0%20(19).png"
 let enemyLevel6 = new Image();
 enemyLevel6.src = "images/pixil-frame-0%20(20).png"
 
+let enemyLevel7 = new Image();
+enemyLevel7.src = "images/astronought (1).png"
+
 const bulletIMG = new Image();
 bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
 
@@ -266,7 +269,7 @@ const player = {
 let energyDrinkCooldown = 800
 enemies = []
 
-function spawnEnemy(type="basic") {
+function spawnEnemy(type="basic", mod=0) {
   px = Math.random()*1770-1000
   py = Math.random()*1530 - 770
   while ((px + 45-player.x)*(px+45 -player.x) +(py +45-player.y)*(py+45-player.y) < 60000) {
@@ -304,8 +307,12 @@ function spawnEnemy(type="basic") {
     Ehealth = 40
     typeImage = enemyLevel6
     enemySize = 40
+  } else if (type === "level7") {
+    Ehealth = 300
+    typeImage = enemyLevel7
+    enemySize = 30
   }
-  enemies.push({x:px, y:py, health: Ehealth, image: typeImage, enemyType: type, size: enemySize})
+  enemies.push({x:px, y:py, health: Ehealth+mod, image: typeImage, enemyType: type, size: enemySize})
 }
 
 spawnEnemy("basic")
@@ -571,7 +578,7 @@ function update() { //----------------------------------------------------------
     } else if (killsWithMod >= 252 && killsWithMod < 300) {
       mobSpawnCooldown = 60
       spawnEnemy("level4")
-    } else if(killsWithMod >= 300) {
+    } else if(killsWithMod >= 300 && killsWithMod < 380) {
       mobSpawnCooldown = 200
       spawnEnemy('basic')
       spawnEnemy('level2')
@@ -579,6 +586,25 @@ function update() { //----------------------------------------------------------
       spawnEnemy('level4')
       spawnEnemy('level5')
       spawnEnemy('level6')
+    } else if (killsWithMod >= 380 && killsWithMod < 540) {
+      mobSpawnCooldown = 20
+      spawnEnemy("level3")
+    } else if (killsWithMod >= 540 && killsWithMod < 550) {
+      mobSpawnCooldown = 150
+      spawnEnemy("boss1")
+    } else if (killsWithMod >= 550 && killsWithMod < 650) {
+      mobSpawnCooldown = 20
+      spawnEnemy("level6")
+    } else if (killsWithMod > 650) {
+      mobSpawnCooldown = 150
+      spawnEnemy("level6")
+      spawnEnemy("level7")
+      spawnEnemy('level5')
+      spawnEnemy('level4')
+      spawnEnemy('level3')
+      spawnEnemy('level3')
+      spawnEnemy('level2')
+      spawnEnemy('basic')
     }
   }
   
@@ -657,7 +683,6 @@ function update() { //----------------------------------------------------------
       }
     }
 
-    // ---- player collision ----
     if (
       player.x < enemy.x + enemy.size &&
       player.x + 30 > enemy.x &&
@@ -695,12 +720,10 @@ function update() { //----------------------------------------------------------
           }
           if (enemy.enemyType === "level3"){
             CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
           }
           if (enemy.enemyType === "level4"){
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1.5})
+
           }
           if(enemy.enemyType === "boss1"){
             for (let i = 0; i <= coinsToUpgrade; i ++) {
