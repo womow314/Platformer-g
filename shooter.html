@@ -655,13 +655,7 @@ function update() { //----------------------------------------------------------
     let dx = player.x - enemy.x;
     let dy = player.y - enemy.y;
 
-<<<<<<< HEAD
-    if (enemy.health <= 0) {
-      enemies.splice(enemies.indexOf(enemy), 1);
-      kills += 1;
-=======
     let dist = Math.sqrt(dx * dx + dy * dy);
->>>>>>> d53f84c5b2514a5e8e23c48ce4ea51032b18fbf4
 
     if (dist > 0) {
       dx /= dist;
