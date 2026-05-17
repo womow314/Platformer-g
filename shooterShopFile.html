@@ -23,27 +23,35 @@
     <h3 id="killMOD"></h3>
     <button id="killMODBTN" onclick="buy(3)"> +3 kill at start 1 KC
     </button>
+</div>
 
+<div id="skillTree">
+    <h3 id="skillCoins"></h3>
+    <button>Start</button>
+    <button onclick="buySkill(1)" id="rapid">x2 fire</button>
+    <button style="display: none;"> x2 Force Field damage</button>
 </div>
 
 <script>
-    localStorage.setItem('localPower',
-        localStorage.getItem('localPower') || "1");
+    localStorage.setItem('localPower', localStorage.getItem('localPower') || "1");
 
-    localStorage.setItem('localHealth',
-        localStorage.getItem('localHealth') || "100");
+    localStorage.setItem('localHealth', localStorage.getItem('localHealth') || "100");
 
-    localStorage.setItem('localPowerCost',
-        localStorage.getItem('localPowerCost') || "10");
+    localStorage.setItem('localPowerCost', localStorage.getItem('localPowerCost') || "10");
 
-    localStorage.setItem('localHealthCost',
-        localStorage.getItem('localHealthCost') || "10");
+    localStorage.setItem('localHealthCost', localStorage.getItem('localHealthCost') || "10");
 
-    localStorage.setItem('killCoins',
-        localStorage.getItem('killCoins') || "0");
+    localStorage.setItem('killCoins', localStorage.getItem('killCoins') || "0");
 
-    localStorage.setItem('killModifyer',
-        localStorage.getItem('killModifyer') || "0");
+    localStorage.setItem('repeatFire', localStorage.getItem('repeatFire') || "1");
+
+    localStorage.setItem('killModifyer', localStorage.getItem('killModifyer') || "0");
+
+    localStorage.setItem('mostKillsWithMod', localStorage.getItem('mostKillsWithMod') || "0")
+
+    localStorage.setItem('skillCoinsSpent', localStorage.getItem('skillCoinsSpent') || "0")
+
+    skillCoins = Math.floor(Number(localStorage.getItem('mostKillsWithMod'))/10) - Number(localStorage.getItem('skillCoinsSpent'))
 
     updateUI();
 
@@ -65,6 +73,9 @@
             `Upgrade power ${localStorage.getItem('localPower')} => ${Number(localStorage.getItem('localPower')) + 1}. ${localStorage.getItem('localPowerCost')} KC`;
 
         document.querySelector('#killMOD').innerText = `+${localStorage.getItem('killModifyer')} kills at start`
+        skillCoins = Math.floor(Number(localStorage.getItem('mostKillsWithMod'))/10) - Number(localStorage.getItem('skillCoinsSpent'))
+        document.querySelector('#skillCoins').innerText = `${skillCoins} skill coins`
+        document.querySelector('#rapid').innerText = `x${Number(localStorage.getItem('repeatFire')) + 1} fire`
     }
 
     function home() {
@@ -148,6 +159,13 @@
         updateUI();
     }
 
+    function buySkill (x) {
+        if (x === 1 && skillCoins > 20) {
+            localStorage.setItem('repeatFire', String(Number(localStorage.getItem('repeatFire'))+1));
+            localStorage.setItem('skillCoinsSpent', String(Number(localStorage.getItem('skillCoinsSpent'))+20));
+            updateUI()
+        }
+    }
 </script>
 
 </body>

@@ -214,3 +214,7 @@ h3 {
   width: 100%;
   aspect-ratio: 2/1;
 }
+line{
+    stroke:white;
+    stroke-width:4;
+}
