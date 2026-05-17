@@ -364,7 +364,7 @@ function shop() {
   localStorage.setItem('killCoins', String(totalCoins));
   window.location.href = "shooterShopFile.html";
 } 
-
+let totalUpgradesCompleteed = 0;
 function buy(choice) {
 
   playBuySound();
@@ -665,6 +665,22 @@ function update() { //----------------------------------------------------------
       enemy.y += dy * MobSpeed;
     }
 
+    for (let j = 0; j < enemies.length; j++) {
+      if (i === j) continue;
+      let other = enemies[j];
+      let dx2 = enemy.x - other.x;
+      let dy2 = enemy.y - other.y;
+      let dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+      let minDist = (enemy.size + other.size) / 2;
+      if (dist2 < minDist && dist2 > 0) {
+        dx2 /= dist2;
+        dy2 /= dist2;
+        let push = (minDist - dist2) * 0.1;
+        enemy.x += dx2 * push;
+        enemy.y += dy2 * push;
+      }
+    }
+
     if (inRange(player, enemy, forceFieldRange)) {
       enemy.health -= forcePower;
 
@@ -742,8 +758,10 @@ function update() { //----------------------------------------------------------
       playCollectSound();
       coins+= coin.value
       if (coins >= coinsToUpgrade) {
-        coins = 0
-        coinsToUpgrade += 1
+        coins -= coinsToUpgrade
+        let increaseAmount = totalUpgradesCompleteed/10 +1
+        coinsToUpgrade += increaseAmount
+        totalUpgradesCompleteed+= 1
         displayUpgrades()
       }
 
