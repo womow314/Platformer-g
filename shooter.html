@@ -65,6 +65,8 @@
 localStorage.setItem('localPower', localStorage.getItem('localPower') || "1")
 localStorage.setItem('killModifyer', localStorage.getItem('killModifyer') || "0")
 localStorage.setItem('localHealth', localStorage.getItem('localHealth') || "100")
+localStorage.setItem('mostKillsWithMod', localStorage.getItem('mostKillsWithMod') || "0")
+localStorage.setItem('skillCoinsSpent', localStorage.getItem('skillCoinsSpent') || "0")
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -74,6 +76,7 @@ let killCoins = localStorage.getItem('killCoins') || 0
 let magnetRange = 30;
 const MAX_UPGRADE = 6;
 let health = Number(localStorage.getItem('localHealth'));
+let rapid = Number(localStorage.getItem('repeatFire'));
 let MaxHealth = health
 localStorage.setItem('currentScore', '0')
 document.getElementById('statsHealth').innerText = `Max Health: ${health}`
@@ -611,41 +614,43 @@ function update() { //----------------------------------------------------------
   if (keys['Space'] && bulletCooldown <= 0) {
     bulletCooldown = Math.max(bulletCooldownMax, 2)
     playShootSound();
-    let pdx;
-    let pdy;
-    if (player.direction === "e") {
-      pdx = 1;
-      pdy = 0;
-    } else if (player.direction === "n") {
-      pdx = 0;
-      pdy = -1;
-    } else if (player.direction === "s") {
-      pdx = 0;
-      pdy = 1;
-    } else if (player.direction === "w") {
-      pdx = -1;
-      pdy = 0;
-    }
-    addBullet(player.x, player.y, pdx, pdy, bulletSize)
-    if(backWave){
-      addBullet(player.x, player.y, -pdx, -pdy, bulletSize)
-    }
-    if(sideWaves){
+    for(let k = 0; k < rapid; k ++){
+      let pdx;
+      let pdy;
       if (player.direction === "e") {
-        pdx = 0;
-        pdy = 1;
+        pdx = 1;
+        pdy = 0;
       } else if (player.direction === "n") {
-        pdx = 1;
-        pdy = 0;
+        pdx = 0;
+        pdy = -1;
       } else if (player.direction === "s") {
-        pdx = 1;
-        pdy = 0;
-      } else if (player.direction === "w") {
         pdx = 0;
         pdy = 1;
+      } else if (player.direction === "w") {
+        pdx = -1;
+        pdy = 0;
       }
       addBullet(player.x, player.y, pdx, pdy, bulletSize)
-      addBullet(player.x, player.y, -pdx, -pdy, bulletSize)
+      if(backWave){
+        addBullet(player.x, player.y, -pdx, -pdy, bulletSize)
+      }
+      if(sideWaves){
+        if (player.direction === "e") {
+          pdx = 0;
+          pdy = 1;
+        } else if (player.direction === "n") {
+          pdx = 1;
+          pdy = 0;
+        } else if (player.direction === "s") {
+          pdx = 1;
+          pdy = 0;
+        } else if (player.direction === "w") {
+          pdx = 0;
+          pdy = 1;
+        }
+        addBullet(player.x, player.y, pdx, pdy, bulletSize)
+        addBullet(player.x, player.y, -pdx, -pdy, bulletSize)
+      }
     }
   }
   
@@ -724,7 +729,7 @@ function update() { //----------------------------------------------------------
       enemy = enemies[e]
       if (bulletHitsEnemy(bullet, enemy)) {
         bullets.splice(i, 1)
-        enemy.health -= bulletPower
+        enemy.health -= bulletPower/rapid + rapid/2
         playMobHurtSound();
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
@@ -789,6 +794,8 @@ function update() { //----------------------------------------------------------
     mostKills = kills;
     localStorage.setItem("mostKills", mostKills);
   }
+
+  localStorage.setItem("mostKillsWithMod", String(Number(localStorage.getItem('killModifyer')) +Number(localStorage.getItem('mostKills'))));
   
 }
 let pattern;
