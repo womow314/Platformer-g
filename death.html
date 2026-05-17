@@ -5,18 +5,23 @@
     <link rel="stylesheet" href="styles1.css" />
 </head>
 <body>
- <h1>
-    Deaths
- </h1>
+ <h1 id="deathMessage">YOU DIED ☠️ Kills: 0</h1>
  <button onclick="home()" id="home">Home</button>
   <script>
-    let score = Number(localStorage.getItem('currentScore'))
-    document.querySelector('h1').innerText = `YOU DIED ☠️ Kills: ${score}`
+    let score = Number(localStorage.getItem('currentScore')) || 0;
+    
+    let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
+    
+    let earnedCoins = Math.round(score / 10);
+    let totalCoins = currentCoins + earnedCoins;
+    
+    localStorage.setItem('killCoins', String(totalCoins));
+
+    document.getElementById('deathMessage').innerText = `YOU DIED ☠️ Kills: ${score}`;
 
     function home() {
         window.location.href = "index.html";
     } 
-    
   </script>
 </body>
 </html>
