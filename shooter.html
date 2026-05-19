@@ -69,6 +69,8 @@ localStorage.setItem('mostKillsWithMod', localStorage.getItem('mostKillsWithMod'
 localStorage.setItem('skillCoinsSpent', localStorage.getItem('skillCoinsSpent') || "0")
 localStorage.setItem('repeatFire', localStorage.getItem('repeatFire') || "1")
 
+localStorage.setItem('forceMod', localStorage.getItem('forceMod') || "1");
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
   
@@ -688,7 +690,7 @@ function update() { //----------------------------------------------------------
     }
 
     if (inRange(player, enemy, forceFieldRange)) {
-      enemy.health -= forcePower;
+      enemy.health -= forcePower * Number(localStorage.getItem('forceMod'));
 
       if (enemy.health <= 0) {
         enemies.splice(i, 1);

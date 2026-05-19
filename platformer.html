@@ -247,8 +247,11 @@ let end = {
   x: 0,
   y: 0
 }
-
+let time = 0
 const levelsNum = 23
+setInterval ( () => {
+  time += 1
+}, 1000)
 
 function generateWorld() {
   currentX = 100; 
@@ -532,7 +535,7 @@ function addPortal (cx, cy, dx, dy) {
 function update() {
   
     highScore = Math.max(Math.round(player.x/10), highScore)
-    document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-((player.y/10)-34))}, Highest score: ${highScore}, Level: ${printLevel}, Deaths: ${deathNum}`
+    document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-((player.y/10)-34))}, Highest score: ${highScore}, Level: ${printLevel}, Deaths: ${deathNum}, Time: ${time}`
     let moveDir = 0;
     
     for (let i = bullets.length - 1; i >= 0; i--) {
