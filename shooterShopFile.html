@@ -27,9 +27,11 @@
 
 <div id="skillTree">
     <h3 id="skillCoins"></h3>
-    <button>Start</button>
-    <button onclick="buySkill(1)" id="rapid">x2 fire</button>
-    <button style="display: none;"> x2 Force Field damage</button>
+    <div id="skillTreeButtons">
+        <button>Start</button>
+        <button onclick="buySkill(1)" id="rapid">x2 split amount</button>
+        <button style="display: none;" id="force" onclick="buySkill(2)"> x2 Force Field damage</button>
+    </div>
 </div>
 
 <script>
@@ -42,6 +44,8 @@
     localStorage.setItem('localHealthCost', localStorage.getItem('localHealthCost') || "10");
 
     localStorage.setItem('killCoins', localStorage.getItem('killCoins') || "0");
+
+    localStorage.setItem('forceMod', localStorage.getItem('forceMod') || "1");
 
     localStorage.setItem('repeatFire', localStorage.getItem('repeatFire') || "1");
 
@@ -75,7 +79,12 @@
         document.querySelector('#killMOD').innerText = `+${localStorage.getItem('killModifyer')} kills at start`
         skillCoins = Math.floor(Number(localStorage.getItem('mostKillsWithMod'))/10) - Number(localStorage.getItem('skillCoinsSpent'))
         document.querySelector('#skillCoins').innerText = `${skillCoins} skill coins`
-        document.querySelector('#rapid').innerText = `x${Number(localStorage.getItem('repeatFire')) + 1} fire`
+        document.querySelector('#rapid').innerText = `x${Number(localStorage.getItem('repeatFire')) + 1} split amount`
+        document.querySelector('#force').innerText = `x${Number(localStorage.getItem('forceMod')) + 1} Force Field damage`
+
+        if (Number(localStorage.getItem('repeatFire')) > 1) {
+            document.querySelector('#force').style.display = 'block'
+        }
     }
 
     function home() {
@@ -162,6 +171,13 @@
     function buySkill (x) {
         if (x === 1 && skillCoins > 20) {
             localStorage.setItem('repeatFire', String(Number(localStorage.getItem('repeatFire'))+1));
+            localStorage.setItem('skillCoinsSpent', String(Number(localStorage.getItem('skillCoinsSpent'))+20));
+            document.querySelector('#force').style.display = 'block'
+            updateUI()
+        }
+
+        if (x === 2 && skillCoins > 20) {
+            localStorage.setItem('forceMod', String(Number(localStorage.getItem('forceMod'))+1));
             localStorage.setItem('skillCoinsSpent', String(Number(localStorage.getItem('skillCoinsSpent'))+20));
             updateUI()
         }

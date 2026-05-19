@@ -218,3 +218,10 @@ line{
     stroke:white;
     stroke-width:4;
 }
+
+#skillTreeButtons{
+  display: flex;
+  gap: 10px;         
+  justify-content: center; 
+  align-items: center;
+}

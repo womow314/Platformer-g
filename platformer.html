@@ -8,7 +8,7 @@
 <div id="instructions">
   Arrow right/left = Move ←→ <br>Up arrow/space = jump ⤒ <br>Shift = sprint⚡. <br><br> Brick is normal platform <br>Lava is death <br>Slime is bouncy platform <br>Water is reverse gravity <br>Orange dudes shoot bullets
 </div>
-<canvas id="gameCanvas" height="400" width="800"></canvas>
+<canvas id="gameCanvas" height="800" width="1600"></canvas>
 <div id="stuff">
   <p id="cord">x: 0, y: 0</p>
   <select id="levelSelect">
@@ -247,8 +247,11 @@ let end = {
   x: 0,
   y: 0
 }
-
+let time = 0
 const levelsNum = 23
+setInterval ( () => {
+  time += 1
+}, 1000)
 
 function generateWorld() {
   currentX = 100; 
@@ -532,7 +535,7 @@ function addPortal (cx, cy, dx, dy) {
 function update() {
   
     highScore = Math.max(Math.round(player.x/10), highScore)
-    document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-((player.y/10)-34))}, Highest score: ${highScore}, Level: ${printLevel}, Deaths: ${deathNum}`
+    document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-((player.y/10)-34))}, Highest score: ${highScore}, Level: ${printLevel}, Deaths: ${deathNum}, Time: ${time}`
     let moveDir = 0;
     
     for (let i = bullets.length - 1; i >= 0; i--) {
@@ -696,7 +699,7 @@ function draw() {
     ctx.fillStyle = '#287271';
     nope = false
     platforms.forEach(plat => {
-        if (plat.x>player.x+800) {return;}
+        if (plat.x>player.x+1700) {return;}
         if(plat.b){
           for (let b = 0; b < plat.width; b += 20) {
             ctx.drawImage(slime, plat.x + b, plat.y, 20, plat.height);
