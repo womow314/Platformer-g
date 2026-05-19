@@ -67,6 +67,7 @@ localStorage.setItem('killModifyer', localStorage.getItem('killModifyer') || "0"
 localStorage.setItem('localHealth', localStorage.getItem('localHealth') || "100")
 localStorage.setItem('mostKillsWithMod', localStorage.getItem('mostKillsWithMod') || "0")
 localStorage.setItem('skillCoinsSpent', localStorage.getItem('skillCoinsSpent') || "0")
+localStorage.setItem('repeatFire', localStorage.getItem('repeatFire') || "1")
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -311,7 +312,7 @@ function spawnEnemy(type="basic", mod=0) {
     typeImage = enemyLevel6
     enemySize = 40
   } else if (type === "level7") {
-    Ehealth = 300
+    Ehealth = 200
     typeImage = enemyLevel7
     enemySize = 30
   }
@@ -729,7 +730,7 @@ function update() { //----------------------------------------------------------
       enemy = enemies[e]
       if (bulletHitsEnemy(bullet, enemy)) {
         bullets.splice(i, 1)
-        enemy.health -= bulletPower/rapid + rapid/2
+        enemy.health -= bulletPower/rapid + 0.1
         playMobHurtSound();
         if (enemy.health <= 0) {
           enemies.splice(e, 1);

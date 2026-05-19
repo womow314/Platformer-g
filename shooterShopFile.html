@@ -27,9 +27,11 @@
 
 <div id="skillTree">
     <h3 id="skillCoins"></h3>
-    <button>Start</button>
-    <button onclick="buySkill(1)" id="rapid">x2 fire</button>
-    <button style="display: none;"> x2 Force Field damage</button>
+    <div id="skillTreeButtons">
+        <button>Start</button>
+        <button onclick="buySkill(1)" id="rapid">x2 split amount</button>
+        <button style="display: none; opacity: 0.3;" id="force"> x2 Force Field damage</button>
+    </div>
 </div>
 
 <script>
@@ -75,7 +77,11 @@
         document.querySelector('#killMOD').innerText = `+${localStorage.getItem('killModifyer')} kills at start`
         skillCoins = Math.floor(Number(localStorage.getItem('mostKillsWithMod'))/10) - Number(localStorage.getItem('skillCoinsSpent'))
         document.querySelector('#skillCoins').innerText = `${skillCoins} skill coins`
-        document.querySelector('#rapid').innerText = `x${Number(localStorage.getItem('repeatFire')) + 1} fire`
+        document.querySelector('#rapid').innerText = `x${Number(localStorage.getItem('repeatFire')) + 1} split amount`
+
+        if (Number(localStorage.getItem('repeatFire')) > 1) {
+            document.querySelector('#force').style.display = 'block'
+        }
     }
 
     function home() {
@@ -163,6 +169,7 @@
         if (x === 1 && skillCoins > 20) {
             localStorage.setItem('repeatFire', String(Number(localStorage.getItem('repeatFire'))+1));
             localStorage.setItem('skillCoinsSpent', String(Number(localStorage.getItem('skillCoinsSpent'))+20));
+            document.querySelector('#force').style.display = 'block'
             updateUI()
         }
     }

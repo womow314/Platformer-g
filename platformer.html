@@ -8,7 +8,7 @@
 <div id="instructions">
   Arrow right/left = Move ←→ <br>Up arrow/space = jump ⤒ <br>Shift = sprint⚡. <br><br> Brick is normal platform <br>Lava is death <br>Slime is bouncy platform <br>Water is reverse gravity <br>Orange dudes shoot bullets
 </div>
-<canvas id="gameCanvas" height="400" width="800"></canvas>
+<canvas id="gameCanvas" height="800" width="1600"></canvas>
 <div id="stuff">
   <p id="cord">x: 0, y: 0</p>
   <select id="levelSelect">
@@ -696,7 +696,7 @@ function draw() {
     ctx.fillStyle = '#287271';
     nope = false
     platforms.forEach(plat => {
-        if (plat.x>player.x+800) {return;}
+        if (plat.x>player.x+1700) {return;}
         if(plat.b){
           for (let b = 0; b < plat.width; b += 20) {
             ctx.drawImage(slime, plat.x + b, plat.y, 20, plat.height);
