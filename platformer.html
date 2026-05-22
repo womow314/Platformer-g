@@ -235,6 +235,14 @@ let level = 1;
 let printLevel = 1;
 const DASH_DURATION = 1;
 
+function flipPlayerIMG() {
+  playerImg.src = "images/pixil-frame-0 (21).png"
+}
+
+function unflipPlayerIMG() {
+  playerImg.src = "images/pixil-frame-0 (1).png"
+}
+
 function redo(){
   level = parseInt(document.getElementById('levelSelect').value);
   printLevel = level
@@ -626,7 +634,8 @@ function update() {
               continue;
               
             }
-            if (plat.water) {gravity = -0.5; continue;};
+            if (!plat.water) {unflipPlayerIMG();};
+            if (plat.water) {gravity = -0.5; flipPlayerIMG(); continue;};
             if (plat.check) {printLevel += 1; plat.check = false; save.x = player.x+10; save.y = player.y; playCheckpointSound();};
             if (gravity > 0){
 
