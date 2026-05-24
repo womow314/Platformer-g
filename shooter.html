@@ -601,7 +601,7 @@ function update() { //----------------------------------------------------------
     } else if (killsWithMod >= 550 && killsWithMod < 650) {
       mobSpawnCooldown = 20
       spawnEnemy("level6")
-    } else if (killsWithMod > 650) {
+    } else if (killsWithMod >= 650 && killsWithMod < 800) {
       mobSpawnCooldown = 150
       spawnEnemy("level6")
       spawnEnemy("level7")
@@ -611,6 +611,10 @@ function update() { //----------------------------------------------------------
       spawnEnemy('level3')
       spawnEnemy('level2')
       spawnEnemy('basic')
+    } else if (killsWithMod > 800){
+      mobSpawnCooldown = 20
+      spawnEnemy("level6")
+      spawnEnemy("level7")
     }
   }
   
