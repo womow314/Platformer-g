@@ -30,7 +30,7 @@
     <p id="statsHealth">Max Health: 100</p>
   </details>
 </div>
-<div id="shop">
+<div id="shop" style="display: none;">
   <button id="buy1" onclick="buy(1)">Wait for upgrade</button>
   <button id="buy2" onclick="buy(2)">Wait for upgrade</button>
   <button id="buy3" onclick="buy(3)">Wait for upgrade</button>
@@ -204,7 +204,7 @@ let CoinsOnGround = []
 let rockets = []
 let rocketFacts = {
   cooldown: Infinity,
-  damage: 10,
+  damage: 20,
   explosionMod: 30,
   speed: 3
 }
@@ -447,7 +447,7 @@ function buy(choice) {
       break;
 
     case "energy":
-      energyDrinkEffect += 1;
+      energyDrinkEffect += MaxHealth/100;
       document.getElementById('statsEnergy').innerText = `+${energyDrinkEffect} hp 10/sec`
       break;
 
@@ -461,7 +461,7 @@ function buy(choice) {
           rocketFacts.cooldown = 260;
           break;
         case 3: 
-          rocketFacts.damage = 20;
+          rocketFacts.damage = 50;
           break;
         case 4:
           rocketFacts.explosionMod += 20;

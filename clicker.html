@@ -6,7 +6,7 @@
 </head>
 <body>
     <h1 id="clicks">0 clicks</h1>
-    <h2 id="cps">0 CPS</h2>
+    <h2 id="cps">0 CPS, 1 power</h2>
     <button onclick="home()" id="home">Home</button>
     
 
@@ -93,18 +93,19 @@
                     hasBoughtMod = true;
                 } else if (mod1.innerHTML = "1012.5 clicks: 1 Click Modifyer" && !hasBoughtMod) {
                     mod1.innerHTML = "Maxed out"
-                } else if (shopcosts[x] = 1518.75) {
+                } else if (shopcosts[x] > 1500) {
                     isModMaxedOut = true;
                 }
                 }
                
                 playUpgradeSound();
+                update()
             }
         }
 
         function update() {
             document.querySelector('#clicks').innerText = `${Math.floor(clicks)} clicks`
-            document.querySelector('#cps').innerText = `${cps.toFixed(1)} CPS`
+            document.querySelector('#cps').innerText = `${cps.toFixed(1)} CPS, ${clickPower.toFixed(1)} power`
         }
 
 
