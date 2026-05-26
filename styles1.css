@@ -151,7 +151,7 @@ details {
   justify-content: center;
 
   flex-wrap: nowrap;
-  opacity: 0;
+  opacity: 1;
 }
 
 #shop button {
