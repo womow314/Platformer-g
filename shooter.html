@@ -168,6 +168,10 @@ coinImg.src = "images/pixil-frame-0%20(17).png"
 const forceField = new Image();
 forceField.src = "images/pixil-frame-0%20(18).png"
 
+
+const boom = new Image();
+boom.src = "images/pixil-frame-0%20(22).png"
+
 const collectSound = document.getElementById("collectSound");
 function playCollectSound() {
   collectSound.currentTime = 0;
@@ -710,7 +714,8 @@ function update() { //----------------------------------------------------------
         y: player.y,
         dx: tdx,
         dy: tdy,
-        size: rocketFacts.explosionMod
+        size: rocketFacts.explosionMod,
+        photo: rocketIMG
       }); 
 
       rocketCooldown = rocketFacts.cooldown;
@@ -731,7 +736,11 @@ function update() { //----------------------------------------------------------
 
       if (bulletHitsEnemy(rocket, enemy)) {
 
-        enemy.health -= rocketFacts.damage/6;
+        const timeAfterHit = 200
+
+        enemy.health -= rocketFacts.damage/12;
+
+        rocket.photo = boom
 
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
@@ -741,7 +750,7 @@ function update() { //----------------------------------------------------------
 
         setTimeout(()=>{
           rockets.splice(r, 1);
-        }, 100)
+        }, timeAfterHit)
 
         
         break;
@@ -969,7 +978,7 @@ function draw() {
     });
 
     rockets.forEach(rocket => {
-        ctx.drawImage(rocketIMG, rocket.x, rocket.y, rocketFacts.explosionMod, rocketFacts.explosionMod);
+        ctx.drawImage(rocket.photo, rocket.x, rocket.y, rocketFacts.explosionMod, rocketFacts.explosionMod);
     });
     
     enemies.forEach(enemy => {
