@@ -201,7 +201,8 @@ let rockets = []
 let rocketFacts = {
   cooldown: Infinity,
   damage: 10,
-  explosionMod: 1
+  explosionMod: 30,
+  speed: 3
 }
 
 let coinsToUpgrade = 2;
@@ -223,8 +224,8 @@ let upgrades = {
 
 let upgradeText = {
     power: ['Increase power +1', 'Increase power +2', 'Increase power +3', 'Increase power +4', 'Increase power +5'],
-    speed: ['Increase bullet speed 10%', 'Increase bullet speed 20%', 'Increase bullet speed 30%', 'Increase bullet speed 40%', 'Increase bullet speed 50%'],
-    size: ['Increase bullet size 10 => 12', 'Increase bullet size 12 => 14', 'Increase bullet size 14 => 16', 'Increase bullet size 16 => 18', 'Increase bullet size 18 => 20' ],
+    speed: ['Increase projectile speed 10%', 'Increase projectile speed 20%', 'Increase projectile speed 30%', 'Increase projectile speed 40%', 'Increase projectile speed 50%'],
+    size: ['Increase projectile size 10 => 12', 'Increase projectile size 12 => 14', 'Increase projectile size 14 => 16', 'Increase projectile size 16 => 18', 'Increase projectile size 18 => 20' ],
     cooldown: ['Decrease bullet cooldown 10 ticks', 'Decrease bullet cooldown 20 ticks', 'Decrease bullet cooldown 30 ticks', 'Decrease bullet cooldown 40 ticks', 'Decrease bullet cooldown 50 ticks'],
     playerSpeed: ['Player Speed 5 => 6', 'Player Speed 6 => 7', 'Player Speed 7 => 8', 'Player Speed 8 => 9', 'Player Speed 9 => 10'],
     magnet: ['Increase magnet range 30 => 50', 'Increase magnet range 50 => 70', 'Increase magnet range 70 => 90', 'Increase magnet range 90 => 110', 'Increase magnet range 110 => 130'],
@@ -404,11 +405,13 @@ function buy(choice) {
 
     case "speed":
       bulletSpeed *= 1.1;
+      rocketFacts.speed *= 1.1
       document.getElementById('statsBulletSpeed').innerText = `Bullet speed: ${Math.round(bulletSpeed)}`
       break;
 
     case "size":
       bulletSize += 2;
+      rocketFacts.explosionMod += 3
       document.getElementById('statsSize').innerText = `Bullet Size: ${bulletSize}`
       break;
 
@@ -457,7 +460,7 @@ function buy(choice) {
           rocketFacts.damage = 20;
           break;
         case 4:
-          rocketFacts.explosionMod = 2;
+          rocketFacts.explosionMod += 20;
           break;
         case 5: 
           rocketFacts.cooldown = 200
@@ -478,6 +481,26 @@ function buy(choice) {
   document.querySelector('#mobileControls').style.display = 'block'
   canvas.style.opacity = '1'
   document.querySelector('#shop').style.opacity = '0'
+}
+
+function dropXP(enemy) {
+CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+if (enemy.enemyType === "level2") {
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+}
+if (enemy.enemyType === "level3"){
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+}
+if (enemy.enemyType === "level4"){
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1.5})
+
+}
+if(enemy.enemyType === "boss1"){
+  for (let i = 0; i <= coinsToUpgrade; i ++) {
+    CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: 1})
+  }
+  mobSpawnCooldown = 0
+}
 }
 
 
@@ -675,13 +698,19 @@ function update() { //----------------------------------------------------------
 
     let target = getClosestMob();
 
+    let dx = player.x - target.x;
+    let dy = player.y - target.y;
+
+    let tdx = (player.x - target.x)/ Math.sqrt(dx * dx + dy * dy)
+    let tdy = (player.y - target.y)/ Math.sqrt(dx * dx + dy * dy)
+
     if (target) {
       rockets.push({
         x: player.x,
         y: player.y,
-        locX: target.x,
-        locY: target.y,
-        size: 30
+        dx: tdx,
+        dy: tdy,
+        size: rocketFacts.explosionMod
       }); 
 
       rocketCooldown = rocketFacts.cooldown;
@@ -694,32 +723,27 @@ function update() { //----------------------------------------------------------
 
     if (!rocket) continue;
 
-    let dx = rocket.locX - rocket.x;
-    let dy = rocket.locY - rocket.y;
-
-    let dist = Math.sqrt(dx * dx + dy * dy);
-
-    if (dist > 0) {
-      dx /= dist;
-      dy /= dist;
-
-      rocket.x += dx * 3;
-      rocket.y += dy * 3;
-    }
+    rocket.x -= rocket.dx * rocketFacts.speed;
+    rocket.y -= rocket.dy * rocketFacts.speed;
 
     for (let e = enemies.length - 1; e >= 0; e--) {
       let enemy = enemies[e];
 
       if (bulletHitsEnemy(rocket, enemy)) {
 
-        enemy.health -= rocketFacts.damage;
+        enemy.health -= rocketFacts.damage/6;
 
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
           kills += 1;
+          dropXP(enemy)
         }
 
-        rockets.splice(r, 1);
+        setTimeout(()=>{
+          rockets.splice(r, 1);
+        }, 100)
+
+        
         break;
       }
     }
@@ -778,6 +802,7 @@ function update() { //----------------------------------------------------------
     if (enemy.health <= 0) {
       enemies.splice(enemies.indexOf(enemy), 1);
       kills += 1;
+      dropXP(enemy)
     }
 
     if (dist > 0) {
@@ -811,11 +836,7 @@ function update() { //----------------------------------------------------------
         enemies.splice(i, 1);
         kills += 1;
 
-        CoinsOnGround.push({
-          x: enemy.x + enemy.size / 2 + Math.random() * 10,
-          y: enemy.y + enemy.size / 2 + Math.random() * 10,
-          value: 1
-        });
+        dropXP(enemy)
 
         continue;
       }
@@ -852,23 +873,7 @@ function update() { //----------------------------------------------------------
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
           kills +=1
-          CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
-          if (enemy.enemyType === "level2") {
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
-          }
-          if (enemy.enemyType === "level3"){
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
-          }
-          if (enemy.enemyType === "level4"){
-            CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1.5})
-
-          }
-          if(enemy.enemyType === "boss1"){
-            for (let i = 0; i <= coinsToUpgrade; i ++) {
-              CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: 1})
-            }
-            mobSpawnCooldown = 0
-          }
+          dropXP(enemy)
         }
       }
     }
@@ -964,7 +969,7 @@ function draw() {
     });
 
     rockets.forEach(rocket => {
-        ctx.drawImage(rocketIMG, rocket.x, rocket.y, 30, 30);
+        ctx.drawImage(rocketIMG, rocket.x, rocket.y, rocketFacts.explosionMod, rocketFacts.explosionMod);
     });
     
     enemies.forEach(enemy => {
