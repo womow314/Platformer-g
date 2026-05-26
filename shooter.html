@@ -155,6 +155,10 @@ enemyLevel7.src = "images/astronought (1).png"
 const bulletIMG = new Image();
 bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
 
+
+const rocketIMG = new Image();
+rocketIMG.src = "images/pixil-frame-0%20(21).png";
+
 const pausedIMG = new Image();
 pausedIMG.src = "images/Screen Shot 2026-05-05 at 8.37.53 AM.png"
 
@@ -684,10 +688,14 @@ function update() { //----------------------------------------------------------
     }
   }
 
-  for (let r = rockets.length-1; r > 0; r++) {
-    rocket = rockets[r]
-    let dx = player.x - rocket.x;
-    let dy = player.y - rocket.y;
+  for (let r = rockets.length - 1; r >= 0; r--) {
+
+    let rocket = rockets[r];
+
+    if (!rocket) continue;
+
+    let dx = rocket.locX - rocket.x;
+    let dy = rocket.locY - rocket.y;
 
     let dist = Math.sqrt(dx * dx + dy * dy);
 
@@ -695,14 +703,24 @@ function update() { //----------------------------------------------------------
       dx /= dist;
       dy /= dist;
 
-      rocket.x += dx * 40;
-      rocket.y += dy * 40;
+      rocket.x += dx * 10;
+      rocket.y += dy * 10;
     }
 
-    for (enemy of enemies){
-      if(bulletHitsEnemy(rocket, enemy)) {
-        enemy.health -= rocketFacts.damage
-        rockets.splice(1, r)
+    for (let e = enemies.length - 1; e >= 0; e--) {
+      let enemy = enemies[e];
+
+      if (bulletHitsEnemy(rocket, enemy)) {
+
+        enemy.health -= rocketFacts.damage;
+
+        if (enemy.health <= 0) {
+          enemies.splice(e, 1);
+          kills += 1;
+        }
+
+        rockets.splice(r, 1);
+        break;
       }
     }
   }
@@ -939,6 +957,10 @@ function draw() {
     
     bullets.forEach(bullet => {
         ctx.drawImage(bulletIMG, bullet.x, bullet.y, bulletSize, bulletSize);
+    });
+
+    rockets.forEach(rocket => {
+        ctx.drawImage(rocketIMG, rocket.x, rocket.y, 30, 30);
     });
     
     enemies.forEach(enemy => {
