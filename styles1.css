@@ -37,6 +37,14 @@ img {
   font-family: sans-serif;
 }
 
+#gameText {
+  color: white;
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 #stuff {
   position: fixed; 
   bottom: 0; 

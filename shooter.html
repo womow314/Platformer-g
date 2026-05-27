@@ -30,6 +30,10 @@
     <p id="statsHealth">Max Health: 100</p>
   </details>
 </div>
+
+<div id="gameText"></div>
+
+
 <div id="shop" style="display: none;">
   <button id="buy1" onclick="buy(1)">Wait for upgrade</button>
   <button id="buy2" onclick="buy(2)">Wait for upgrade</button>
@@ -89,6 +93,7 @@ try {
 } catch (e) {
   mostKills = 0;
 }
+let upgradeMenuOpen = false;
 function bindButton(id, key) {
   const btn = document.getElementById(id);
 
@@ -142,6 +147,9 @@ enemyLevel3.src = "images/pixil-frame-0%20(15).png"
 
 let enemyLevel4 = new Image();
 enemyLevel4.src = "images/pixil-frame-0%20(16).png"
+
+let boxIMG = new Image();
+boxIMG.src = "images/pixil-frame-0 (1) (2).png"
 
 let enemyLevel5 = new Image();
 enemyLevel5.src = "images/pixil-frame-0%20(19).png"
@@ -226,6 +234,10 @@ let upgrades = {
     rocket: 1
 }
 
+setInterval(() => {
+  spawnBox()
+}, 40000);
+
 let upgradeText = {
     power: ['Increase power +1', 'Increase power +2', 'Increase power +3', 'Increase power +4', 'Increase power +5'],
     speed: ['Increase projectile speed 10%', 'Increase projectile speed 20%', 'Increase projectile speed 30%', 'Increase projectile speed 40%', 'Increase projectile speed 50%'],
@@ -244,6 +256,10 @@ let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet
 let avaibleUpgrades = []
 
 function displayUpgrades() {
+
+  if (upgradeMenuOpen) return;
+  upgradeMenuOpen = true;
+
   document.querySelector('#shop').style.opacity = '0.95'
 
   avaibleUpgrades = [];
@@ -338,6 +354,37 @@ function spawnEnemy(type="basic", mod=0) {
   enemies.push({x:px, y:py, health: Ehealth+mod, image: typeImage, enemyType: type, size: enemySize})
 }
 
+boxes = []
+
+function spawnBox() {
+  let box = {
+    x: 0,
+    y: 0
+  }
+  let roll = Math.floor(Math.random()*4)+1
+
+  switch (roll) {
+    case 1:
+      box.x = 740
+      box.y = 710
+      break
+    case 2:
+      box.x = -960
+      box.y = 710
+      break
+    case 3:
+      box.x = 740
+      box.y = -710
+      break
+    case 4:
+      box.x = -960
+      box.y = -710
+      break
+  }
+
+  boxes.push({x: box.x, y: box.y, size: 20})
+}
+
 spawnEnemy("basic")
 spawnEnemy("basic")
 spawnEnemy("basic")
@@ -371,7 +418,11 @@ function inRange(obj1, obj2, range) {
 let bulletCooldown = 0;
 let bulletCooldownMax = 60
 
-
+function clearText() {
+  setTimeout(() => {
+    document.querySelector('#gameText').innerText = ``
+  }, 3000);
+}
 
 
 function home() {
@@ -399,6 +450,7 @@ function buy(choice) {
   let selectedUpgrade = avaibleUpgrades[choice - 1];
 
   if (!selectedUpgrade) return;
+  upgradeMenuOpen = false;
 
   switch (selectedUpgrade) {
 
@@ -587,7 +639,7 @@ const MobSpeed = 1
 
 document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
 
-function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -697,6 +749,55 @@ function update() { //----------------------------------------------------------
   }
 
   rocketCooldown--;
+
+  for (box of boxes) {
+    if (inRange(player, box, 20)) {
+      let roll = Math.floor(Math.random()*3)
+      boxes.splice(boxes.indexOf(box), 1)
+      switch (roll) {
+        case 0:
+          for (let c = CoinsOnGround.length - 1; c >= 0; c --) {
+            coin = CoinsOnGround[c]
+            CoinsOnGround.splice(c, 1)
+            coins+= coin.value
+          }
+          
+          document.querySelector('#gameText').innerText = `Magnet!`
+          clearText()
+          setTimeout(() => {
+            displayUpgrades()
+            setTimeout(() => {
+              displayUpgrades()
+              setTimeout(() => {
+                displayUpgrades()
+                setTimeout(() => {
+                  displayUpgrades()
+                  setTimeout(() => {
+                    displayUpgrades()
+                  }, 20);
+                }, 20);
+              }, 20);
+            }, 20);
+          }, 20);
+          break;
+        case 1:
+          health += Math.round(MaxHealth/3)
+          document.querySelector('#gameText').innerText = `Foooooood`
+          clearText()
+          break;
+        case 2:
+          let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
+          let earnedCoins = Math.floor(Math.random()*17);
+          let totalCoins = currentCoins + earnedCoins;
+
+          document.querySelector('#gameText').innerText = `Earned ${earnedCoins} kill coins`
+          clearText()
+          
+          localStorage.setItem('killCoins', String(totalCoins));
+          break;
+      }
+    }
+  }
 
   if (rocketFacts.cooldown !== Infinity && rocketCooldown <= 0) {
 
@@ -975,6 +1076,10 @@ function draw() {
     
     bullets.forEach(bullet => {
         ctx.drawImage(bulletIMG, bullet.x, bullet.y, bulletSize, bulletSize);
+    });
+
+    boxes.forEach(box => {
+        ctx.drawImage(boxIMG, box.x, box.y, 20, 20);
     });
 
     rockets.forEach(rocket => {
