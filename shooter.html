@@ -774,15 +774,16 @@ function update() { //----------------------------------------------------------
                   displayUpgrades()
                   setTimeout(() => {
                     displayUpgrades()
-                  }, 20);
-                }, 20);
-              }, 20);
-            }, 20);
-          }, 20);
+                  }, 100);
+                }, 100);
+              }, 100);
+            }, 100);
+          }, 100);
           break;
         case 1:
           health += Math.round(MaxHealth/3)
           document.querySelector('#gameText').innerText = `Foooooood`
+          if (health >MaxHealth) health = MaxHealth;
           clearText()
           break;
         case 2:
