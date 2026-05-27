@@ -79,19 +79,19 @@
                 clickPower *= shopClickMod[x]; clicks -= shopcosts[x];
                 shopcosts["3"] *= 1.5;
                 hasBoughtMod = false;
-                if ((mod1.innerHTML = "200 clicks: 1 Click Modifyer") && (!hasBoughtMod)) {
+                if ((mod1.innerHTML === "200 clicks: 1 Click Modifyer") && (!hasBoughtMod)) {
                     mod1.innerHTML = "300 clicks: 1 Click Modifyer";
                 hasBoughtMod = true;
-                } else if (mod1.innerHTML = "300 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                } else if (mod1.innerHTML === "300 clicks: 1 Click Modifyer" && !hasBoughtMod) {
                     mod1.innerHTML = "450 clicks: 1 Click Modifyer";
                     hasBoughtMod = true;
-                } else if (mod1.innerHTML = "450 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                } else if (mod1.innerHTML === "450 clicks: 1 Click Modifyer" && !hasBoughtMod) {
                     mod1.innerHTML = "675 clicks: 1 Click Modifyer";
                     hasBoughtMod = true;
-                } else if (mod1.innerHTML = "675 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                } else if (mod1.innerHTML === "675 clicks: 1 Click Modifyer" && !hasBoughtMod) {
                     mod1.innerHTML = "1012.5 clicks: 1 Click Modifyer";
                     hasBoughtMod = true;
-                } else if (mod1.innerHTML = "1012.5 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                } else if (mod1.innerHTML === "1012.5 clicks: 1 Click Modifyer" && !hasBoughtMod) {
                     mod1.innerHTML = "Maxed out"
                 } else if (shopcosts[x] > 1500) {
                     isModMaxedOut = true;
