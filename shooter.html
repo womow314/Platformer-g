@@ -749,6 +749,13 @@ function update() { //----------------------------------------------------------
   }
 
   rocketCooldown--;
+  if (coins >= coinsToUpgrade) {
+    coins -= coinsToUpgrade
+    let increaseAmount = totalUpgradesCompleteed/10 +1
+    coinsToUpgrade += increaseAmount
+    totalUpgradesCompleteed+= 1
+    displayUpgrades()
+  }
 
   for (box of boxes) {
     if (inRange(player, box, 20)) {
@@ -764,21 +771,6 @@ function update() { //----------------------------------------------------------
           
           document.querySelector('#gameText').innerText = `Magnet!`
           clearText()
-          setTimeout(() => {
-            displayUpgrades()
-            setTimeout(() => {
-              displayUpgrades()
-              setTimeout(() => {
-                displayUpgrades()
-                setTimeout(() => {
-                  displayUpgrades()
-                  setTimeout(() => {
-                    displayUpgrades()
-                  }, 100);
-                }, 100);
-              }, 100);
-            }, 100);
-          }, 100);
           break;
         case 1:
           health += Math.round(MaxHealth/3)
@@ -838,9 +830,9 @@ function update() { //----------------------------------------------------------
 
       if (bulletHitsEnemy(rocket, enemy)) {
 
-        const timeAfterHit = 200
+        const timeAfterHit = rocketFacts.explosionMod*6.5
 
-        enemy.health -= rocketFacts.damage/12;
+        enemy.health -= (rocketFacts.damage*60)/timeAfterHit;
 
         rocket.photo = boom
 
@@ -996,13 +988,6 @@ function update() { //----------------------------------------------------------
       CoinsOnGround.splice(i, 1)
       playCollectSound();
       coins+= coin.value
-      if (coins >= coinsToUpgrade) {
-        coins -= coinsToUpgrade
-        let increaseAmount = totalUpgradesCompleteed/10 +1
-        coinsToUpgrade += increaseAmount
-        totalUpgradesCompleteed+= 1
-        displayUpgrades()
-      }
 
     }
 
