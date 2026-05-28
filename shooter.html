@@ -217,6 +217,11 @@ let rocketFacts = {
   speed: 3
 }
 
+
+let ballsFacts = {
+  damage: 1
+}
+
 let coinsToUpgrade = 2;
 forceFieldRange = 0;
 let forcePower = 0.03
@@ -231,8 +236,11 @@ let upgrades = {
     forceField: 1,
     wave: 1,
     energy: 1,
-    rocket: 1
+    rocket: 1,
+    balls: 1
 }
+
+let balls = []
 
 setInterval(() => {
   spawnBox()
@@ -248,11 +256,12 @@ let upgradeText = {
     forceField: ['Add force field', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power' ],
     wave: ['Added bullet wave (back)', 'Partial upgrade: Wave sides: 1/4', 'Partial upgrade: Wave sides: 2/4', 'Partial upgrade: Wave sides: 3/4', 'Added bullet wave (sides)' ],
     energy: ['+1 hp 10/sec', '+2 hp 10/sec', '+3 hp 10/sec', '+4 hp 10/sec', '+5 hp 10/sec'],
-    rocket: ['Shoot a rocket every 5 seconds', 'Decrease rocket shoot time to 4 seconds', 'Increase rocket damage', 'Increase explosion range', 'Decrease shoot time to 3 seconds']
+    rocket: ['Shoot a rocket every 5 seconds', 'Decrease rocket shoot time to 4 seconds', 'Increase rocket damage', 'Increase explosion range', 'Decrease shoot time to 3 seconds'],
+    balls: ['Shoot a soccor ball that bounces around the screen', 'Shoot another ball', 'Increase damage', 'Shoot another ball', 'Increase ball size']
 
 }
 
-let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'wave', 'energy', 'rocket']
+let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'wave', 'energy', 'rocket', 'balls']
 let avaibleUpgrades = []
 
 function displayUpgrades() {
@@ -522,6 +531,27 @@ function buy(choice) {
           rocketFacts.cooldown = 200
           break;
       }
+    case "balls":
+      switch (upgrades.balls) {
+        case 1: 
+          balls.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: 20})
+          break
+        case 2:
+          balls.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: 20})
+          break
+        case 3:
+          ballsFacts.damage += 1
+          break
+        case 4:
+          balls.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: 20})
+          break
+        case 5:
+          for(ball of balls) {
+            ball.size = 30
+          }
+          break
+      }
+    
 
   }
   document.querySelector('#buy1').innerText = 'Wait for upgrade'
