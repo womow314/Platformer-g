@@ -163,6 +163,9 @@ enemyLevel7.src = "images/astronought (1).png"
 const bulletIMG = new Image();
 bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
 
+const drillIMG = new Image();
+drillIMG.src = "images/drill.png";
+
 
 const rocketIMG = new Image();
 rocketIMG.src = "images/rocket.png";
@@ -241,10 +244,12 @@ let upgrades = {
     wave: 1,
     energy: 1,
     rocket: 1,
-    balls: 1
+    balls: 1,
+    drill: 1
 }
 
 let balls = []
+let drills = []
 
 setInterval(() => {
   spawnBox()
@@ -261,11 +266,12 @@ let upgradeText = {
     wave: ['Added bullet wave (back)', 'Partial upgrade: Wave sides: 1/4', 'Partial upgrade: Wave sides: 2/4', 'Partial upgrade: Wave sides: 3/4', 'Added bullet wave (sides)' ],
     energy: ['+1 hp 10/sec', '+2 hp 10/sec', '+3 hp 10/sec', '+4 hp 10/sec', '+5 hp 10/sec'],
     rocket: ['Shoot a rocket every 5 seconds', 'Decrease rocket shoot time to 4 seconds', 'Increase rocket damage', 'Increase explosion range', 'Decrease shoot time to 3 seconds'],
-    balls: ['Shoot a soccor ball that bounces around the screen', 'Shoot another ball', 'Increase damage', 'Shoot another ball', 'Increase ball size']
+    balls: ['Shoot a soccor ball that bounces off the screen and enemies', 'Shoot another ball', 'Increase damage', 'Shoot another ball', 'Increase ball size'],
+    drill: ['Shoot a drill that bounces around the screen', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill']
 
 }
 
-let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'wave', 'energy', 'rocket', 'balls']
+let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'wave', 'energy', 'rocket', 'balls', 'drill']
 let avaibleUpgrades = []
 
 function displayUpgrades() {
@@ -557,6 +563,10 @@ function buy(choice) {
           updateBalls()
           break
       }
+      break
+    case "drill":
+      drills.push({x: player.x, y: player.y, dx: 0.64278760968, dy: -0.76604444311, size: 20})
+      break
     
 
   }
@@ -1063,6 +1073,58 @@ function update() { //----------------------------------------------------------
       }
     }
   }
+
+  for(ball of drills){
+      
+    ball.x += ball.dx*5;
+    ball.y += ball.dy*5;
+
+    if (ball.x + ball.size > scrollX + canvas.width) {
+      ball.x = scrollX + canvas.width - ball.size-15;
+      ball.dx *= -1;
+    }
+
+    if (ball.x < scrollX) {
+      ball.x = scrollX+15;
+      ball.dx *= -1;
+    }
+
+    if (ball.y + ball.size > scrollY + canvas.height) {
+      ball.y = scrollY + canvas.height - ball.size;
+      ball.dy *= -1;
+    }
+
+    if (ball.y < scrollY) {
+      ball.y = scrollY;
+      ball.dy *= -1;
+    }
+
+    for (let ball1 of drills) {
+      if (ball1 === ball) {
+        continue;
+      }
+      if (inRange(ball1, ball, 10)) {
+        drills.splice(drills.indexOf(ball), 1)
+        drills.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size})
+      }
+    }
+
+    for (let e = enemies.length - 1; e >= 0; e--) {
+
+      let enemy = enemies[e];
+
+      if (bulletHitsEnemy(ball, enemy)) {
+
+        enemy.health -= 0.0875;
+
+        if (enemy.health <= 0) {
+          enemies.splice(e, 1);
+          kills += 1;
+          dropXP(enemy);
+        }
+      }
+    }
+  }
   
   
   for (let i = bullets.length - 1; i >= 0; i--) {
@@ -1171,6 +1233,10 @@ function draw() {
 
     balls.forEach(ball => {
       ctx.drawImage(soccorBallIMG, ball.x, ball.y, ball.size, ball.size);
+    });
+
+    drills.forEach(drill => {
+      ctx.drawImage(brick, drill.x, drill.y, 20, 20);
     });
 
     boxes.forEach(box => {
