@@ -6,14 +6,15 @@
 </head>
 <body>
     <h1 id="clicks">0 clicks</h1>
-    <h2 id="cps">0 CPS</h2>
+    <h2 id="cps">0 CPS, 1 power</h2>
     <button onclick="home()" id="home">Home</button>
     
 
     <button onclick="clicker()" id="clickButton">Click me</button>
-    <div id="shop" style="display: block;">
-        <button onclick="buy('1')">15 clicks: 0.1 CPS</button>
-        <button onclick="buy('2')">100 clicks: 1 CPS</button>
+    <div id="shop">
+        <button onclick="buyCPS('1')">15 clicks: 0.1 CPS</button>
+        <button onclick="buyCPS('2')">100 clicks: 1 CPS</button>
+        <button onclick="buyMod('3')" id = "x1.5mod">200 clicks: 1 Click Modifyer</button>
     </div>
 
     <audio id ="clickSound" preload="auto">
@@ -28,7 +29,11 @@
     <script>
         let clicks = 0;
         let clickPower = 1;
-        let cps = 0
+        let cps = 0;
+
+        let mod1 = document.getElementById('x1.5mod');
+        let isModMaxedOut = false;
+        let hasBoughtMod = false;
 
         setInterval(() => {
             clicks += cps/100
@@ -37,11 +42,15 @@
 
         let shopcosts = {
             "1": 15,
-            "2": 100
+            "2": 100,
+            "3": 200
         }
         let shopCPS = {
             "1": 0.1,
             "2": 1
+        }
+        let shopClickMod = {
+            "3": 2
         }
         function clicker() {
             clicks += clickPower
@@ -58,14 +67,45 @@
             upgradeSound.currentTime = 0;
             upgradeSound.play();
         }
-        function buy(x) {
-            playUpgradeSound();
-            if (clicks >= shopcosts[x]) {cps += shopCPS[x]; clicks -= shopcosts[x]}
+        function buyCPS(x) {
+            if (clicks >= shopcosts[x]) {
+                cps += shopCPS[x]; clicks -= shopcosts[x]
+                playUpgradeSound();
+            }
+        }
+        function buyMod(x) {
+            if (clicks >= shopcosts[x]) {
+                if (!isModMaxedOut) {
+                clickPower *= shopClickMod[x]; clicks -= shopcosts[x];
+                shopcosts["3"] *= 1.5;
+                hasBoughtMod = false;
+                if ((mod1.innerHTML === "200 clicks: 1 Click Modifyer") && (!hasBoughtMod)) {
+                    mod1.innerHTML = "300 clicks: 1 Click Modifyer";
+                hasBoughtMod = true;
+                } else if (mod1.innerHTML === "300 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                    mod1.innerHTML = "450 clicks: 1 Click Modifyer";
+                    hasBoughtMod = true;
+                } else if (mod1.innerHTML === "450 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                    mod1.innerHTML = "675 clicks: 1 Click Modifyer";
+                    hasBoughtMod = true;
+                } else if (mod1.innerHTML === "675 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                    mod1.innerHTML = "1012.5 clicks: 1 Click Modifyer";
+                    hasBoughtMod = true;
+                } else if (mod1.innerHTML === "1012.5 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                    mod1.innerHTML = "Maxed out"
+                } else if (shopcosts[x] > 1500) {
+                    isModMaxedOut = true;
+                }
+                }
+               
+                playUpgradeSound();
+                update()
+            }
         }
 
         function update() {
             document.querySelector('#clicks').innerText = `${Math.floor(clicks)} clicks`
-            document.querySelector('#cps').innerText = `${cps.toFixed(1)} CPS`
+            document.querySelector('#cps').innerText = `${cps.toFixed(1)} CPS, ${clickPower.toFixed(1)} power`
         }
 
 
