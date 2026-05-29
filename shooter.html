@@ -167,6 +167,9 @@ bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
 const rocketIMG = new Image();
 rocketIMG.src = "images/rocket.png";
 
+const soccorBallIMG = new Image();
+soccorBallIMG.src = "images/pixil-frame-0%20(23).png";
+
 const pausedIMG = new Image();
 pausedIMG.src = "images/Screen Shot 2026-05-05 at 8.37.53 AM.png"
 
@@ -217,6 +220,12 @@ let rocketFacts = {
   speed: 3
 }
 
+
+let ballsFacts = {
+  damage: 1,
+  size: 20
+}
+
 let coinsToUpgrade = 2;
 forceFieldRange = 0;
 let forcePower = 0.03
@@ -231,8 +240,11 @@ let upgrades = {
     forceField: 1,
     wave: 1,
     energy: 1,
-    rocket: 1
+    rocket: 1,
+    balls: 1
 }
+
+let balls = []
 
 setInterval(() => {
   spawnBox()
@@ -248,11 +260,12 @@ let upgradeText = {
     forceField: ['Add force field', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power' ],
     wave: ['Added bullet wave (back)', 'Partial upgrade: Wave sides: 1/4', 'Partial upgrade: Wave sides: 2/4', 'Partial upgrade: Wave sides: 3/4', 'Added bullet wave (sides)' ],
     energy: ['+1 hp 10/sec', '+2 hp 10/sec', '+3 hp 10/sec', '+4 hp 10/sec', '+5 hp 10/sec'],
-    rocket: ['Shoot a rocket every 5 seconds', 'Decrease rocket shoot time to 4 seconds', 'Increase rocket damage', 'Increase explosion range', 'Decrease shoot time to 3 seconds']
+    rocket: ['Shoot a rocket every 5 seconds', 'Decrease rocket shoot time to 4 seconds', 'Increase rocket damage', 'Increase explosion range', 'Decrease shoot time to 3 seconds'],
+    balls: ['Shoot a soccor ball that bounces around the screen', 'Shoot another ball', 'Increase damage', 'Shoot another ball', 'Increase ball size']
 
 }
 
-let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'wave', 'energy', 'rocket']
+let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'wave', 'energy', 'rocket', 'balls']
 let avaibleUpgrades = []
 
 function displayUpgrades() {
@@ -466,6 +479,8 @@ function buy(choice) {
       break;
 
     case "size":
+      ballsFacts.size += 2
+      updateBalls()
       bulletSize += 2;
       rocketFacts.explosionMod += 3
       document.getElementById('statsSize').innerText = `Bullet Size: ${bulletSize}`
@@ -522,8 +537,30 @@ function buy(choice) {
           rocketFacts.cooldown = 200
           break;
       }
+      break
+    case "balls":
+      switch (upgrades.balls) {
+        case 1: 
+          balls.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size})
+          break
+        case 2:
+          balls.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size})
+          break
+        case 3:
+          ballsFacts.damage += 2
+          break
+        case 4:
+          balls.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size})
+          break
+        case 5:
+          ballsFacts.size += 10
+          updateBalls()
+          break
+      }
+    
 
   }
+
   document.querySelector('#buy1').innerText = 'Wait for upgrade'
   document.querySelector('#buy2').innerText = 'Wait for upgrade'
   document.querySelector('#buy3').innerText = 'Wait for upgrade'
@@ -538,7 +575,11 @@ function buy(choice) {
   canvas.style.opacity = '1'
   document.querySelector('#shop').style.opacity = '0'
 }
-
+function updateBalls(){
+  for(ball of balls) {
+    ball.size = ballsFacts.size
+  }
+}
 function dropXP(enemy) {
 CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
 if (enemy.enemyType === "level2") {
@@ -549,13 +590,22 @@ if (enemy.enemyType === "level3"){
 }
 if (enemy.enemyType === "level4"){
   CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1.5})
-
 }
 if(enemy.enemyType === "boss1"){
   for (let i = 0; i <= coinsToUpgrade; i ++) {
     CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: 1})
   }
   mobSpawnCooldown = 0
+}
+if (enemy.enemyType === "level6"){
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+}
+if (enemy.enemyType === "level7"){
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
 }
 }
 
@@ -959,6 +1009,59 @@ function update() { //----------------------------------------------------------
       }
     }
   }
+
+  for(ball of balls){
+      
+    ball.x += ball.dx*2.5;
+    ball.y += ball.dy*2.5;
+
+    if (ball.x + ball.size > scrollX + canvas.width) {
+      ball.x = scrollX + canvas.width - ball.size;
+      ball.dx *= -1;
+    }
+
+    if (ball.x < scrollX) {
+      ball.x = scrollX;
+      ball.dx *= -1;
+    }
+
+    if (ball.y + ball.size > scrollY + canvas.height) {
+      ball.y = scrollY + canvas.height - ball.size;
+      ball.dy *= -1;
+    }
+
+    if (ball.y < scrollY) {
+      ball.y = scrollY;
+      ball.dy *= -1;
+    }
+
+    for (let ball1 of balls) {
+      if (ball1 === ball) {
+        continue;
+      }
+      if (ball.x === ball1.x && ball.y === ball.y) {
+        balls.splice(balls.indexOf(ball), 1)
+        balls.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size})
+      }
+    }
+
+    for (let e = enemies.length - 1; e >= 0; e--) {
+
+      let enemy = enemies[e];
+
+      if (bulletHitsEnemy(ball, enemy)) {
+
+        enemy.health -= ballsFacts.damage/40;
+
+        if (enemy.health <= 0) {
+          enemies.splice(e, 1);
+          kills += 1;
+          dropXP(enemy);
+        }
+      }
+    }
+  }
+  
   
   for (let i = bullets.length - 1; i >= 0; i--) {
     bullet = bullets[i]
@@ -1062,6 +1165,10 @@ function draw() {
     
     bullets.forEach(bullet => {
         ctx.drawImage(bulletIMG, bullet.x, bullet.y, bulletSize, bulletSize);
+    });
+
+    balls.forEach(ball => {
+      ctx.drawImage(soccorBallIMG, ball.x, ball.y, ball.size, ball.size);
     });
 
     boxes.forEach(box => {
