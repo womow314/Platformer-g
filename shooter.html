@@ -1012,16 +1012,16 @@ function update() { //----------------------------------------------------------
 
   for(ball of balls){
       
-    ball.x += ball.dx*2.5;
-    ball.y += ball.dy*2.5;
+    ball.x += ball.dx*(player.speed+3);
+    ball.y += ball.dy*(player.speed+3);
 
     if (ball.x + ball.size > scrollX + canvas.width) {
-      ball.x = scrollX + canvas.width - ball.size;
+      ball.x = scrollX + canvas.width - ball.size-15;
       ball.dx *= -1;
     }
 
     if (ball.x < scrollX) {
-      ball.x = scrollX;
+      ball.x = scrollX+15;
       ball.dx *= -1;
     }
 
@@ -1050,8 +1050,10 @@ function update() { //----------------------------------------------------------
       let enemy = enemies[e];
 
       if (bulletHitsEnemy(ball, enemy)) {
+        ball.dx = -ball.dx
+        ball.dy = -ball.dy
 
-        enemy.health -= ballsFacts.damage/40;
+        enemy.health -= ballsFacts.damage;
 
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
