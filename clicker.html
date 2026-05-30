@@ -82,23 +82,27 @@
                 if ((mod1.innerHTML === "200 clicks: 1 Click Modifyer") && (!hasBoughtMod)) {
                     mod1.innerHTML = "300 clicks: 1 Click Modifyer";
                 hasBoughtMod = true;
+                playUpgradeSound();
                 } else if (mod1.innerHTML === "300 clicks: 1 Click Modifyer" && !hasBoughtMod) {
                     mod1.innerHTML = "450 clicks: 1 Click Modifyer";
                     hasBoughtMod = true;
+                    playUpgradeSound();
                 } else if (mod1.innerHTML === "450 clicks: 1 Click Modifyer" && !hasBoughtMod) {
                     mod1.innerHTML = "675 clicks: 1 Click Modifyer";
                     hasBoughtMod = true;
+                    playUpgradeSound();
                 } else if (mod1.innerHTML === "675 clicks: 1 Click Modifyer" && !hasBoughtMod) {
                     mod1.innerHTML = "1012.5 clicks: 1 Click Modifyer";
                     hasBoughtMod = true;
+                    playUpgradeSound();
                 } else if (mod1.innerHTML === "1012.5 clicks: 1 Click Modifyer" && !hasBoughtMod) {
                     mod1.innerHTML = "Maxed out"
+                    playUpgradeSound();
                 } else if (shopcosts[x] > 1500) {
                     isModMaxedOut = true;
                 }
                 }
                
-                playUpgradeSound();
                 update()
             }
         }
