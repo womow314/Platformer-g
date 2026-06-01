@@ -162,6 +162,9 @@ enemyLevel7.src = "images/astronought (1).png"
 let enemyLevel8 = new Image();
 enemyLevel8.src = "images/pixil-frame-0 (24).png"
 
+let elite1 = new Image();
+elite1.src = "images/pixil-frame-0 (25).png"
+
 const bulletIMG = new Image();
 bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
 
@@ -377,11 +380,17 @@ function spawnEnemy(type="basic", mod=0) {
     Ehealth = 240
     typeImage = enemyLevel8
     enemySize = 80
+  } else if (type === "elite1") {
+    Ehealth = 180
+    typeImage = elite1
+    enemySize = 50
   }
   enemies.push({x:px, y:py, health: Ehealth+mod, image: typeImage, enemyType: type, size: enemySize})
 }
 let bulletFireAmount = 1
 boxes = []
+
+let elite1Spawned = false
 
 function spawnBox() {
   let box = {
@@ -637,6 +646,10 @@ if(enemy.enemyType === "boss1"){
   CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: coinsToUpgrade})
   mobSpawnCooldown = 0
 }
+if(enemy.enemyType === "elite1"){
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: coinsToUpgrade})
+  mobSpawnCooldown = 0
+}
 if (enemy.enemyType === "level6"){
   CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 2.5})
 }
@@ -780,6 +793,10 @@ function update() { //----------------------------------------------------------
       if(randomNum < 0.2) spawnEnemy("basic");
       if(randomNum <0.05) spawnEnemy("level2");
     } else if (killsWithMod > 100 && killsWithMod <= 160) {
+      if(!elite1Spawned) {
+        spawnEnemy('elite1')
+        elite1Spawned = true
+      }
       mobSpawnCooldown = Math.max(150 - 2*(killsWithMod-100), 80)
       spawnEnemy("basic")
       spawnEnemy("basic")
@@ -1133,7 +1150,7 @@ function update() { //----------------------------------------------------------
 
       if (bulletHitsEnemy(ball, enemy)) {
 
-        enemy.health -= 0.2;
+        enemy.health -= 0.3;
 
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
