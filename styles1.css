@@ -78,6 +78,9 @@ details {
   right: 15px;
   top: 40px;
 }
+#shop button {
+  font-size: 12px;
+}
 
 #instructions {
   position: fixed;

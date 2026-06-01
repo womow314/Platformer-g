@@ -83,7 +83,6 @@ let killCoins = localStorage.getItem('killCoins') || 0
 let magnetRange = 30;
 const MAX_UPGRADE = 6;
 let health = Number(localStorage.getItem('localHealth'));
-let rapid = Number(localStorage.getItem('repeatFire'));
 let MaxHealth = health
 localStorage.setItem('currentScore', '0')
 document.getElementById('statsHealth').innerText = `Max Health: ${health}`
@@ -160,6 +159,9 @@ enemyLevel6.src = "images/pixil-frame-0%20(20).png"
 let enemyLevel7 = new Image();
 enemyLevel7.src = "images/astronought (1).png"
 
+let enemyLevel8 = new Image();
+enemyLevel8.src = "images/pixil-frame-0 (24).png"
+
 const bulletIMG = new Image();
 bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
 
@@ -229,6 +231,8 @@ let ballsFacts = {
   size: 20
 }
 
+let rocketCooldownDecreaser = 0
+
 let coinsToUpgrade = 2;
 forceFieldRange = 0;
 let forcePower = 0.03
@@ -241,7 +245,7 @@ let upgrades = {
     playerSpeed: 1,
     magnet: 1,
     forceField: 1,
-    wave: 1,
+    rapid: 1,
     energy: 1,
     rocket: 1,
     balls: 1,
@@ -259,11 +263,11 @@ let upgradeText = {
     power: ['Increase power +1', 'Increase power +2', 'Increase power +3', 'Increase power +4', 'Increase power +5'],
     speed: ['Increase projectile speed 10%', 'Increase projectile speed 20%', 'Increase projectile speed 30%', 'Increase projectile speed 40%', 'Increase projectile speed 50%'],
     size: ['Increase projectile size 10 => 12', 'Increase projectile size 12 => 14', 'Increase projectile size 14 => 16', 'Increase projectile size 16 => 18', 'Increase projectile size 18 => 20' ],
-    cooldown: ['Decrease bullet cooldown 10 ticks', 'Decrease bullet cooldown 20 ticks', 'Decrease bullet cooldown 30 ticks', 'Decrease bullet cooldown 40 ticks', 'Decrease bullet cooldown 50 ticks'],
+    cooldown: ["Decrease all attack cooldown", "Decrease all attack cooldown", "Decrease all attack cooldown", "Decrease all attack cooldown", "Decrease all attack cooldown"],
     playerSpeed: ['Player Speed 5 => 6', 'Player Speed 6 => 7', 'Player Speed 7 => 8', 'Player Speed 8 => 9', 'Player Speed 9 => 10'],
     magnet: ['Increase magnet range 30 => 50', 'Increase magnet range 50 => 70', 'Increase magnet range 70 => 90', 'Increase magnet range 90 => 110', 'Increase magnet range 110 => 130'],
     forceField: ['Add force field', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power' ],
-    wave: ['Added bullet wave (back)', 'Partial upgrade: Wave sides: 1/4', 'Partial upgrade: Wave sides: 2/4', 'Partial upgrade: Wave sides: 3/4', 'Added bullet wave (sides)' ],
+    rapid: ['Shoot and extra bullet', 'Shoot and extra bullet', 'Shoot and extra bullet', 'Shoot and extra bullet', 'Shoot and extra bullet' ],
     energy: ['+1 hp 10/sec', '+2 hp 10/sec', '+3 hp 10/sec', '+4 hp 10/sec', '+5 hp 10/sec'],
     rocket: ['Shoot a rocket every 5 seconds', 'Decrease rocket shoot time to 4 seconds', 'Increase rocket damage', 'Increase explosion range', 'Decrease shoot time to 3 seconds'],
     balls: ['Shoot a soccor ball that bounces off the screen and enemies', 'Shoot another ball', 'Increase damage', 'Shoot another ball', 'Increase ball size'],
@@ -271,7 +275,7 @@ let upgradeText = {
 
 }
 
-let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'wave', 'energy', 'rocket', 'balls', 'drill']
+let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill']
 let avaibleUpgrades = []
 
 function displayUpgrades() {
@@ -366,13 +370,17 @@ function spawnEnemy(type="basic", mod=0) {
     typeImage = enemyLevel6
     enemySize = 40
   } else if (type === "level7") {
-    Ehealth = 200
+    Ehealth = 130
     typeImage = enemyLevel7
     enemySize = 30
+  } else if (type === "level8") {
+    Ehealth = 240
+    typeImage = enemyLevel8
+    enemySize = 80
   }
   enemies.push({x:px, y:py, health: Ehealth+mod, image: typeImage, enemyType: type, size: enemySize})
 }
-
+let bulletFireAmount = 1
 boxes = []
 
 function spawnBox() {
@@ -410,10 +418,14 @@ spawnEnemy("basic")
 spawnEnemy("basic")
 spawnEnemy("basic")
 
+for(let i = 0; i < 20; i++){
+  px = Math.random()*1770-1000
+  py = Math.random()*1530 - 770
+  CoinsOnGround.push({x: px, y: py, value: 0.5})
+}
+
 
 keys = {};
-let backWave = false;
-let sideWaves = false;
 let energyDrinkEffect = 0;
 
 function inRange(obj1, obj2, range) {
@@ -435,7 +447,7 @@ function inRange(obj1, obj2, range) {
 }
 
 let bulletCooldown = 0;
-let bulletCooldownMax = 60
+let bulletCooldownMax = 120
 
 function clearText() {
   setTimeout(() => {
@@ -493,7 +505,8 @@ function buy(choice) {
       break;
 
     case "cooldown":
-      bulletCooldownMax = Math.max(5, bulletCooldownMax - 10);
+      bulletCooldownMax = Math.max(5, bulletCooldownMax - 20);
+      rocketCooldownDecreaser += 20
       document.getElementById('statsCooldown').innerText = `Bullet cooldown: ${bulletCooldownMax}`
       break;
 
@@ -514,9 +527,8 @@ function buy(choice) {
       document.getElementById('statsForce').innerText = `Force Field range: ${forceFieldRange}`
       break;
 
-    case "wave":
-      if (upgrades.wave === 1) backWave = true;
-      if (upgrades.wave === 5) sideWaves = true;
+    case "rapid":
+      bulletFireAmount += 1
       break;
 
     case "energy":
@@ -527,11 +539,11 @@ function buy(choice) {
     case "rocket":
       switch (upgrades.rocket) {
         case 1:
-          rocketFacts.cooldown = 320;
+          rocketFacts.cooldown = 320 - rocketCooldownDecreaser;
           rocketCooldown = 2
           break;
         case 2:
-          rocketFacts.cooldown = 260;
+          rocketFacts.cooldown = 260- rocketCooldownDecreaser;
           break;
         case 3: 
           rocketFacts.damage = 50;
@@ -540,7 +552,7 @@ function buy(choice) {
           rocketFacts.explosionMod += 20;
           break;
         case 5: 
-          rocketFacts.cooldown = 200
+          rocketFacts.cooldown = 200 - rocketCooldownDecreaser
           break;
       }
       break
@@ -590,32 +602,49 @@ function updateBalls(){
     ball.size = ballsFacts.size
   }
 }
+
+function shootBullet() {
+  playShootSound();
+  let ptarget = getClosestMob()
+  let dx = ptarget.x +ptarget.size/2 - player.x;
+  let dy = ptarget.y+ptarget.size/2 - player.y;
+
+  let dist = Math.sqrt(dx * dx + dy * dy);
+
+  let pdx = dx / dist;
+  let pdy = dy / dist;
+
+  addBullet(player.x, player.y, pdx, pdy, bulletSize);
+}
+
 function dropXP(enemy) {
-CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
 if (enemy.enemyType === "level2") {
   CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
 }
-if (enemy.enemyType === "level3"){
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+if (enemy.enemyType === "basic") {
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 0.5})
 }
-if (enemy.enemyType === "level4"){
+if (enemy.enemyType === "level5") {
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 0.5})
+}
+if (enemy.enemyType === "level3"){
   CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1.5})
 }
+if (enemy.enemyType === "level4"){
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 2})
+}
 if(enemy.enemyType === "boss1"){
-  for (let i = 0; i <= coinsToUpgrade; i ++) {
-    CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: 1})
-  }
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: coinsToUpgrade})
   mobSpawnCooldown = 0
 }
 if (enemy.enemyType === "level6"){
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 2.5})
 }
 if (enemy.enemyType === "level7"){
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 4.5})
+}
+if (enemy.enemyType === "level8"){
+  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 6.5})
 }
 }
 
@@ -734,24 +763,24 @@ function update() { //----------------------------------------------------------
   if (mobSpawnCooldown <=0) {
      killsWithMod = kills + Number(localStorage.getItem('killModifyer'))
     if (killsWithMod <= 20){
-      mobSpawnCooldown = 250 - 6*killsWithMod
+      mobSpawnCooldown = 180 - 6*killsWithMod
       spawnEnemy("basic")
     } else if (killsWithMod > 20 && killsWithMod <= 60) {
-      mobSpawnCooldown = Math.max(250 - 2*(killsWithMod-20), 120)
+      mobSpawnCooldown = Math.max(180 - 2*(killsWithMod-20), 60)
       spawnEnemy("level2")
       let randomNum = Math.random()
       randomNum -= (killsWithMod-20)/13
       if(randomNum < 0.2) spawnEnemy("basic");
       if(randomNum <0.05) spawnEnemy("basic");
     } else if (killsWithMod > 60 && killsWithMod < 100) {
-      mobSpawnCooldown = Math.max(250 - 2*(killsWithMod-60), 120)
+      mobSpawnCooldown = Math.max(200 - 2*(killsWithMod-60), 60)
       spawnEnemy("level3") 
       let randomNum = Math.random()
       randomNum -= (killsWithMod-60)/13
       if(randomNum < 0.2) spawnEnemy("basic");
       if(randomNum <0.05) spawnEnemy("level2");
     } else if (killsWithMod > 100 && killsWithMod <= 160) {
-      mobSpawnCooldown = Math.max(200 - 2*(killsWithMod-100), 120)
+      mobSpawnCooldown = Math.max(150 - 2*(killsWithMod-100), 80)
       spawnEnemy("basic")
       spawnEnemy("basic")
       spawnEnemy("basic")
@@ -761,7 +790,7 @@ function update() { //----------------------------------------------------------
       if(randomNum <0.1) spawnEnemy("level3");
       if (killsWithMod >= 120) spawnEnemy("level4")
     } else if (killsWithMod > 160 && killsWithMod <= 250) {
-      mobSpawnCooldown = 15
+      mobSpawnCooldown = 12
       spawnEnemy("level5")
       let randomNum = Math.random()
       if(randomNum < 0.1) spawnEnemy("level4");
@@ -772,10 +801,10 @@ function update() { //----------------------------------------------------------
       mobSpawnCooldown = Infinity;
       
     } else if (killsWithMod >= 252 && killsWithMod < 300) {
-      mobSpawnCooldown = 60
+      mobSpawnCooldown = 40
       spawnEnemy("level4")
     } else if(killsWithMod >= 300 && killsWithMod < 380) {
-      mobSpawnCooldown = 200
+      mobSpawnCooldown = 160
       spawnEnemy('basic')
       spawnEnemy('level2')
       spawnEnemy('level3')
@@ -783,16 +812,16 @@ function update() { //----------------------------------------------------------
       spawnEnemy('level5')
       spawnEnemy('level6')
     } else if (killsWithMod >= 380 && killsWithMod < 540) {
-      mobSpawnCooldown = 20
+      mobSpawnCooldown = 14
       spawnEnemy("level3")
     } else if (killsWithMod >= 540 && killsWithMod < 550) {
       mobSpawnCooldown = 150
       spawnEnemy("boss1")
     } else if (killsWithMod >= 550 && killsWithMod < 650) {
-      mobSpawnCooldown = 20
+      mobSpawnCooldown = 15
       spawnEnemy("level6")
     } else if (killsWithMod >= 650 && killsWithMod < 800) {
-      mobSpawnCooldown = 150
+      mobSpawnCooldown = 120
       spawnEnemy("level6")
       spawnEnemy("level7")
       spawnEnemy('level5')
@@ -801,10 +830,15 @@ function update() { //----------------------------------------------------------
       spawnEnemy('level3')
       spawnEnemy('level2')
       spawnEnemy('basic')
-    } else if (killsWithMod > 800){
-      mobSpawnCooldown = 20
+    } else if (killsWithMod >= 800 && killsWithMod < 1100){
+      mobSpawnCooldown = 15
       spawnEnemy("level6")
       spawnEnemy("level7")
+    } else if (killsWithMod > 1100){
+      mobSpawnCooldown = 24
+      spawnEnemy("level6")
+      spawnEnemy("level7")
+      spawnEnemy("level8")
     }
   }
 
@@ -912,47 +946,31 @@ function update() { //----------------------------------------------------------
     }
   }
   
-  if (keys['Space'] && bulletCooldown <= 0) {
+  if ( bulletCooldown <= 0) {
     bulletCooldown = Math.max(bulletCooldownMax, 2)
-    playShootSound();
-    for(let k = 0; k < rapid; k ++){
-      let pdx;
-      let pdy;
-      if (player.direction === "e") {
-        pdx = 1;
-        pdy = 0;
-      } else if (player.direction === "n") {
-        pdx = 0;
-        pdy = -1;
-      } else if (player.direction === "s") {
-        pdx = 0;
-        pdy = 1;
-      } else if (player.direction === "w") {
-        pdx = -1;
-        pdy = 0;
-      }
-      addBullet(player.x, player.y, pdx, pdy, bulletSize)
-      if(backWave){
-        addBullet(player.x, player.y, -pdx, -pdy, bulletSize)
-      }
-      if(sideWaves){
-        if (player.direction === "e") {
-          pdx = 0;
-          pdy = 1;
-        } else if (player.direction === "n") {
-          pdx = 1;
-          pdy = 0;
-        } else if (player.direction === "s") {
-          pdx = 1;
-          pdy = 0;
-        } else if (player.direction === "w") {
-          pdx = 0;
-          pdy = 1;
-        }
-        addBullet(player.x, player.y, pdx, pdy, bulletSize)
-        addBullet(player.x, player.y, -pdx, -pdy, bulletSize)
-      }
-    }
+    shootBullet()
+    const timeDelay = 100
+    setTimeout(() => {
+      if(bulletFireAmount > 1) {
+        shootBullet()
+        setTimeout(() => {
+        if(bulletFireAmount > 2) {
+          shootBullet()
+          setTimeout(() => {
+          if(bulletFireAmount > 3) {
+            shootBullet()
+            setTimeout(() => {
+              if(bulletFireAmount > 4) {
+                shootBullet()
+                setTimeout(() => {
+                if(bulletFireAmount > 5) {
+                  shootBullet()
+            }}, timeDelay);
+          }}, timeDelay);
+        }}, timeDelay);
+      }}, timeDelay);
+    }}, timeDelay);
+    
   }
   
   for (let i = enemies.length - 1; i >= 0; i--) {
@@ -1115,7 +1133,7 @@ function update() { //----------------------------------------------------------
 
       if (bulletHitsEnemy(ball, enemy)) {
 
-        enemy.health -= 0.0875;
+        enemy.health -= 0.1;
 
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
@@ -1129,7 +1147,7 @@ function update() { //----------------------------------------------------------
   
   for (let i = bullets.length - 1; i >= 0; i--) {
     bullet = bullets[i]
-    bullet.x -= bullet.dx * bulletSpeed
+    bullet.x += bullet.dx * bulletSpeed
     bullet.y += bullet.dy * bulletSpeed
     if (Math.abs(player.x - bullet.x) > 2000 || Math.abs(player.y - bullet.y) > 2000) {
       bullets.splice(i, 1)
@@ -1138,7 +1156,7 @@ function update() { //----------------------------------------------------------
       enemy = enemies[e]
       if (bulletHitsEnemy(bullet, enemy)) {
         bullets.splice(i, 1)
-        enemy.health -= bulletPower/rapid + 0.1
+        enemy.health -= bulletPower
         playMobHurtSound();
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
@@ -1253,7 +1271,7 @@ function draw() {
     });
 
     CoinsOnGround.forEach(coin => {
-        ctx.drawImage(coinImg, coin.x, coin.y, 8,8);
+        ctx.drawImage(coinImg, coin.x, coin.y, Math.min(5+(coin.value)*2, 60), Math.min(5+(coin.value)*2, 60));
     });
     
     
