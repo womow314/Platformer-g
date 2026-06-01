@@ -949,7 +949,7 @@ function update() { //----------------------------------------------------------
   if ( bulletCooldown <= 0) {
     bulletCooldown = Math.max(bulletCooldownMax, 2)
     shootBullet()
-    const timeDelay = 100
+    const timeDelay = 150 - bulletCooldownMax/2
     setTimeout(() => {
       if(bulletFireAmount > 1) {
         shootBullet()
@@ -1133,7 +1133,7 @@ function update() { //----------------------------------------------------------
 
       if (bulletHitsEnemy(ball, enemy)) {
 
-        enemy.health -= 0.1;
+        enemy.health -= 0.2;
 
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
