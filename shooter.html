@@ -1138,7 +1138,7 @@ function update() { //----------------------------------------------------------
       if (ball1 === ball) {
         continue;
       }
-      if (inRange(ball1, ball, 10)) {
+      if (inRange(ball1, ball, 3)) {
         drills.splice(drills.indexOf(ball), 1)
         drills.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size})
       }
