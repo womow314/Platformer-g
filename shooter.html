@@ -335,12 +335,16 @@ let energyDrinkCooldown = 800
 enemies = []
 
 function spawnEnemy(type="basic", mod=0) {
-  px = Math.random()*1770-1000
-  py = Math.random()*1530 - 770
-  while ((px + 45-player.x)*(px+45 -player.x) +(py +45-player.y)*(py+45-player.y) < 60000) {
-    px = Math.random()*1770-1000
-    py = Math.random()*1530 - 770
-  }
+  
+  const minRadius = 800;
+  const maxRadius = 1000;
+
+  const angle = Math.random() * Math.PI * 2;
+  const radius = minRadius + Math.random() * (maxRadius - minRadius);
+
+  const px = player.x + Math.cos(angle) * radius;
+  const py = player.y + Math.sin(angle) * radius;
+
   let Ehealth;
   let typeImage;
   let enemySize
@@ -393,32 +397,20 @@ boxes = []
 let elite1Spawned = false
 
 function spawnBox() {
-  let box = {
-    x: 0,
-    y: 0
-  }
-  let roll = Math.floor(Math.random()*4)+1
+  const minRadius = 400;
+  const maxRadius = 600;
 
-  switch (roll) {
-    case 1:
-      box.x = 740
-      box.y = 710
-      break
-    case 2:
-      box.x = -960
-      box.y = 710
-      break
-    case 3:
-      box.x = 740
-      box.y = -710
-      break
-    case 4:
-      box.x = -960
-      box.y = -710
-      break
-  }
+  const angle = Math.random() * Math.PI * 2;
+  const radius = minRadius + Math.random() * (maxRadius - minRadius);
 
-  boxes.push({x: box.x, y: box.y, size: 20})
+  const x = player.x + Math.cos(angle) * radius;
+  const y = player.y + Math.sin(angle) * radius;
+
+  boxes.push({
+    x: x,
+    y: y,
+    size: 20
+  });
 }
 
 spawnEnemy("basic")
@@ -686,10 +678,7 @@ function addWall(px, py, w, h) {
   walls.push({x:px, y:py, width:w, height:h})
 }
 
-addWall(-1500, 800, 2500, 300)
-addWall(-1500, -1060, 2500, 300)
-addWall(-1500, -800, 500, 1600)
-addWall(800, -1000, 500, 2000)
+
 
 function bulletHitsEnemy(bullet, enemy) {
   const bulletRadius = bullet.size / 2;
@@ -991,68 +980,86 @@ function update() { //----------------------------------------------------------
   }
   
   for (let i = enemies.length - 1; i >= 0; i--) {
-    let enemy = enemies[i];
+      let enemy = enemies[i];
 
-    let dx = player.x - enemy.x;
-    let dy = player.y - enemy.y;
-
-    let dist = Math.sqrt(dx * dx + dy * dy);
-    if (enemy.health <= 0) {
-      enemies.splice(enemies.indexOf(enemy), 1);
-      kills += 1;
-      dropXP(enemy)
-    }
-
-    if (dist > 0) {
-      dx /= dist;
-      dy /= dist;
-
-      enemy.x += dx * MobSpeed;
-      enemy.y += dy * MobSpeed;
-    }
-
-    for (let j = 0; j < enemies.length; j++) {
-      if (i === j) continue;
-      let other = enemies[j];
-      let dx2 = enemy.x - other.x;
-      let dy2 = enemy.y - other.y;
-      let dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-      let minDist = (enemy.size + other.size) / 2;
-      if (dist2 < minDist && dist2 > 0) {
-        dx2 /= dist2;
-        dy2 /= dist2;
-        let push = (minDist - dist2) * 0.1;
-        enemy.x += dx2 * push;
-        enemy.y += dy2 * push;
-      }
-    }
-
-    if (inRange(player, enemy, forceFieldRange)) {
-      enemy.health -= forcePower * Number(localStorage.getItem('forceMod'));
-
+      // Remove dead enemies
       if (enemy.health <= 0) {
-        enemies.splice(i, 1);
-        kills += 1;
-
-        dropXP(enemy)
-
-        continue;
+          enemies.splice(i, 1);
+          kills += 1;
+          dropXP(enemy);
+          continue;
       }
-    }
 
-    if (
-      player.x < enemy.x + enemy.size &&
-      player.x + 30 > enemy.x &&
-      player.y < enemy.y + enemy.size &&
-      player.y + 30 > enemy.y
-    ) {
-      health -= 1;
+      // Move toward player
+      let dx = player.x - enemy.x;
+      let dy = player.y - enemy.y;
 
-      if (health <= 0) {
-        localStorage.setItem('currentScore', kills);
-        window.location.href = "death.html";
+      let dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > 0) {
+          dx /= dist;
+          dy /= dist;
+
+          enemy.x += dx * MobSpeed;
+          enemy.y += dy * MobSpeed;
       }
-    }
+
+      // Enemy separation
+      for (let j = i - 1; j >= 0; j--) {
+
+          let other = enemies[j];
+
+          let dx2 = enemy.x - other.x;
+          let dy2 = enemy.y - other.y;
+
+          let dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+          let minDist = (enemy.size + other.size) / 2;
+
+          if (dist2 < minDist && dist2 > 0) {
+
+              dx2 /= dist2;
+              dy2 /= dist2;
+
+              let push = (minDist - dist2) * 0.5;
+
+              // Push BOTH enemies apart
+              enemy.x += dx2 * push * 0.5;
+              enemy.y += dy2 * push * 0.5;
+
+              other.x -= dx2 * push * 0.5;
+              other.y -= dy2 * push * 0.5;
+          }
+      }
+
+      // Force field damage
+      if (inRange(player, enemy, forceFieldRange)) {
+
+          enemy.health -=
+              forcePower * Number(localStorage.getItem('forceMod'));
+
+          if (enemy.health <= 0) {
+              enemies.splice(i, 1);
+              kills += 1;
+              dropXP(enemy);
+              continue;
+          }
+      }
+
+      // Player collision
+      if (
+          player.x < enemy.x + enemy.size &&
+          player.x + 30 > enemy.x &&
+          player.y < enemy.y + enemy.size &&
+          player.y + 30 > enemy.y
+      ) {
+          health -= 1;
+
+          if (health <= 0) {
+              localStorage.setItem('currentScore', kills);
+              window.location.href = "death.html";
+          }
+      }
   }
 
   for(ball of balls){
