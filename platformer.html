@@ -66,8 +66,6 @@
   <source src="audio/platformer/finish-sound.ogg" type="audio/ogg">
 </audio>
 <script>
-
-
   
 function home() {
   window.location.href = "index.html";
@@ -541,6 +539,10 @@ function addPortal (cx, cy, dx, dy) {
 }
 
 function update() {
+
+  localStorage.setItem('Score', highScore);
+  localStorage.setItem('Deaths', deathNum);
+  localStorage.setItem('Time', time)
   
     highScore = Math.max(Math.round(player.x/10), highScore)
     document.querySelector("#cord").innerText = `x: ${Math.round(player.x/10)}, y: ${Math.round(0-((player.y/10)-34))}, Highest score: ${highScore}, Level: ${printLevel}, Deaths: ${deathNum}, Time: ${time}`
@@ -604,7 +606,6 @@ function update() {
         player.dy = 0;
         player.dx = 0;
       document.getElementById('levelSelect').value = 1
-      deathNum = 0
       if (!playedFinishSound) {
       playFinishSound();
       playedFinishSound = true;
