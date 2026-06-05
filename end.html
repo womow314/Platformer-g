@@ -4,11 +4,30 @@
     <link rel = "stylesheet" href = "styles1.css">
 </head>
 <body>
-    <h1>Congratulations, you made it!</h1>
-    <h2>Statistics:</h2>
-    <div id = "statistics"></div>
+    <h2>Congratulations, you made it!</h2>
+    <div id = "statistics">
+        <h3 id="score">Score: </h3>
+        <h3 id="deaths">Deaths: </h3>
+        <h3 id="time">Time: </h3>
+    </div>
+    <button onclick="copy()" id="copy">Copy to share</button>
     <button onclick = "home()" id = "home">Home</button>
     <script>
+
+        document.getElementById('score').innerText = `Score: ${localStorage.getItem('Score')}`
+        document.getElementById('deaths').innerText = `Deaths: ${localStorage.getItem('Deaths')}`
+        document.getElementById('time').innerText = `Time: ${localStorage.getItem('Time')}`
+
+        let copyButton = document.getElementById('copy');
+        const copiedText = ("I just finished Games.io Platformer with a time of " + localStorage.getItem('Time') + "! \nScore: " + localStorage.getItem('Score') + "\nDeaths: " + localStorage.getItem('Deaths'));
+        function copy() {
+            navigator.clipboard.writeText(copiedText);
+            copyButton.innerText = "Copied!";
+            setTimeout ( () => {
+                copyButton.innerText = "Copy to share";
+            }, 800)
+        }
+
         function home() {
             window.location.href = "index.html"
         }
