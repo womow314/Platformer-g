@@ -82,8 +82,8 @@ function finish() {
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
-let gravity = 1;
+const basegravity = 1
+let gravity = basegravity;
 let isGameOver = false;
 let highScore = 0;
 let imagesLoaded = 0;
@@ -596,7 +596,7 @@ function update() {
     player.y += player.dy;
 
     player.grounded = false;
-    gravity = 1
+    gravity = basegravity
     
     if (player.x < end.x + 50 &&
       player.x + player.width > end.x &&
@@ -639,7 +639,7 @@ function update() {
               
             }
             if (!plat.water) {unflipPlayerIMG();};
-            if (plat.water) {gravity = -0.5; flipPlayerIMG(); continue;};
+            if (plat.water) {gravity = -basegravity/2; flipPlayerIMG(); continue;};
             if (plat.check) {printLevel += 1; plat.check = false; save.x = player.x+10; save.y = player.y; playCheckpointSound();};
             if (gravity > 0){
 
@@ -709,7 +709,7 @@ function draw() {
     ctx.fillStyle = '#287271';
     nope = false
     platforms.forEach(plat => {
-        if (plat.x>player.x+1700) {return;}
+        if (plat.x>player.x+canvas.width + 200) {return;}
         if(plat.b){
           for (let b = 0; b < plat.width; b += 20) {
             ctx.drawImage(slime, plat.x + b, plat.y, 20, plat.height);

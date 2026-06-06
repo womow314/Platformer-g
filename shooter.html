@@ -334,12 +334,15 @@ const player = {
 let energyDrinkCooldown = 800
 enemies = []
 
-function spawnEnemy(type="basic", mod=0) {
+function spawnEnemy(type="basic", mod=0, is=false, degree = 0) {
   
   const minRadius = 800;
   const maxRadius = 1000;
-
-  const angle = Math.random() * Math.PI * 2;
+  let angle;
+  if( is){
+     angle = degree
+  }
+  else { angle = Math.random() * Math.PI * 2;}
   const radius = minRadius + Math.random() * (maxRadius - minRadius);
 
   const px = player.x + Math.cos(angle) * radius;
@@ -412,12 +415,7 @@ function spawnBox() {
     size: 20
   });
 }
-
-spawnEnemy("basic")
-spawnEnemy("basic")
-spawnEnemy("basic")
-spawnEnemy("basic")
-spawnEnemy("basic")
+spawnEnemy()
 
 for(let i = 0; i < 20; i++){
   px = Math.random()*1770-1000
@@ -607,6 +605,7 @@ function updateBalls(){
 function shootBullet() {
   playShootSound();
   let ptarget = getClosestMob()
+  if (!ptarget) return;
   let dx = ptarget.x +ptarget.size/2 - player.x;
   let dy = ptarget.y+ptarget.size/2 - player.y;
 
@@ -730,6 +729,75 @@ const MobSpeed = 1
 
 document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
 
+
+function spawnWave(type, amount){
+  const angle = Math.random() * Math.PI * 2;
+  const increment = Math.PI * 2/amount
+  for (let i = 0; i <amount; i ++) {
+    spawnEnemy(type, 0, true, angle+increment*i)
+  }
+}
+
+let time = 0
+
+setInterval(() => {
+  if(!isPaused) time ++;
+
+  summonWave()
+
+
+}, 1000);
+
+function summonWave(){
+
+    switch (time) {
+      case 1:
+        spawnWave("basic", 5)
+        break
+      case 10:
+        spawnWave("basic", 5)
+        break
+      case 20:
+        spawnWave("basic", 8)
+        break
+      case 30:
+        spawnWave("basic", 5)
+        spawnWave("level2", 5)
+        break
+      case 45:
+        spawnWave("basic", 4)
+        spawnWave("level2", 5)
+        break
+      case 60:
+        spawnWave("basic", 5)
+        spawnWave("level2", 6)
+        break
+      case 75:
+        spawnWave("basic", 6)
+        spawnWave("level2", 7)
+        break
+      case 90:
+        spawnWave("basic", 7)
+        spawnWave("level2", 8)
+        break
+      case 110: 
+        spawnWave("basic", 80)
+        break
+      case 140:
+        spawnWave("basic", 70)
+        break
+      case 170:
+        spawnWave("level2", 50)
+        break
+      case 200:
+        spawnWave("level2", 40)
+        break
+    }
+}
+
+
+
+
 function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -737,13 +805,16 @@ function update() { //----------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   let killsWithMod = kills + Number(localStorage.getItem('killModifyer'))
-  if (killsWithMod === 251) mobSpawnCooldown = 0;
   document.querySelector(('h1')).innerText = `HEALTH: ${health}`
   document.querySelector('h1').style.color = `rgb(${255 - (health * (255/MaxHealth))}, ${health * (255/MaxHealth)}, 0)`
-  document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills} + ${localStorage.getItem('killModifyer')} Modifier, Coins: ${coins}/${coinsToUpgrade}, Most Kills: ${mostKills}`
+  document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills} + ${localStorage.getItem('killModifyer')} Modifier, Most Kills: ${mostKills}, Time: ${time}`
   let progressPercent = (coins / coinsToUpgrade) * 100;
   document.getElementById("progressBar").style.width = `${progressPercent}%`;
   if (isPaused) return;
+  if(enemies.length <=0 ) {
+    time ++
+  summonWave()
+  }
   player.dx = 0; player.dy = 0;
   player.currentSpeed = player.speed
   if(keys['ShiftRight']||keys['ShiftLeft']) player.currentSpeed = player.speed *1.5;
@@ -754,99 +825,12 @@ function update() { //----------------------------------------------------------
   
   MobsOnBoard = enemies.length
   bulletCooldown -= 1
-  mobSpawnCooldown -= 1
   energyDrinkCooldown -= 1
   if (energyDrinkCooldown <=0 && health <= MaxHealth - energyDrinkEffect) {
     health += energyDrinkEffect
     energyDrinkCooldown = 700
   }
-  
-  if (MobsOnBoard  <= 0) mobSpawnCooldown = 0
-  if (mobSpawnCooldown <=0) {
-     killsWithMod = kills + Number(localStorage.getItem('killModifyer'))
-    if (killsWithMod <= 20){
-      mobSpawnCooldown = 180 - 6*killsWithMod
-      spawnEnemy("basic")
-    } else if (killsWithMod > 20 && killsWithMod <= 60) {
-      mobSpawnCooldown = Math.max(180 - 2*(killsWithMod-20), 60)
-      spawnEnemy("level2")
-      let randomNum = Math.random()
-      randomNum -= (killsWithMod-20)/13
-      if(randomNum < 0.2) spawnEnemy("basic");
-      if(randomNum <0.05) spawnEnemy("basic");
-    } else if (killsWithMod > 60 && killsWithMod < 100) {
-      mobSpawnCooldown = Math.max(200 - 2*(killsWithMod-60), 60)
-      spawnEnemy("level3") 
-      let randomNum = Math.random()
-      randomNum -= (killsWithMod-60)/13
-      if(randomNum < 0.2) spawnEnemy("basic");
-      if(randomNum <0.05) spawnEnemy("level2");
-    } else if (killsWithMod > 100 && killsWithMod <= 160) {
-      if(!elite1Spawned) {
-        spawnEnemy('elite1')
-        elite1Spawned = true
-      }
-      mobSpawnCooldown = Math.max(150 - 2*(killsWithMod-100), 80)
-      spawnEnemy("basic")
-      spawnEnemy("basic")
-      spawnEnemy("basic")
-      let randomNum = Math.random()
-      randomNum -= (killsWithMod-100)/20
-      if(randomNum < 0.4) spawnEnemy("level2");
-      if(randomNum <0.1) spawnEnemy("level3");
-      if (killsWithMod >= 120) spawnEnemy("level4")
-    } else if (killsWithMod > 160 && killsWithMod <= 250) {
-      mobSpawnCooldown = 12
-      spawnEnemy("level5")
-      let randomNum = Math.random()
-      if(randomNum < 0.1) spawnEnemy("level4");
-    } else if (killsWithMod === 251 && !bossSpawned) {
-      enemies = []
-      bossSpawned = true
-      spawnEnemy('boss1')
-      mobSpawnCooldown = Infinity;
-      
-    } else if (killsWithMod >= 252 && killsWithMod < 300) {
-      mobSpawnCooldown = 40
-      spawnEnemy("level4")
-    } else if(killsWithMod >= 300 && killsWithMod < 380) {
-      mobSpawnCooldown = 160
-      spawnEnemy('basic')
-      spawnEnemy('level2')
-      spawnEnemy('level3')
-      spawnEnemy('level4')
-      spawnEnemy('level5')
-      spawnEnemy('level6')
-    } else if (killsWithMod >= 380 && killsWithMod < 540) {
-      mobSpawnCooldown = 14
-      spawnEnemy("level3")
-    } else if (killsWithMod >= 540 && killsWithMod < 550) {
-      mobSpawnCooldown = 150
-      spawnEnemy("boss1")
-    } else if (killsWithMod >= 550 && killsWithMod < 650) {
-      mobSpawnCooldown = 15
-      spawnEnemy("level6")
-    } else if (killsWithMod >= 650 && killsWithMod < 800) {
-      mobSpawnCooldown = 120
-      spawnEnemy("level6")
-      spawnEnemy("level7")
-      spawnEnemy('level5')
-      spawnEnemy('level4')
-      spawnEnemy('level3')
-      spawnEnemy('level3')
-      spawnEnemy('level2')
-      spawnEnemy('basic')
-    } else if (killsWithMod >= 800 && killsWithMod < 1100){
-      mobSpawnCooldown = 15
-      spawnEnemy("level6")
-      spawnEnemy("level7")
-    } else if (killsWithMod > 1100){
-      mobSpawnCooldown = 24
-      spawnEnemy("level6")
-      spawnEnemy("level7")
-      spawnEnemy("level8")
-    }
-  }
+
 
   rocketCooldown--;
   if (coins >= coinsToUpgrade) {
@@ -858,7 +842,7 @@ function update() { //----------------------------------------------------------
   }
 
   for (box of boxes) {
-    if (inRange(player, box, 20)) {
+    if (inRange(player, box, magnetRange)) {
       let roll = Math.floor(Math.random()*3)
       boxes.splice(boxes.indexOf(box), 1)
       switch (roll) {
@@ -895,6 +879,7 @@ function update() { //----------------------------------------------------------
   if (rocketFacts.cooldown !== Infinity && rocketCooldown <= 0) {
 
     let target = getClosestMob();
+    if (target){
 
     let dx = player.x - target.x;
     let dy = player.y - target.y;
@@ -913,6 +898,7 @@ function update() { //----------------------------------------------------------
       }); 
 
       rocketCooldown = rocketFacts.cooldown;
+    }
     }
   }
 
@@ -1007,29 +993,24 @@ function update() { //----------------------------------------------------------
       // Enemy separation
       for (let j = i - 1; j >= 0; j--) {
 
-          let other = enemies[j];
+        let other = enemies[j];
 
-          let dx2 = enemy.x - other.x;
-          let dy2 = enemy.y - other.y;
+        let dx2 = enemy.x - other.x;
+        let dy2 = enemy.y - other.y;
 
-          let dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+        let dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
 
-          let minDist = (enemy.size + other.size) / 2;
+        let minDist = (enemy.size + other.size) / 2;
 
-          if (dist2 < minDist && dist2 > 0) {
+        if (dist2 < minDist && dist2 > 0) {
+          dx2 /= dist2;
+          dy2 /= dist2;
 
-              dx2 /= dist2;
-              dy2 /= dist2;
+          let push = (minDist - dist2) * 0.5;
 
-              let push = (minDist - dist2) * 0.5;
-
-              // Push BOTH enemies apart
-              enemy.x += dx2 * push * 0.5;
-              enemy.y += dy2 * push * 0.5;
-
-              other.x -= dx2 * push * 0.5;
-              other.y -= dy2 * push * 0.5;
-          }
+          enemy.x += dx2 * push;
+          enemy.y += dy2 * push;
+        }
       }
 
       // Force field damage
