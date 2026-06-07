@@ -783,20 +783,30 @@ function summonWave(){
       case 110: 
         spawnWave("basic", 80)
         break
-      case 140:
+      case 130:
         spawnWave("basic", 70)
         break
-      case 170:
+      case 150:
         spawnWave("level2", 50)
         break
-      case 200:
+      case 170:
         spawnWave("level2", 40)
         break
     }
 }
 
+function getRandomVisibleMob() {
+  let visibleMobs = enemies.filter(enemy =>
+    enemy.x + enemy.size > scrollX &&
+    enemy.x < scrollX + canvas.width &&
+    enemy.y + enemy.size > scrollY &&
+    enemy.y < scrollY + canvas.height
+  );
 
+  if (visibleMobs.length === 0) return null;
 
+  return visibleMobs[Math.floor(Math.random() * visibleMobs.length)];
+}
 
 function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
