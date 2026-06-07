@@ -165,6 +165,9 @@ enemyLevel8.src = "images/pixil-frame-0 (24).png"
 let elite1 = new Image();
 elite1.src = "images/pixil-frame-0 (25).png"
 
+let lightning = new Image();
+lightning.src = "images/pixil-frame-0 (26).png"
+
 const bulletIMG = new Image();
 bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
 
@@ -233,6 +236,7 @@ let ballsFacts = {
   damage: 1,
   size: 20
 }
+let bolts = 0
 
 let rocketCooldownDecreaser = 0
 
@@ -252,7 +256,8 @@ let upgrades = {
     energy: 1,
     rocket: 1,
     balls: 1,
-    drill: 1
+    drill: 1,
+    lightning: 1
 }
 
 let balls = []
@@ -274,11 +279,12 @@ let upgradeText = {
     energy: ['+1 hp 10/sec', '+2 hp 10/sec', '+3 hp 10/sec', '+4 hp 10/sec', '+5 hp 10/sec'],
     rocket: ['Shoot a rocket every 5 seconds', 'Decrease rocket shoot time to 4 seconds', 'Increase rocket damage', 'Increase explosion range', 'Decrease shoot time to 3 seconds'],
     balls: ['Shoot a soccor ball that bounces off the screen and enemies', 'Shoot another ball', 'Increase damage', 'Shoot another ball', 'Increase ball size'],
-    drill: ['Shoot a drill that bounces around the screen', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill']
+    drill: ['Shoot a drill that bounces around the screen', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill'],
+    lightning: ['Summon a lightning shower: 1 bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt']
 
 }
 
-let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill']
+let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning']
 let avaibleUpgrades = []
 
 function displayUpgrades() {
@@ -422,6 +428,7 @@ for(let i = 0; i < 20; i++){
   py = Math.random()*1530 - 770
   CoinsOnGround.push({x: px, y: py, value: 0.5})
 }
+let lightningMaxCooldown = 300
 
 
 keys = {};
@@ -578,6 +585,9 @@ function buy(choice) {
     case "drill":
       drills.push({x: player.x, y: player.y, dx: 0.64278760968, dy: -0.76604444311, size: 20})
       break
+    case "lightning":
+      bolts +=1
+      break
     
 
   }
@@ -718,6 +728,7 @@ function getClosestMob() {
 
 let bulletSpeed = 10
 let bulletSize = 10
+let lightningCooldown = 0
 let increasePowerCost = 5
 let mobSpawnCooldown = 300
 let MobsOnBoard = 3
@@ -808,6 +819,21 @@ function getRandomVisibleMob() {
   return visibleMobs[Math.floor(Math.random() * visibleMobs.length)];
 }
 
+function shootLightning(){
+  let mob = getRandomVisibleMob()
+  if (mob){
+    let bolt = {x: mob.x, y: mob.y, size: 40}
+    for(let enemy of enemies){
+      if (inRange(enemy, bolt, 40)){
+        enemy.health -= 8
+      }
+    }
+    lightningBolts.push({x: mob.x, y: mob.y, time: 30})
+  }
+}
+
+let lightningBolts = []
+
 function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -839,6 +865,40 @@ function update() { //----------------------------------------------------------
   if (energyDrinkCooldown <=0 && health <= MaxHealth - energyDrinkEffect) {
     health += energyDrinkEffect
     energyDrinkCooldown = 700
+  }
+  lightningCooldown -= 1
+  if (lightningCooldown < 0){
+    lightningCooldown = lightningMaxCooldown
+    if(bolts >= 1 ){
+      shootLightning()
+    }
+    setTimeout(() => {
+      if(bolts >= 2 ){
+        shootLightning()
+      }
+    }, 200);
+
+    setTimeout(() => {
+      if(bolts >= 3 ){
+        shootLightning()
+      }
+    }, 400);
+
+    setTimeout(() => {
+      if(bolts >= 4 ){
+        shootLightning()
+      }
+    }, 600);
+
+    setTimeout(() => {
+      if(bolts >= 5 ){
+        shootLightning()
+      }
+    }, 800);
+
+  }
+  for(let bolt of lightningBolts){
+    bolt.time -= 1
   }
 
 
@@ -1266,6 +1326,11 @@ function draw() {
 
     balls.forEach(ball => {
       ctx.drawImage(soccorBallIMG, ball.x, ball.y, ball.size, ball.size);
+    });
+
+    lightningBolts.forEach(bolt => {
+      if (bolt.time < 0) return;
+      ctx.drawImage(lightning, bolt.x, bolt.y, 40, 40);
     });
 
     drills.forEach(drill => {
