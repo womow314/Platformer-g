@@ -248,4 +248,13 @@ line{
   margin-top: 85px;
   margin-left: 25px;
   position: center;
+  cursor: pointer;
+}
+
+#wiki{
+  background-color: green;
+  cursor: pointer;
+}
+#article{
+  
 }
