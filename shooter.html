@@ -513,6 +513,7 @@ function buy(choice) {
     case "cooldown":
       bulletCooldownMax = Math.max(5, bulletCooldownMax - 20);
       rocketCooldownDecreaser += 20
+      lightningMaxCooldown -= 10
       document.getElementById('statsCooldown').innerText = `Bullet cooldown: ${bulletCooldownMax}`
       break;
 
@@ -763,7 +764,7 @@ function summonWave(){
 
     switch (time) {
       case 1:
-        spawnWave("basic", 5)
+        spawnWave("basic", 14)
         break
       case 10:
         spawnWave("basic", 5)
@@ -803,6 +804,42 @@ function summonWave(){
       case 170:
         spawnWave("level2", 40)
         break
+      case 190:
+        spawnEnemy('elite1')
+        spawnWave("level2", 30)
+        spawnWave("level3", 10)
+        break
+      case 210:
+        spawnWave("level3", 30)
+        break
+      case 230:
+        spawnWave("level5", 130)
+        break
+      case 240:
+        spawnWave("level5", 90)
+        break
+      case 245:
+        spawnWave("level5", 70)
+        break
+      case 250:
+        spawnWave("basic", 90)
+        break
+      case 260:
+        spawnWave("level2", 30)
+        break
+      case 270:
+        spawnWave("level5", 80)
+        break
+      case 275:
+        spawnWave("level4", 30)
+        break
+      case 285:
+        spawnWave("level4", 10)
+        break
+      case 300:
+        spawnWave("level4", 15)
+        break
+      
     }
 }
 
@@ -825,7 +862,7 @@ function shootLightning(){
     let bolt = {x: mob.x, y: mob.y, size: 40}
     for(let enemy of enemies){
       if (inRange(enemy, bolt, 40)){
-        enemy.health -= 8
+        enemy.health -= 20
       }
     }
     lightningBolts.push({x: mob.x, y: mob.y, time: 30})
@@ -1058,6 +1095,10 @@ function update() { //----------------------------------------------------------
 
           enemy.x += dx * MobSpeed;
           enemy.y += dy * MobSpeed;
+          if( enemy.enemyType === 'level5'){
+            enemy.x += dx * MobSpeed;
+            enemy.y += dy * MobSpeed;
+          }
       }
 
       // Enemy separation
