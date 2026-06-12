@@ -278,7 +278,7 @@ let upgradeText = {
     rapid: ['Shoot and extra bullet', 'Shoot and extra bullet', 'Shoot and extra bullet', 'Shoot and extra bullet', 'Shoot and extra bullet' ],
     energy: ['+1 hp 10/sec', '+2 hp 10/sec', '+3 hp 10/sec', '+4 hp 10/sec', '+5 hp 10/sec'],
     rocket: ['Shoot a rocket every 5 seconds', 'Decrease rocket shoot time to 4 seconds', 'Increase rocket damage', 'Increase explosion range', 'Decrease shoot time to 3 seconds'],
-    balls: ['Shoot a soccor ball that bounces off the screen and enemies', 'Shoot another ball', 'Increase damage', 'Shoot another ball', 'Increase ball size'],
+    balls: ['Shoot a soccor ball that bounces off the screen and enemies', 'Shoot another ball', 'Increase soccer damage', 'Shoot another ball', 'Increase ball size'],
     drill: ['Shoot a drill that bounces around the screen', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill'],
     lightning: ['Summon a lightning shower: 1 bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt']
 
@@ -398,6 +398,9 @@ function spawnEnemy(type="basic", mod=0, is=false, degree = 0) {
     typeImage = elite1
     enemySize = 50
   }
+  if (type === "boss1") {
+    console.trace("BOSS SPAWNED");
+  }
   enemies.push({x:px, y:py, health: Ehealth+mod, image: typeImage, enemyType: type, size: enemySize})
 }
 let bulletFireAmount = 1
@@ -513,7 +516,7 @@ function buy(choice) {
     case "cooldown":
       bulletCooldownMax = Math.max(5, bulletCooldownMax - 20);
       rocketCooldownDecreaser += 20
-      lightningMaxCooldown -= 10
+      lightningMaxCooldown -= 30
       document.getElementById('statsCooldown').innerText = `Bullet cooldown: ${bulletCooldownMax}`
       break;
 
@@ -646,7 +649,12 @@ if (enemy.enemyType === "level4"){
 }
 if(enemy.enemyType === "boss1"){
   CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: coinsToUpgrade})
-  mobSpawnCooldown = 0
+  bossOnBoard = false
+  for (let c = CoinsOnGround.length - 1; c >= 0; c --) {
+    coin = CoinsOnGround[c]
+    CoinsOnGround.splice(c, 1)
+    coins+= coin.value
+  }
 }
 if(enemy.enemyType === "elite1"){
   CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: coinsToUpgrade})
@@ -672,6 +680,12 @@ window.addEventListener("keydown", function(e) {
         e.preventDefault();
     }
 }, false);
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === '-') {
+    time = prompt("LOl you found the secret hack. Please enter the mod time: ")
+  }
+});
 
 window.addEventListener("keydown", function(e) {
     if (["KeyQ"].indexOf(e.code) > -1) {
@@ -750,16 +764,16 @@ function spawnWave(type, amount){
   }
 }
 
-let time = 0
+let time = localStorage.getItem('killModifyer')
 
 setInterval(() => {
-  if(!isPaused) time ++;
+  if(!bossOnBoard) {if(!isPaused) {time ++;
 
-  summonWave()
+  summonWave()}}
 
 
 }, 1000);
-
+let bossOnBoard = false
 function summonWave(){
 
     switch (time) {
@@ -789,8 +803,12 @@ function summonWave(){
         spawnWave("level2", 7)
         break
       case 90:
-        spawnWave("basic", 7)
-        spawnWave("level2", 8)
+        spawnWave("basic", 4)
+        spawnWave("level2", 6)
+        break
+      case 100:
+        spawnWave("basic", 4)
+        spawnWave("level2", 6)
         break
       case 110: 
         spawnWave("basic", 80)
@@ -810,11 +828,13 @@ function summonWave(){
         spawnWave("level3", 10)
         break
       case 210:
-        spawnWave("level3", 30)
+        spawnWave("level3", 40)
         break
       case 230:
         spawnWave("level5", 130)
         break
+      case 235:
+        spawnWave("basic", 50)
       case 240:
         spawnWave("level5", 90)
         break
@@ -827,7 +847,7 @@ function summonWave(){
       case 260:
         spawnWave("level2", 30)
         break
-      case 270:
+      case 265:
         spawnWave("level5", 80)
         break
       case 275:
@@ -837,8 +857,88 @@ function summonWave(){
         spawnWave("level4", 10)
         break
       case 300:
-        spawnWave("level4", 15)
+        enemies = []
+        spawnEnemy('boss1')
+        bossOnBoard=true
         break
+      case 301:
+        spawnWave("level4", 40)
+        break
+      case 310:
+        spawnWave("level4", 30)
+        break
+      case 325:
+        spawnWave("level4", 30)
+        break
+      case 340:
+        spawnWave("level6", 20)
+        break
+      case 360:
+        spawnWave("level4", 80)
+        break
+      case 380:
+        spawnWave("level4", 80)
+        spawnEnemy('elite1', 100)
+        break
+      case 400:
+        spawnWave("level6", 60)
+        break
+      case 420:
+        spawnWave("level6", 60)
+        break
+      case 440:
+        spawnWave("level6", 60)
+        break
+      case 460:
+        spawnWave("level7", 20)
+        break
+      case 480:
+        spawnWave("level7", 20)
+        break
+      case 500:
+        spawnWave("level7", 20)
+        spawnWave("level5", 100)
+        break
+      case 520:
+        spawnWave("level7", 20)
+        spawnWave("level6", 60)
+        break
+      case 540:
+        spawnWave("level7", 20)
+        spawnWave("level6", 60)
+        spawnEnemy('elite1', 300)
+        break
+      case 560:
+        spawnWave("level4", 300)
+        break
+      case 565:
+        spawnWave("level4", 10)
+        break
+      case 570:
+        spawnWave("level4", 10)
+        break
+      case 575:
+        spawnWave("level4", 10)
+        break
+      case 580:
+        spawnWave("level4", 10)
+        break
+      case 585:
+        spawnWave("level4", 10)
+        break
+      case 600:
+        enemies = []
+        spawnEnemy('boss1', 800)
+        bossOnBoard=true
+        break
+      case 601:
+        spawnWave("level6", 50)
+        break
+      default:
+        if (time > 601 && time % 2 === 0){
+          spawnWave("level6", 30)
+        }
+
       
     }
 }
@@ -869,6 +969,7 @@ function shootLightning(){
   }
 }
 
+
 let lightningBolts = []
 
 function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -884,10 +985,6 @@ function update() { //----------------------------------------------------------
   let progressPercent = (coins / coinsToUpgrade) * 100;
   document.getElementById("progressBar").style.width = `${progressPercent}%`;
   if (isPaused) return;
-  if(enemies.length <=0 ) {
-    time ++
-  summonWave()
-  }
   player.dx = 0; player.dy = 0;
   player.currentSpeed = player.speed
   if(keys['ShiftRight']||keys['ShiftLeft']) player.currentSpeed = player.speed *1.5;
