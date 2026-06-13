@@ -73,7 +73,7 @@
         document.querySelector('#powerBtn').innerText =
             `Upgrade power ${localStorage.getItem('localPower')} => ${Number(localStorage.getItem('localPower')) + 1}. ${localStorage.getItem('localPowerCost')} KC`;
 
-        document.querySelector('#killMOD').innerText = `+${localStorage.getItem('killModifyer')} kills at start`
+        document.querySelector('#killMOD').innerText = `+${localStorage.getItem('killModifyer')} seconds at start`
         skillCoins = Math.floor(Number(localStorage.getItem('mostKillsWithMod'))/10) - Number(localStorage.getItem('skillCoinsSpent'))
         document.querySelector('#skillCoins').innerText = `${skillCoins} skill coins`
         document.querySelector('#rapid').innerText = `x${Number(localStorage.getItem('repeatFire')) + 1} split amount`
