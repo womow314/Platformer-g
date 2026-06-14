@@ -77,7 +77,7 @@ localStorage.setItem('forceMod', localStorage.getItem('forceMod') || "1");
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-  
+let guardians = []
 let mostKills = 0;
 let killCoins = localStorage.getItem('killCoins') || 0
 let magnetRange = 30;
@@ -168,6 +168,9 @@ elite1.src = "images/pixil-frame-0 (25).png"
 let lightning = new Image();
 lightning.src = "images/pixil-frame-0 (26).png"
 
+let gaurd = new Image();
+gaurd.src = "images/pixil-frame-0 (27).png"
+
 const bulletIMG = new Image();
 bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
 
@@ -230,6 +233,7 @@ let rocketFacts = {
   explosionMod: 30,
   speed: 3
 }
+let blades = 0
 
 
 let ballsFacts = {
@@ -257,14 +261,15 @@ let upgrades = {
     rocket: 1,
     balls: 1,
     drill: 1,
-    lightning: 1
+    lightning: 1,
+    guardian: 1
 }
 
 let balls = []
 let drills = []
 
 setInterval(() => {
-  spawnBox()
+  if(!isPaused) spawnBox();
 }, 40000);
 
 let upgradeText = {
@@ -280,11 +285,12 @@ let upgradeText = {
     rocket: ['Shoot a rocket every 5 seconds', 'Decrease rocket shoot time to 4 seconds', 'Increase rocket damage', 'Increase explosion range', 'Decrease shoot time to 3 seconds'],
     balls: ['Shoot a soccor ball that bounces off the screen and enemies', 'Shoot another ball', 'Increase soccer damage', 'Shoot another ball', 'Increase ball size'],
     drill: ['Shoot a drill that bounces around the screen', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill'],
-    lightning: ['Summon a lightning shower: 1 bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt']
+    lightning: ['Summon a lightning shower: 1 bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt'],
+    guardian: ['Spawn 2 circles that spin around the player', 'Add a 3rd circle', 'Add a 4th circle', 'Add a 5th circle', 'Add a 6th circle']
 
 }
 
-let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning']
+let upgradeArray = ['forceField', 'rapid', 'rocket', 'balls', 'drill', 'lightning', 'guardian']
 let avaibleUpgrades = []
 
 function displayUpgrades() {
@@ -484,6 +490,7 @@ let totalUpgradesCompleteed = 0;
 let rocketCooldown = Infinity;
 
 function buy(choice) {
+  upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian']
 
   playBuySound();
 
@@ -592,6 +599,48 @@ function buy(choice) {
     case "lightning":
       bolts +=1
       break
+    case "guardian":
+      switch (upgrades.guardian){
+      case 1:
+        guardians.push({x: 0, y: 0, turn: 0})
+        guardians.push({x: 0, y: 0, turn: Math.PI})
+        break
+
+      case 2:
+        guardians = []
+        guardians.push({x: 0, y: 0, turn: 0})
+        guardians.push({x: 0, y: 0, turn: 4*Math.PI/3})
+        guardians.push({x: 0, y: 0, turn: 2*Math.PI/3})
+        break
+      
+      case 3:
+        guardians = []
+        guardians.push({x: 0, y: 0, turn: 0})
+        guardians.push({x: 0, y: 0, turn: Math.PI/2})
+        guardians.push({x: 0, y: 0, turn: Math.PI})
+        guardians.push({x: 0, y: 0, turn: 3*Math.PI/2})
+        break
+
+      case 4:
+        guardians = []
+        guardians.push({x: 0, y: 0, turn: 0})
+        guardians.push({x: 0, y: 0, turn: 8*Math.PI/5})
+        guardians.push({x: 0, y: 0, turn: 6*Math.PI/5})
+        guardians.push({x: 0, y: 0, turn: 4*Math.PI/5})
+        guardians.push({x: 0, y: 0, turn: 2*Math.PI/5})
+        break
+      
+      case 5:
+        guardians = []
+        guardians.push({x: 0, y: 0, turn: 0})
+        guardians.push({x: 0, y: 0, turn: 10*Math.PI/6})
+        guardians.push({x: 0, y: 0, turn: 8*Math.PI/6})
+        guardians.push({x: 0, y: 0, turn: 6*Math.PI/6})
+        guardians.push({x: 0, y: 0, turn: 4*Math.PI/6})
+        guardians.push({x: 0, y: 0, turn: 2*Math.PI/6})
+        break
+      
+      }
     
 
   }
@@ -1034,6 +1083,12 @@ function update() { //----------------------------------------------------------
   for(let bolt of lightningBolts){
     bolt.time -= 1
   }
+  for (let guardian of guardians){
+    guardian.x = player.x + Math.cos(guardian.turn)*80 - 15
+    guardian.y = player.y + Math.sin(guardian.turn)*80 - 15
+    guardian.turn += 0.02
+    guardian.size = 50
+  }
 
 
   rocketCooldown--;
@@ -1196,6 +1251,21 @@ function update() { //----------------------------------------------------------
             enemy.x += dx * MobSpeed;
             enemy.y += dy * MobSpeed;
           }
+      }
+
+      for (let gaurd of guardians){
+        if (gaurd.x < enemy.x + enemy.size && gaurd.x + gaurd.size > enemy.x && gaurd.y < enemy.y + enemy.size && gaurd.y + gaurd.size > enemy.y){
+
+          enemy.x -= 0.5*dx
+          enemy.y -= 0.5 * dy
+          enemy.health -= 0.04
+          if (enemy.health <= 0) {
+            enemies.splice(i, 1);
+            kills += 1;
+            dropXP(enemy);
+            continue;
+        }
+        }
       }
 
       // Enemy separation
@@ -1477,6 +1547,10 @@ function draw() {
 
     boxes.forEach(box => {
         ctx.drawImage(boxIMG, box.x, box.y, 20, 20);
+    });
+  
+    guardians.forEach(grd => {
+        ctx.drawImage(gaurd, grd.x, grd.y, 50, 50);
     });
 
     rockets.forEach(rocket => {
