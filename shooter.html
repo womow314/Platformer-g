@@ -77,7 +77,7 @@ localStorage.setItem('forceMod', localStorage.getItem('forceMod') || "1");
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-  
+let guardians = []
 let mostKills = 0;
 let killCoins = localStorage.getItem('killCoins') || 0
 let magnetRange = 30;
@@ -230,6 +230,7 @@ let rocketFacts = {
   explosionMod: 30,
   speed: 3
 }
+let blades = 0
 
 
 let ballsFacts = {
@@ -257,14 +258,15 @@ let upgrades = {
     rocket: 1,
     balls: 1,
     drill: 1,
-    lightning: 1
+    lightning: 1,
+    guardian: 1
 }
 
 let balls = []
 let drills = []
 
 setInterval(() => {
-  spawnBox()
+  if(!isPaused) spawnBox();
 }, 40000);
 
 let upgradeText = {
@@ -280,11 +282,12 @@ let upgradeText = {
     rocket: ['Shoot a rocket every 5 seconds', 'Decrease rocket shoot time to 4 seconds', 'Increase rocket damage', 'Increase explosion range', 'Decrease shoot time to 3 seconds'],
     balls: ['Shoot a soccor ball that bounces off the screen and enemies', 'Shoot another ball', 'Increase soccer damage', 'Shoot another ball', 'Increase ball size'],
     drill: ['Shoot a drill that bounces around the screen', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill'],
-    lightning: ['Summon a lightning shower: 1 bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt']
+    lightning: ['Summon a lightning shower: 1 bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt'],
+    guardian: ['Spawn 2 circles that spin around the player', 'Add a 3rd circle', 'Add a 4th circle', 'Add a 5th circle', 'Add a 6th circle']
 
 }
 
-let upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning']
+let upgradeArray = ['forceField', 'rapid', 'rocket', 'balls', 'drill', 'lightning', 'guardian']
 let avaibleUpgrades = []
 
 function displayUpgrades() {
@@ -484,6 +487,7 @@ let totalUpgradesCompleteed = 0;
 let rocketCooldown = Infinity;
 
 function buy(choice) {
+  upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian']
 
   playBuySound();
 
@@ -592,6 +596,37 @@ function buy(choice) {
     case "lightning":
       bolts +=1
       break
+    case "guardian":
+      switch (upgrades.guardian){
+      case 1:
+        gaurdians.push({x: 0, y: 0, turn: 0})
+        gaurdians.push({x: 0, y: 0, turn: Math.PI})
+        break
+
+      case 2:
+        gaurdians = []
+        gaurdians.push({x: 0, y: 0, turn: 0})
+        gaurdians.push({x: 0, y: 0, turn: 4*MathPI/3})
+        gaurdians.push({x: 0, y: 0, turn: 2*MathPI/3})
+        break
+      
+      case 3:
+        gaurdians = []
+        gaurdians.push({x: 0, y: 0, turn: 0})
+        gaurdians.push({x: 0, y: 0, turn: MathPI/2})
+        gaurdians.push({x: 0, y: 0, turn: MathPI})
+        gaurdians.push({x: 0, y: 0, turn: 3*MathPI/2})
+        break
+
+      case 4:
+        gaurdians.push({x: 0, y: 0, turn: 0})
+        gaurdians.push({x: 0, y: 0, turn: 8*Math.PI/5})
+        gaurdians.push({x: 0, y: 0, turn: 6*Math.PI/5})
+        gaurdians.push({x: 0, y: 0, turn: 4*Math.PI/5})
+        gaurdians.push({x: 0, y: 0, turn: 2*Math.PI/5})
+        break
+      
+      }
     
 
   }
