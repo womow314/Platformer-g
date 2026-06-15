@@ -247,7 +247,7 @@ let rocketCooldownDecreaser = 0
 let coinsToUpgrade = 2;
 forceFieldRange = 0;
 let forcePower = 0.03
-
+document.querySelector('#shop').style.opacity = '0'
 let upgrades = {
     power: 1,
     speed: 1,
@@ -273,22 +273,21 @@ setInterval(() => {
 }, 40000);
 
 let upgradeText = {
-    power: ['Increase power +1', 'Increase power +2', 'Increase power +3', 'Increase power +4', 'Increase power +5'],
-    speed: ['Increase projectile speed 10%', 'Increase projectile speed 20%', 'Increase projectile speed 30%', 'Increase projectile speed 40%', 'Increase projectile speed 50%'],
-    size: ['Increase projectile size 10 => 12', 'Increase projectile size 12 => 14', 'Increase projectile size 14 => 16', 'Increase projectile size 16 => 18', 'Increase projectile size 18 => 20' ],
-    cooldown: ["Decrease all attack cooldown", "Decrease all attack cooldown", "Decrease all attack cooldown", "Decrease all attack cooldown", "Decrease all attack cooldown"],
-    playerSpeed: ['Player Speed 5 => 6', 'Player Speed 6 => 7', 'Player Speed 7 => 8', 'Player Speed 8 => 9', 'Player Speed 9 => 10'],
-    magnet: ['Increase magnet range 30 => 50', 'Increase magnet range 50 => 70', 'Increase magnet range 70 => 90', 'Increase magnet range 90 => 110', 'Increase magnet range 110 => 130'],
-    forceField: ['Add force field', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power', 'Increased force Field range and power' ],
-    rapid: ['Shoot and extra bullet', 'Shoot and extra bullet', 'Shoot and extra bullet', 'Shoot and extra bullet', 'Shoot and extra bullet' ],
-    energy: ['+1 hp 10/sec', '+2 hp 10/sec', '+3 hp 10/sec', '+4 hp 10/sec', '+5 hp 10/sec'],
-    rocket: ['Shoot a rocket every 5 seconds', 'Decrease rocket shoot time to 4 seconds', 'Increase rocket damage', 'Increase explosion range', 'Decrease shoot time to 3 seconds'],
-    balls: ['Shoot a soccor ball that bounces off the screen and enemies', 'Shoot another ball', 'Increase soccer damage', 'Shoot another ball', 'Increase ball size'],
-    drill: ['Shoot a drill that bounces around the screen', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill', 'Shoot another drill'],
-    lightning: ['Summon a lightning shower: 1 bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt', 'Add another bolt'],
-    guardian: ['Spawn 2 circles that spin around the player', 'Add a 3rd circle', 'Add a 4th circle', 'Add a 5th circle', 'Add a 6th circle']
-
-}
+    power: ['<b>Hi-Power Bullet</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase power +1', '<b>Hi-Power Bullet</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase power +2', '<b>Hi-Power Bullet</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase power +3', '<b>Hi-Power Bullet</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase power +4', '<b>Hi-Power Bullet</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase power +5'],
+    speed: ['<b>Ammo thruster</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase projectile speed 10%', '<b>Ammo thruster</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase projectile speed 20%', '<b>Ammo thruster</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase projectile speed 30%', '<b>Ammo thruster</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase projectile speed 40%', '<b>Ammo thruster</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase projectile speed 50%'],
+    size: ['<b>HE Fuel</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase projectile size 10 => 12', '<b>HE Fuel</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase projectile size 12 => 14', '<b>HE Fuel</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase projectile size 14 => 16', '<b>HE Fuel</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase projectile size 16 => 18', '<b>HE Fuel</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase projectile size 18 => 20'],
+    cooldown: ['<b>Power cube</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Decrease all attack cooldown'],
+    playerSpeed: ['<b>Sport shoes</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Player Speed 5 => 6', '<b>Sport shoes</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Player Speed 6 => 7', '<b>Sport shoes</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Player Speed 7 => 8', '<b>Sport shoes</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Player Speed 8 => 9', '<b>Sport shoes</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Player Speed 9 => 10'],
+    magnet: ['<b>Hi-Powered Magnet</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase magnet range 30 => 50', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase magnet range 50 => 70', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase magnet range 70 => 90', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase magnet range 90 => 110', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase magnet range 110 => 130'],
+    forceField: ['<b>ForceField</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Generate a dissolving force field', '<b>ForceField</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increased force field range and power'],
+    rapid: ['<b>Shotgun</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Shoot an extra bullet'],
+    energy: ['<b>Energy drink</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>+1% hp 10/sec', '<b>Energy drink</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>+2% hp 10/sec', '<b>Energy drink</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>+3% hp 10/sec', '<b>Energy drink</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>+4% hp 10/sec', '<b>Energy drink</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>+5% hp 10/sec'],
+    rocket: ['<b>RPG</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Shoot a rocket every 5 seconds', '<b>RPG</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Decrease rocket shoot time to 4 seconds', '<b>RPG</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase rocket damage', '<b>RPG</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase explosion range', '<b>RPG</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Decrease shoot time to 3 seconds'],
+    balls: ['<b>Soccer Ball</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Shoot a soccer ball that bounces off the screen and enemies', '<b>Soccer Ball</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Shoot another ball', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase soccer damage', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Shoot another ball', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase ball size'],
+    drill: ['<b>Drill shot</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Shoot a drill that bounces around the screen', '<b>Drill shot</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Shoot another drill'],
+    lightning: ['<b>Tesla coil</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Summon a lightning shower: 1 bolt', '<b>Tesla coil</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Add another bolt'],
+    guardian: ['<b>Guardian</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Spawn 2 circles that spin around the player dealing damage', '<b>Guardian</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Add a 3rd circle', '<b>Guardian</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Add a 4th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Add a 5th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Add a 6th circle']
+};
 
 let upgradeArray = ['forceField', 'rapid', 'rocket', 'balls', 'drill', 'lightning', 'guardian']
 let avaibleUpgrades = []
@@ -320,7 +319,7 @@ function displayUpgrades() {
 
     let upgrade = selected[i];
 
-    document.getElementById(`buy${i+1}`).innerText =
+    document.getElementById(`buy${i+1}`).innerHTML =
       upgradeText[upgrade][upgrades[upgrade]-1];
 
     avaibleUpgrades.push(upgrade);
@@ -478,7 +477,7 @@ function shop() {
     
   let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
   
-  let earnedCoins = Math.round(kills / 10);
+  let earnedCoins = Math.round(kills / 30);
   let totalCoins = currentCoins + earnedCoins;
   
   localStorage.setItem('killCoins', String(totalCoins));
@@ -515,6 +514,7 @@ function buy(choice) {
 
     case "size":
       ballsFacts.size += 2
+      forceFieldRange += 20;
       updateBalls()
       bulletSize += 2;
       rocketFacts.explosionMod += 3
@@ -1259,7 +1259,7 @@ function update() { //----------------------------------------------------------
 
           enemy.x -= 0.25*dx
           enemy.y -= 0.25 * dy
-          enemy.health -= bulletPower/60
+          enemy.health -= bulletPower/40
           if (enemy.health <= 0) {
             enemies.splice(i, 1);
             kills += 1;
