@@ -229,7 +229,7 @@ let CoinsOnGround = []
 let rockets = []
 let rocketFacts = {
   cooldown: Infinity,
-  damage: Number(localStorage.getItem('localPower')),
+  damage: Number(localStorage.getItem('localPower'))*3,
   explosionMod: 30,
   speed: 3
 }
