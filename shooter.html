@@ -229,7 +229,7 @@ let CoinsOnGround = []
 let rockets = []
 let rocketFacts = {
   cooldown: Infinity,
-  damage: 20,
+  damage: Number(localStorage.getItem('localPower')),
   explosionMod: 30,
   speed: 3
 }
@@ -237,7 +237,7 @@ let blades = 0
 
 
 let ballsFacts = {
-  damage: Math.max(localStorage.getItem('localPower')/2, 1),
+  damage: Math.max(Number(localStorage.getItem('localPower'))/2, 1),
   size: 20
 }
 let bolts = 0
@@ -276,7 +276,7 @@ setInterval(() => {
 let upgradeText = {
     power: ['<b>Hi-Power Bullet</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase power +1', '<b>Hi-Power Bullet</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase power +2', '<b>Hi-Power Bullet</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase power +3', '<b>Hi-Power Bullet</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase power +4', '<b>Hi-Power Bullet</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase power +5'],
     speed: ['<b>Ammo thruster</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase projectile speed 10%', '<b>Ammo thruster</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase projectile speed 20%', '<b>Ammo thruster</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase projectile speed 30%', '<b>Ammo thruster</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase projectile speed 40%', '<b>Ammo thruster</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase projectile speed 50%'],
-    size: ['<b>HE Fuel</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase projectile size 10 => 12', '<b>HE Fuel</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase projectile size 12 => 14', '<b>HE Fuel</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase projectile size 14 => 16', '<b>HE Fuel</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase projectile size 16 => 18', '<b>HE Fuel</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase projectile size 18 => 20'],
+    size: ['<b>HE Fuel</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase all weapon an ammo range 10%', '<b>HE Fuel</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase all weapon an ammo range 20%', '<b>HE Fuel</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase all weapon an ammo range 30%', '<b>HE Fuel</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase all weapon an ammo range 40%', '<b>HE Fuel</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase all weapon an ammo range 50%'],
     cooldown: ['<b>Power cube</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Decrease all attack cooldown'],
     playerSpeed: ['<b>Sport shoes</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Player Speed 5 => 6', '<b>Sport shoes</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Player Speed 6 => 7', '<b>Sport shoes</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Player Speed 7 => 8', '<b>Sport shoes</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Player Speed 8 => 9', '<b>Sport shoes</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Player Speed 9 => 10'],
     magnet: ['<b>Hi-Powered Magnet</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase magnet range 30 => 50', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase magnet range 50 => 70', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase magnet range 70 => 90', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase magnet range 90 => 110', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase magnet range 110 => 130'],
@@ -465,7 +465,7 @@ function inRange(obj1, obj2, range) {
 
 let bulletCooldown = 0;
 let bulletCooldownMax = 120
-let gaurdianCooldown = 200
+let gaurdianCooldown = 0
 let rocketExplosionMod= 0
 
 function clearText() {
@@ -570,7 +570,7 @@ function buy(choice) {
           rocketFacts.cooldown = 260- rocketCooldownDecreaser;
           break;
         case 3: 
-          rocketFacts.damage = 50;
+          rocketFacts.damage = bulletPower*6;
           break;
         case 4:
           rocketFacts.explosionMod += 20;
@@ -646,12 +646,11 @@ function buy(choice) {
         guardians.push({x: 0, y: 0, turn: 4*Math.PI/6, time: 0})
         guardians.push({x: 0, y: 0, turn: 2*Math.PI/6, time: 0})
         break
+      }
       break
     case "exo":
-      gaurdianCooldown -= 40
+      gaurdianCooldown += 60
       rocketExplosionMod += 20
-      
-      }
     
 
   }
@@ -1020,10 +1019,10 @@ function getRandomVisibleMob() {
 function shootLightning(){
   let mob = getRandomVisibleMob()
   if (mob){
-    let bolt = {x: mob.x, y: mob.y, size: 40}
+    let bolt = {x: mob.x+ mob.size/2, y: mob.y+ mob.size/2, size: 40}
     for(let enemy of enemies){
-      if (inRange(enemy, bolt, 40)){
-        enemy.health -= 20
+      if (bulletHitsEnemy(bolt, enemy)){
+        enemy.health -= 2*bulletPower
       }
     }
     lightningBolts.push({x: mob.x, y: mob.y, time: 30})
@@ -1106,7 +1105,7 @@ function update() { //----------------------------------------------------------
     } else{
       gaurdiansInactive = true
     }
-    if (guardian.time > 400 + gaurdianCooldown){
+    if (guardian.time > 600-gaurdianCooldown){
       guardian.time = 0
     }
   }
@@ -1316,7 +1315,7 @@ function update() { //----------------------------------------------------------
       if (inRange(player, enemy, forceFieldRange)) {
 
           enemy.health -=
-              forcePower * Number(localStorage.getItem('forceMod'));
+              forcePower * bulletPower;
 
           if (enemy.health <= 0) {
               enemies.splice(i, 1);
