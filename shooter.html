@@ -262,7 +262,8 @@ let upgrades = {
     balls: 1,
     drill: 1,
     lightning: 1,
-    guardian: 1
+    guardian: 1,
+    exo: 1
 }
 
 let balls = []
@@ -286,8 +287,10 @@ let upgradeText = {
     balls: ['<b>Soccer Ball</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Shoot a soccer ball that bounces off the screen and enemies', '<b>Soccer Ball</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Shoot another ball', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase soccer damage', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Shoot another ball', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase ball size'],
     drill: ['<b>Drill shot</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Shoot a drill that bounces around the screen', '<b>Drill shot</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Shoot another drill'],
     lightning: ['<b>Tesla coil</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Summon a lightning shower: 1 bolt', '<b>Tesla coil</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Add another bolt'],
-    guardian: ['<b>Guardian</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Spawn 2 circles that spin around the player dealing damage', '<b>Guardian</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Add a 3rd circle', '<b>Guardian</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Add a 4th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Add a 5th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Add a 6th circle']
-};
+    guardian: ['<b>Guardian</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Spawn 2 circles that spin around the player dealing damage', '<b>Guardian</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Add a 3rd circle', '<b>Guardian</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Add a 4th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Add a 5th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Add a 6th circle'],
+    exo: ['<b>Exo Bracer</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Overtime affect +20%', '<b>Exo Bracer</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Overtime affect +40%', '<b>Exo Bracer</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Overtime affect +60%', '<b>Exo Bracer</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Overtime affect +80%', '<b>Exo Bracer</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Overtime affect +100%']
+
+  };
 
 let upgradeArray = ['forceField', 'rapid', 'rocket', 'balls', 'drill', 'lightning', 'guardian']
 let avaibleUpgrades = []
@@ -437,7 +440,7 @@ for(let i = 0; i < 20; i++){
   CoinsOnGround.push({x: px, y: py, value: 0.5})
 }
 let lightningMaxCooldown = 300
-
+let gaurdSize = 40
 
 keys = {};
 let energyDrinkEffect = 0;
@@ -462,6 +465,8 @@ function inRange(obj1, obj2, range) {
 
 let bulletCooldown = 0;
 let bulletCooldownMax = 120
+let gaurdianCooldown = 200
+let rocketExplosionMod= 0
 
 function clearText() {
   setTimeout(() => {
@@ -477,7 +482,7 @@ function shop() {
     
   let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
   
-  let earnedCoins = Math.round(kills / 30);
+  let earnedCoins = Math.round(kills / 50);
   let totalCoins = currentCoins + earnedCoins;
   
   localStorage.setItem('killCoins', String(totalCoins));
@@ -489,7 +494,7 @@ let totalUpgradesCompleteed = 0;
 let rocketCooldown = Infinity;
 
 function buy(choice) {
-  upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian']
+  upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian', 'exo']
 
   playBuySound();
 
@@ -514,7 +519,8 @@ function buy(choice) {
 
     case "size":
       ballsFacts.size += 2
-      forceFieldRange += 20;
+      forceFieldRange += 10;
+      gaurdSize+=5
       updateBalls()
       bulletSize += 2;
       rocketFacts.explosionMod += 3
@@ -603,43 +609,47 @@ function buy(choice) {
     case "guardian":
       switch (upgrades.guardian){
       case 1:
-        guardians.push({x: 0, y: 0, turn: 0})
-        guardians.push({x: 0, y: 0, turn: Math.PI})
+        guardians.push({x: 0, y: 0, turn: 0, time: 0})
+        guardians.push({x: 0, y: 0, turn: Math.PI, time: 0})
         break
 
       case 2:
         guardians = []
         guardians.push({x: 0, y: 0, turn: 0})
-        guardians.push({x: 0, y: 0, turn: 4*Math.PI/3})
-        guardians.push({x: 0, y: 0, turn: 2*Math.PI/3})
+        guardians.push({x: 0, y: 0, turn: 4*Math.PI/3, time: 0})
+        guardians.push({x: 0, y: 0, turn: 2*Math.PI/3, time: 0})
         break
       
       case 3:
         guardians = []
-        guardians.push({x: 0, y: 0, turn: 0})
-        guardians.push({x: 0, y: 0, turn: Math.PI/2})
-        guardians.push({x: 0, y: 0, turn: Math.PI})
-        guardians.push({x: 0, y: 0, turn: 3*Math.PI/2})
+        guardians.push({x: 0, y: 0, turn: 0, time: 0})
+        guardians.push({x: 0, y: 0, turn: Math.PI/2, time: 0})
+        guardians.push({x: 0, y: 0, turn: Math.PI, time: 0})
+        guardians.push({x: 0, y: 0, turn: 3*Math.PI/2, time: 0})
         break
 
       case 4:
         guardians = []
         guardians.push({x: 0, y: 0, turn: 0})
-        guardians.push({x: 0, y: 0, turn: 8*Math.PI/5})
-        guardians.push({x: 0, y: 0, turn: 6*Math.PI/5})
-        guardians.push({x: 0, y: 0, turn: 4*Math.PI/5})
-        guardians.push({x: 0, y: 0, turn: 2*Math.PI/5})
+        guardians.push({x: 0, y: 0, turn: 8*Math.PI/5, time: 0})
+        guardians.push({x: 0, y: 0, turn: 6*Math.PI/5, time: 0})
+        guardians.push({x: 0, y: 0, turn: 4*Math.PI/5, time: 0})
+        guardians.push({x: 0, y: 0, turn: 2*Math.PI/5, time: 0})
         break
       
       case 5:
         guardians = []
         guardians.push({x: 0, y: 0, turn: 0})
-        guardians.push({x: 0, y: 0, turn: 10*Math.PI/6})
-        guardians.push({x: 0, y: 0, turn: 8*Math.PI/6})
-        guardians.push({x: 0, y: 0, turn: 6*Math.PI/6})
-        guardians.push({x: 0, y: 0, turn: 4*Math.PI/6})
-        guardians.push({x: 0, y: 0, turn: 2*Math.PI/6})
+        guardians.push({x: 0, y: 0, turn: 10*Math.PI/6, time: 0})
+        guardians.push({x: 0, y: 0, turn: 8*Math.PI/6, time: 0})
+        guardians.push({x: 0, y: 0, turn: 6*Math.PI/6, time: 0})
+        guardians.push({x: 0, y: 0, turn: 4*Math.PI/6, time: 0})
+        guardians.push({x: 0, y: 0, turn: 2*Math.PI/6, time: 0})
         break
+      break
+    case "exo":
+      gaurdianCooldown -= 40
+      rocketExplosionMod += 20
       
       }
     
@@ -665,6 +675,7 @@ function updateBalls(){
     ball.size = ballsFacts.size
   }
 }
+
 
 function shootBullet() {
   playShootSound();
@@ -1019,7 +1030,7 @@ function shootLightning(){
   }
 }
 
-
+let gaurdiansInactive = false
 let lightningBolts = []
 
 function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1085,10 +1096,19 @@ function update() { //----------------------------------------------------------
     bolt.time -= 1
   }
   for (let guardian of guardians){
-    guardian.x = player.x + Math.cos(guardian.turn)*80 - 15
-    guardian.y = player.y + Math.sin(guardian.turn)*80 - 15
+    guardian.x = player.x + Math.cos(guardian.turn)*100 + 15 -gaurdSize/2
+    guardian.y = player.y + Math.sin(guardian.turn)*100 + 15 - gaurdSize/2
     guardian.turn += 0.03
-    guardian.size = 50
+    guardian.time += 1
+    guardian.size = gaurdSize
+    if (guardian.time < 300){
+      gaurdiansInactive = false
+    } else{
+      gaurdiansInactive = true
+    }
+    if (guardian.time > 400 + gaurdianCooldown){
+      guardian.time = 0
+    }
   }
 
 
@@ -1190,7 +1210,7 @@ function update() { //----------------------------------------------------------
 
         setTimeout(()=>{
           rockets.splice(r, 1);
-        }, timeAfterHit)
+        }, timeAfterHit+rocketExplosionMod)
 
         
         break;
@@ -1255,10 +1275,10 @@ function update() { //----------------------------------------------------------
       }
 
       for (let gaurd of guardians){
-        if (gaurd.x < enemy.x + enemy.size && gaurd.x + gaurd.size > enemy.x && gaurd.y < enemy.y + enemy.size && gaurd.y + gaurd.size > enemy.y){
+        if (gaurd.x < enemy.x + enemy.size && gaurd.x + gaurd.size > enemy.x && gaurd.y < enemy.y + enemy.size && gaurd.y + gaurd.size > enemy.y && !gaurdiansInactive){
 
-          enemy.x -= 0.25*dx
-          enemy.y -= 0.25 * dy
+          enemy.x -= 0.5*dx
+          enemy.y -= 0.5 * dy
           enemy.health -= bulletPower/40
           if (enemy.health <= 0) {
             enemies.splice(i, 1);
@@ -1417,7 +1437,7 @@ function update() { //----------------------------------------------------------
 
       if (bulletHitsEnemy(ball, enemy)) {
 
-        enemy.health -= bulletPower/50;
+        enemy.health -= bulletPower/50 *bulletSpeed/10;
 
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
@@ -1551,7 +1571,8 @@ function draw() {
     });
   
     guardians.forEach(grd => {
-        ctx.drawImage(gaurd, grd.x, grd.y, 50, 50);
+        if(gaurdiansInactive) return;
+        ctx.drawImage(gaurd, grd.x, grd.y, gaurdSize, gaurdSize);
     });
 
     rockets.forEach(rocket => {
