@@ -677,16 +677,6 @@ function updateBalls(){
 }
 
 
-function maxOutGaurd(){
-  guardians.push({x: 0, y: 0, turn: 0})
-  guardians.push({x: 0, y: 0, turn: 10*Math.PI/6, time: 0})
-  guardians.push({x: 0, y: 0, turn: 8*Math.PI/6, time: 0})
-  guardians.push({x: 0, y: 0, turn: 6*Math.PI/6, time: 0})
-  guardians.push({x: 0, y: 0, turn: 4*Math.PI/6, time: 0})
-  guardians.push({x: 0, y: 0, turn: 2*Math.PI/6, time: 0})
-}
-maxOutGaurd()
-
 function shootBullet() {
   playShootSound();
   let ptarget = getClosestMob()
