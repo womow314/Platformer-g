@@ -13,7 +13,7 @@
     
     let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
     
-    let earnedCoins = Math.round(score / 30);
+    let earnedCoins = Math.round(score / 50);
     let totalCoins = currentCoins + earnedCoins;
     
     localStorage.setItem('killCoins', String(totalCoins));
