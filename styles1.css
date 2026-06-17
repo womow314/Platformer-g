@@ -20,6 +20,14 @@ h1 {
   transform: translate(-50%,-50%);
   color: rgb(148, 232, 148);
 }
+.upgrade-icon {
+  width: 60px;
+  height: 60px;
+  display: block;
+  margin: 0 auto;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
 
 h2 {
   position: absolute;
@@ -29,7 +37,7 @@ h2 {
   color: rgb(148, 232, 148);
 }
 
-img {
+#title {
   position: fixed; 
   top: 50px; 
   margin: 15px;
@@ -165,7 +173,7 @@ details {
 
 #shop button {
   width: 200px;
-  height: 150px;
+  height: 250px;
 
   display: flex;
   flex-direction: column;   
