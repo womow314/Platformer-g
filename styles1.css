@@ -20,6 +20,14 @@ h1 {
   transform: translate(-50%,-50%);
   color: rgb(148, 232, 148);
 }
+b{
+  background-color: #f99c3f;
+  margin: 0;
+  padding: 10px;
+  color: #333333;
+  top: 0;
+  font-size: 15px;
+}
 .upgrade-icon {
   width: 60px;
   height: 60px;
@@ -27,6 +35,15 @@ h1 {
   margin: 0 auto;
   margin-top: 5px;
   margin-bottom: 5px;
+}
+.upgradeText {
+  background-color: rgb(28,28,28);
+  padding: 10px;
+  flex-grow: 1; 
+  margin-bottom: 5px;
+}
+.passive {
+  background-color: rgb(52, 141, 52);
 }
 
 h2 {
@@ -177,7 +194,7 @@ details {
 
   display: flex;
   flex-direction: column;   
-  padding: 20px;
+
   
   text-align: center;
 

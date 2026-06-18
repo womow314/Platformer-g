@@ -122,6 +122,7 @@ function pause() {
   document.querySelector('#pauseButton').innerText = "Pause";
   if (isPaused) canvas.style.opacity = '0.3';
   if (isPaused) document.querySelector('#pauseButton').innerText = "Paused";
+  document.querySelector('#shop').style.opacity = '0'
 }
 let isPaused = false
 
@@ -274,23 +275,22 @@ setInterval(() => {
 }, 40000);
 
 let upgradeText = {
-    power: ['<b>Hi-Power Bullet</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase power +1', '<b>Hi-Power Bullet</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase power +2', '<b>Hi-Power Bullet</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase power +3', '<b>Hi-Power Bullet</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase power +4', '<b>Hi-Power Bullet</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase power +5'],
-    speed: ['<b>Ammo thruster</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase projectile speed 10%', '<b>Ammo thruster</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase projectile speed 20%', '<b>Ammo thruster</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase projectile speed 30%', '<b>Ammo thruster</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase projectile speed 40%', '<b>Ammo thruster</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase projectile speed 50%'],
-    size: ['<b>HE Fuel</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase all weapon an ammo range 10%', '<b>HE Fuel</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase all weapon an ammo range 20%', '<b>HE Fuel</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase all weapon an ammo range 30%', '<b>HE Fuel</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase all weapon an ammo range 40%', '<b>HE Fuel</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase all weapon an ammo range 50%'],
-    cooldown: ['<b>Power cube</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Decrease all attack cooldown', '<b>Power cube</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Decrease all attack cooldown'],
-    playerSpeed: ['<b>Sport shoes</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Player Speed 5 => 6', '<b>Sport shoes</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Player Speed 6 => 7', '<b>Sport shoes</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Player Speed 7 => 8', '<b>Sport shoes</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Player Speed 8 => 9', '<b>Sport shoes</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Player Speed 9 => 10'],
-    magnet: ['<b>Hi-Powered Magnet</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Increase magnet range 30 => 50', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increase magnet range 50 => 70', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase magnet range 70 => 90', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase magnet range 90 => 110', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase magnet range 110 => 130'],
-    forceField: ['<b>ForceField</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Generate a dissolving force field', '<b>ForceField</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increased force field range and power'],
-    rapid: ['<b>Shotgun</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Shoot an extra bullet'],
-    energy: ['<b>Energy drink</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>+1% hp 10/sec', '<b>Energy drink</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>+2% hp 10/sec', '<b>Energy drink</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>+3% hp 10/sec', '<b>Energy drink</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>+4% hp 10/sec', '<b>Energy drink</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>+5% hp 10/sec'],
-    rocket: ['<b>RPG</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Shoot a rocket every 5 seconds', '<b>RPG</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Decrease rocket shoot time to 4 seconds', '<b>RPG</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase rocket damage', '<b>RPG</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Increase explosion range', '<b>RPG</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Decrease shoot time to 3 seconds'],
-    balls: ['<b>Soccer Ball</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Shoot a soccer ball that bounces off the screen and enemies', '<b>Soccer Ball</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Shoot another ball', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Increase soccer damage', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Shoot another ball', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Increase ball size'],
-    drill: ['<b>Drill shot</b><br>⭐️⬛️⬛️⬛️⬛️<img class="upgrade-icon" src="images/drill.png">Shoot a drill that bounces around the screen', '<b>Drill shot</b><br>⭐️⭐️⬛️⬛️⬛️<img class="upgrade-icon" src="images/drill.png">Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⬛️⬛️<img class="upgrade-icon" src="images/drill.png">Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⭐️⬛️<<img class="upgrade-icon" src="images/drill.png">Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⭐️⭐️<img class="upgrade-icon" src="images/drill.png">Shoot another drill'],
-    lightning: ['<b>Tesla coil</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Summon a lightning shower: 1 bolt', '<b>Tesla coil</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Add another bolt'],
-    guardian: ['<b>Guardian</b><br>⭐️⬛️⬛️⬛️⬛️ <img class="upgrade-icon" src="images/guard.png"> Spawn 2 circles that spin around the player dealing damage', '<b>Guardian</b><br>⭐️⭐️⬛️⬛️⬛️<img class="upgrade-icon" src="images/guard.png">Add a 3rd circle', '<b>Guardian</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Add a 4th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⬛️<img class="upgrade-icon" src="images/guard.png">Add a 5th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⭐️<img class="upgrade-icon" src="images/guard.png">Add a 6th circle'],
-    exo: ['<b>Exo Bracer</b><br>⭐️⬛️⬛️⬛️⬛️<br><br>Overtime affect +20%', '<b>Exo Bracer</b><br>⭐️⭐️⬛️⬛️⬛️<br><br>Overtime affect +40%', '<b>Exo Bracer</b><br>⭐️⭐️⭐️⬛️⬛️<br><br>Overtime affect +60%', '<b>Exo Bracer</b><br>⭐️⭐️⭐️⭐️⬛️<br><br>Overtime affect +80%', '<b>Exo Bracer</b><br>⭐️⭐️⭐️⭐️⭐️<br><br>Overtime affect +100%']
-
-  };
+    power: ['<b class="passive">Hi-Power Bullet</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase power +1', '<b class="passive">Hi-Power Bullet</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase power +2', '<b class="passive">Hi-Power Bullet</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase power +3', '<b class="passive">Hi-Power Bullet</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increase power +4', '<b class="passive">Hi-Power Bullet</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increase power +5'],
+    speed: ['<b class="passive">Ammo thruster</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase projectile speed 10%', '<b class="passive">Ammo thruster</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase projectile speed 20%', '<b class="passive">Ammo thruster</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase projectile speed 30%', '<b class="passive">Ammo thruster</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increase projectile speed 40%', '<b class="passive">Ammo thruster</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increase projectile speed 50%'],
+    size: ['<b class="passive">HE Fuel</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase all weapon an ammo range 10%', '<b class="passive">HE Fuel</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase all weapon an ammo range 20%', '<b class="passive">HE Fuel</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase all weapon an ammo range 30%', '<b class="passive">HE Fuel</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increase all weapon an ammo range 40%', '<b class="passive">HE Fuel</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increase all weapon an ammo range 50%'],
+    cooldown: ['<b class="passive">Power cube</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Decrease all attack cooldown', '<b class="passive">Power cube</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Decrease all attack cooldown', '<b class="passive">Power cube</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Decrease all attack cooldown', '<b class="passive">Power cube</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Decrease all attack cooldown', '<b class="passive">Power cube</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Decrease all attack cooldown'],
+    playerSpeed: ['<b class="passive">Sport shoes</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Player Speed 5 => 6', '<b class="passive">Sport shoes</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Player Speed 6 => 7', '<b class="passive">Sport shoes</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Player Speed 7 => 8', '<b class="passive">Sport shoes</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Player Speed 8 => 9', '<b class="passive">Sport shoes</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Player Speed 9 => 10'],
+    magnet: ['<b class="passive">Hi-Powered Magnet</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase magnet range 30 => 50', '<b class="passive">Hi-Powered Magnet</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase magnet range 50 => 70', '<b class="passive">Hi-Powered Magnet</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase magnet range 70 => 90', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increase magnet range 90 => 110', '<b>Hi-Powered Magnet</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increase magnet range 110 => 130'],
+    forceField: ['<b>ForceField</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Generate a dissolving force field', '<b>ForceField</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increased force field range and power'],
+    rapid: ['<b>Shotgun</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Shoot an extra bullet'],
+    energy: ['<b class="passive">Energy drink</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">+1% hp 10/sec', '<b class="passive">Energy drink</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">+2% hp 10/sec', '<b class="passive">Energy drink</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">+3% hp 10/sec', '<b class="passive">Energy drink</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">+4% hp 10/sec', '<b class="passive">Energy drink</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">+5% hp 10/sec'],
+    rocket: ['<b>RPG</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Shoot a rocket every 5 seconds', '<b>RPG</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Decrease rocket shoot time to 4 seconds', '<b>RPG</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase rocket damage', '<b>RPG</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increase explosion range', '<b>RPG</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Decrease shoot time to 3 seconds'],
+    balls: ['<b>Soccer Ball</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Shoot a soccer ball that bounces off the screen and enemies', '<b>Soccer Ball</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Shoot another ball', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase soccer damage', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Shoot another ball', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increase ball size'],
+    drill: ['<b>Drill shot</b><br>⭐️⬛️⬛️⬛️⬛️<img class="upgrade-icon" src="images/drill.png"><div class="upgradeText">Shoot a drill that bounces around the screen', '<b>Drill shot</b><br>⭐️⭐️⬛️⬛️⬛️<img class="upgrade-icon" src="images/drill.png"><div class="upgradeText">Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⬛️⬛️<img class="upgrade-icon" src="images/drill.png"><div class="upgradeText">Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⭐️⬛️<img class="upgrade-icon" src="images/drill.png"><div class="upgradeText">Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⭐️⭐️<img class="upgrade-icon" src="images/drill.png"><div class="upgradeText">Shoot another drill'],
+    lightning: ['<b>Tesla coil</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Summon a lightning shower: 1 bolt', '<b>Tesla coil</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Add another bolt'],
+    guardian: ['<b>Guardian</b><br>⭐️⬛️⬛️⬛️⬛️ <img class="upgrade-icon" src="images/guard.png"><div class="upgradeText"> Spawn 2 circles that spin around the player dealing damage', '<b>Guardian</b><br>⭐️⭐️⬛️⬛️⬛️<img class="upgrade-icon" src="images/guard.png"><div class="upgradeText">Add a 3rd circle', '<b>Guardian</b><br>⭐️⭐️⭐️⬛️⬛️<img class="upgrade-icon" src="images/guard.png"><div class="upgradeText">Add a 4th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⬛️<img class="upgrade-icon" src="images/guard.png"><div class="upgradeText">Add a 5th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⭐️<img class="upgrade-icon" src="images/guard.png"><div class="upgradeText">Add a 6th circle'],
+    exo: ['<b class="passive">Exo Bracer</b><br>⭐️⬛️⬛️⬛️⬛️ <img class="upgrade-icon" src="images/pixil-frame-0 (29).png"><div class="upgradeText">Overtime affect +20%', '<b class="passive">Exo Bracer</b><br>⭐️⭐️⬛️⬛️⬛️<img class="upgrade-icon" src="images/pixil-frame-0 (29).png"><div class="upgradeText">Overtime affect +40%', '<b class="passive">Exo Bracer</b><br>⭐️⭐️⭐️⬛️⬛️<img class="upgrade-icon" src="images/pixil-frame-0 (29).png"><div class="upgradeText">Overtime affect +60%', '<b class="passive">Exo Bracer</b><br>⭐️⭐️⭐️⭐️⬛️<img class="upgrade-icon" src="images/pixil-frame-0 (29).png"><div class="upgradeText">Overtime affect +80%', '<b class="passive">Exo Bracer</b><br>⭐️⭐️⭐️⭐️⭐️<img class="upgrade-icon" src="images/pixil-frame-0 (29).png"><div class="upgradeText">Overtime affect +100%']
+};
 
 let upgradeArray = ['forceField', 'rapid', 'rocket', 'balls', 'drill', 'lightning', 'guardian']
 let avaibleUpgrades = []
@@ -330,6 +330,12 @@ function displayUpgrades() {
 
   isPaused = true;
   canvas.style.opacity = '0.3';
+  if(document.querySelector('#buy1').innerText === document.querySelector('#buy2').innerText === document.querySelector('#buy3').innerText ){
+    isPaused = false
+    document.querySelector('#mobileControls').style.display = 'block'
+    canvas.style.opacity = '1'
+    document.querySelector('#shop').style.opacity = '0'
+  }
 }
 let bossSpawned = false;
 
@@ -747,6 +753,15 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+document.addEventListener('keydown', (event) => {
+  if (event.key === '=') {
+    value = prompt("LOl you found the secret hack. Want some coins? Dont do more than 1000 :3")
+    for (let i = 0; i <value; i ++){
+      CoinsOnGround.push({x: player.x, y: player.y, value: 1})
+    }
+  }
+});
+
 window.addEventListener("keydown", function(e) {
     if (["KeyQ"].indexOf(e.code) > -1) {
         pause()
@@ -995,9 +1010,16 @@ function summonWave(){
         spawnWave("level6", 50)
         break
       default:
-        if (time > 601 && time % 2 === 0){
+        if (time > 601 && time < 630 && time % 2 === 0){
           spawnWave("level6", 30)
-        }
+        } else if (time > 630 && time < 660 && time % 3 === 0){
+          spawnWave("level6", 50)
+        } else if (time > 660 && time < 700 && time % 1 === 0){
+          spawnWave("level7", 20)
+        } else if (time > 700 && time % 1 === 0){
+          spawnWave("level7", 10)
+          spawnWave("level8", 10)
+        } 
 
       
     }
