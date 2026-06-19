@@ -27,10 +27,11 @@ b{
   color: #ffffff;
   text-shadow:
         -1px -1px 0 #000,
-         1px -1px 0 #000,
+        1px -1px 0 #000,
         -1px  1px 0 #000,
-         1px  1px 0 #000;
-  top: 0;
+        1px  1px 0 #000,
+        0px  1px 0 #000;
+  border-bottom: 2px solid black;
   font-size: 15px;
   font-family: "Arimo", sans-serif;
   font-optical-sizing: auto;
@@ -193,7 +194,7 @@ details {
 }
 
 #shop button {
-  width: 150px;
+  width: 170px;
   height: 300px;
 
   display: flex;
@@ -210,6 +211,10 @@ details {
   color: white;
 }
 
+#shop button:focus{
+  outline: none;
+}
+
 .upgradeText {
   background-color: rgb(48, 48, 48);
   padding: 10px;
@@ -221,6 +226,7 @@ details {
   font-style: normal;
   text-align: left;
   font-size: 16px;
+  font-weight: 5px;
 }
 .stars{
   background-color: #171717;
