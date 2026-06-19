@@ -3,12 +3,16 @@
 <head>
     <title>Games.io | Shooter</title>
     <link rel="stylesheet" href="styles1.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
 </head>
 <body>
 <canvas id="gameCanvas" height="600" width="1200"></canvas>
 <button onclick="home()" id="home">Home</button>
 <button onclick="shop()" id="shooterShop">Shop</button>
 <h1>HEALTH: 100%</h1>
+
 <div id="progressContainer">
   <div id="progressBar"></div>
 </div>
@@ -274,23 +278,179 @@ setInterval(() => {
   if(!isPaused) spawnBox();
 }, 40000);
 
-let upgradeText = {
-    power: ['<b class="passive">Hi-Power Bullet</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase power +1', '<b class="passive">Hi-Power Bullet</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase power +2', '<b class="passive">Hi-Power Bullet</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase power +3', '<b class="passive">Hi-Power Bullet</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increase power +4', '<b class="passive">Hi-Power Bullet</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increase power +5'],
-    speed: ['<b class="passive">Ammo thruster</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase projectile speed 10%', '<b class="passive">Ammo thruster</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase projectile speed 20%', '<b class="passive">Ammo thruster</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase projectile speed 30%', '<b class="passive">Ammo thruster</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increase projectile speed 40%', '<b class="passive">Ammo thruster</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increase projectile speed 50%'],
-    size: ['<b class="passive">HE Fuel</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase all weapon an ammo range 10%', '<b class="passive">HE Fuel</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase all weapon an ammo range 20%', '<b class="passive">HE Fuel</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase all weapon an ammo range 30%', '<b class="passive">HE Fuel</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increase all weapon an ammo range 40%', '<b class="passive">HE Fuel</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increase all weapon an ammo range 50%'],
-    cooldown: ['<b class="passive">Power cube</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Decrease all attack cooldown', '<b class="passive">Power cube</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Decrease all attack cooldown', '<b class="passive">Power cube</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Decrease all attack cooldown', '<b class="passive">Power cube</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Decrease all attack cooldown', '<b class="passive">Power cube</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Decrease all attack cooldown'],
-    playerSpeed: ['<b class="passive">Sport shoes</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Player Speed 5 => 6', '<b class="passive">Sport shoes</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Player Speed 6 => 7', '<b class="passive">Sport shoes</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Player Speed 7 => 8', '<b class="passive">Sport shoes</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Player Speed 8 => 9', '<b class="passive">Sport shoes</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Player Speed 9 => 10'],
-    magnet: ['<b class="passive">Hi-Powered Magnet</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase magnet range 30 => 50', '<b class="passive">Hi-Powered Magnet</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Increase magnet range 50 => 70', '<b class="passive">Hi-Powered Magnet</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase magnet range 70 => 90', '<b  class="passive">Hi-Powered Magnet</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increase magnet range 90 => 110', '<b  class="passive">Hi-Powered Magnet</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increase magnet range 110 => 130'],
-    forceField: ['<b>ForceField</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Generate a dissolving force field', '<b>ForceField</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increased force field range and power', '<b>ForceField</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increased force field range and power'],
-    rapid: ['<b>Shotgun</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Shoot an extra bullet', '<b>Shotgun</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Shoot an extra bullet'],
-    energy: ['<b class="passive">Energy drink</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">+1% hp 10/sec', '<b class="passive">Energy drink</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">+2% hp 10/sec', '<b class="passive">Energy drink</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">+3% hp 10/sec', '<b class="passive">Energy drink</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">+4% hp 10/sec', '<b class="passive">Energy drink</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">+5% hp 10/sec'],
-    rocket: ['<b>RPG</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Shoot a rocket every 5 seconds', '<b>RPG</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Decrease rocket shoot time to 4 seconds', '<b>RPG</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase rocket damage', '<b>RPG</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Increase explosion range', '<b>RPG</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Decrease shoot time to 3 seconds'],
-    balls: ['<b>Soccer Ball</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Shoot a soccer ball that bounces off the screen and enemies', '<b>Soccer Ball</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Shoot another ball', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Increase soccer damage', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Shoot another ball', '<b>Soccer Ball</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Increase ball size'],
-    drill: ['<b>Drill shot</b><br>⭐️⬛️⬛️⬛️⬛️<img class="upgrade-icon" src="images/drill.png"><div class="upgradeText">Shoot a drill that bounces around the screen', '<b>Drill shot</b><br>⭐️⭐️⬛️⬛️⬛️<img class="upgrade-icon" src="images/drill.png"><div class="upgradeText">Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⬛️⬛️<img class="upgrade-icon" src="images/drill.png"><div class="upgradeText">Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⭐️⬛️<img class="upgrade-icon" src="images/drill.png"><div class="upgradeText">Shoot another drill', '<b>Drill shot</b><br>⭐️⭐️⭐️⭐️⭐️<img class="upgrade-icon" src="images/drill.png"><div class="upgradeText">Shoot another drill'],
-    lightning: ['<b>Tesla coil</b><br>⭐️⬛️⬛️⬛️⬛️<br><br><div class="upgradeText">Summon a lightning shower: 1 bolt', '<b>Tesla coil</b><br>⭐️⭐️⬛️⬛️⬛️<br><br><div class="upgradeText">Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⬛️⬛️<br><br><div class="upgradeText">Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⭐️⬛️<br><br><div class="upgradeText">Add another bolt', '<b>Tesla coil</b><br>⭐️⭐️⭐️⭐️⭐️<br><br><div class="upgradeText">Add another bolt'],
-    guardian: ['<b>Guardian</b><br>⭐️⬛️⬛️⬛️⬛️ <img class="upgrade-icon" src="images/guard.png"><div class="upgradeText"> Spawn 2 circles that spin around the player dealing damage', '<b>Guardian</b><br>⭐️⭐️⬛️⬛️⬛️<img class="upgrade-icon" src="images/guard.png"><div class="upgradeText">Add a 3rd circle', '<b>Guardian</b><br>⭐️⭐️⭐️⬛️⬛️<img class="upgrade-icon" src="images/guard.png"><div class="upgradeText">Add a 4th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⬛️<img class="upgrade-icon" src="images/guard.png"><div class="upgradeText">Add a 5th circle', '<b>Guardian</b><br>⭐️⭐️⭐️⭐️⭐️<img class="upgrade-icon" src="images/guard.png"><div class="upgradeText">Add a 6th circle'],
-    exo: ['<b class="passive">Exo Bracer</b><br>⭐️⬛️⬛️⬛️⬛️ <img class="upgrade-icon" src="images/pixil-frame-0 (29).png"><div class="upgradeText">Overtime affect +20%', '<b class="passive">Exo Bracer</b><br>⭐️⭐️⬛️⬛️⬛️<img class="upgrade-icon" src="images/pixil-frame-0 (29).png"><div class="upgradeText">Overtime affect +40%', '<b class="passive">Exo Bracer</b><br>⭐️⭐️⭐️⬛️⬛️<img class="upgrade-icon" src="images/pixil-frame-0 (29).png"><div class="upgradeText">Overtime affect +60%', '<b class="passive">Exo Bracer</b><br>⭐️⭐️⭐️⭐️⬛️<img class="upgrade-icon" src="images/pixil-frame-0 (29).png"><div class="upgradeText">Overtime affect +80%', '<b class="passive">Exo Bracer</b><br>⭐️⭐️⭐️⭐️⭐️<img class="upgrade-icon" src="images/pixil-frame-0 (29).png"><div class="upgradeText">Overtime affect +100%']
+
+const DEFAULT_ICON = "images/pixil-frame-0 (30).png";
+
+const upgradeDefinitions = {
+    power: {
+        name: "Hi-Power Bullet",
+        image: "images/Screen Shot 2026-05-04 at 2.50.58 PM.png",
+        passive: true,
+        levels: Array.from({ length: 5 }, (_, i) => `Increase power +${i + 1}`)
+    },
+
+    speed: {
+        name: "Ammo thruster",
+        passive: true,
+        levels: Array.from({ length: 5 }, (_, i) => `Increase projectile speed ${(i + 1) * 10}%`)
+    },
+
+    size: {
+        name: "HE Fuel",
+        passive: true,
+        levels: Array.from({ length: 5 }, (_, i) => `Increase all weapon and ammo range ${(i + 1) * 10}%`)
+    },
+
+    cooldown: {
+        name: "Power cube",
+        passive: true,
+        levels: Array(5).fill("Decrease all attack cooldown")
+    },
+
+    playerSpeed: {
+        name: "Sport shoes",
+        passive: true,
+        levels: [
+            "Player Speed 5 => 6",
+            "Player Speed 6 => 7",
+            "Player Speed 7 => 8",
+            "Player Speed 8 => 9",
+            "Player Speed 9 => 10"
+        ]
+    },
+
+    magnet: {
+        name: "Hi-Powered Magnet",
+        passive: true,
+        image: "images/pixil-frame-0 (31).png",
+        levels: [
+            "Increase magnet range 30 => 50",
+            "Increase magnet range 50 => 70",
+            "Increase magnet range 70 => 90",
+            "Increase magnet range 90 => 110",
+            "Increase magnet range 110 => 130"
+        ]
+    },
+
+    forceField: {
+        name: "ForceField",
+        image: "images/pixil-frame-0 (18).png",
+        levels: [
+            "Generate a dissolving force field",
+            "Increased force field range and power",
+            "Increased force field range and power",
+            "Increased force field range and power",
+            "Increased force field range and power"
+        ]
+    },
+
+    rapid: {
+        name: "Shotgun",
+        image: "images/Screen Shot 2026-05-04 at 2.50.58 PM.png",
+        levels: Array(5).fill("Shoot an extra bullet")
+    },
+
+    energy: {
+        name: "Energy drink",
+        passive: true,
+        levels: Array.from({ length: 5 }, (_, i) => `+${i + 1}% hp 10/sec`)
+    },
+
+    rocket: {
+        name: "RPG",
+        levels: [
+            "Shoot a rocket every 5 seconds",
+            "Decrease rocket shoot time to 4 seconds",
+            "Increase rocket damage",
+            "Increase explosion range",
+            "Decrease shoot time to 3 seconds"
+        ]
+    },
+
+    balls: {
+        name: "Soccer Ball",
+        image: "images/pixil-frame-0 (23).png",
+        levels: [
+            "Shoot a soccer ball that bounces off the screen and enemies",
+            "Shoot another ball",
+            "Increase soccer damage",
+            "Shoot another ball",
+            "Increase ball size"
+        ]
+    },
+
+    drill: {
+        name: "Drill shot",
+        image: "images/drill.png",
+        levels: [
+            "Shoot a drill that bounces around the screen",
+            "Shoot another drill",
+            "Shoot another drill",
+            "Shoot another drill",
+            "Shoot another drill"
+        ]
+    },
+
+    lightning: {
+        name: "Tesla coil",
+        image: 'images/pixil-frame-0 (26).png',
+        levels: [
+            "Summon a lightning shower: 1 bolt",
+            "Add another bolt",
+            "Add another bolt",
+            "Add another bolt",
+            "Add another bolt"
+        ]
+    },
+
+    guardian: {
+        name: "Guardian",
+        image: "images/guard.png",
+        levels: [
+            "Spawn 2 circles that spin around the player dealing damage",
+            "Add a 3rd circle",
+            "Add a 4th circle",
+            "Add a 5th circle",
+            "Add a 6th circle"
+        ]
+    },
+
+    exo: {
+        name: "Exo Bracer",
+        passive: true,
+        image: "images/pixil-frame-0 (29).png",
+        levels: [
+            "Overtime effect +20%",
+            "Overtime effect +40%",
+            "Overtime effect +60%",
+            "Overtime effect +80%",
+            "Overtime effect +100%"
+        ]
+    }
 };
+
+function getUpgradeText(upgradeName, level) {
+    const upgrade = upgradeDefinitions[upgradeName];
+
+    if (!upgrade) {
+        console.error(`Unknown upgrade: ${upgradeName}`);
+        return "";
+    }
+
+    if (level < 0 || level >= upgrade.levels.length) {
+        console.error(`Invalid level ${level} for ${upgradeName}`);
+        return "";
+    }
+
+    const imageSrc = upgrade.image || DEFAULT_ICON;
+
+    const stars =
+        "⭐️".repeat(level + 1) +
+        "⬛️".repeat(5 - (level + 1));
+
+    return `
+        <b${upgrade.passive ? ' class="passive"' : ''}>${upgrade.name}</b> <img class="upgrade-icon" src="${imageSrc}"> <div class="upgradeText">${upgrade.levels[level]}</div><div class='stars'>${stars} </div>`
+}
 
 let upgradeArray = ['forceField', 'rapid', 'rocket', 'balls', 'drill', 'lightning', 'guardian']
 let avaibleUpgrades = []
@@ -322,8 +482,7 @@ function displayUpgrades() {
 
     let upgrade = selected[i];
 
-    document.getElementById(`buy${i+1}`).innerHTML =
-      upgradeText[upgrade][upgrades[upgrade]-1];
+    document.getElementById(`buy${i+1}`).innerHTML = getUpgradeText(upgrade, upgrades[upgrade]-1)
 
     avaibleUpgrades.push(upgrade);
   }

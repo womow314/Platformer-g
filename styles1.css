@@ -21,29 +21,34 @@ h1 {
   color: rgb(148, 232, 148);
 }
 b{
-  background-color: #f99c3f;
+  background-color: #f6bd13;
   margin: 0;
   padding: 10px;
-  color: #333333;
-  top: 0;
+  color: #ffffff;
+  text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px  1px 0 #000,
+        1px  1px 0 #000,
+        0px  1px 0 #000;
+  border-bottom: 2px solid black;
   font-size: 15px;
+  font-family: "Arimo", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 6px;
+  font-style: normal;
 }
 .upgrade-icon {
   width: 60px;
   height: 60px;
   display: block;
   margin: 0 auto;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin-top: 18px;
+  margin-bottom: 3px;
 }
-.upgradeText {
-  background-color: rgb(28,28,28);
-  padding: 10px;
-  flex-grow: 1; 
-  margin-bottom: 5px;
-}
+
 .passive {
-  background-color: rgb(52, 141, 52);
+  background-color: rgb(114, 210, 25);
 }
 
 h2 {
@@ -189,17 +194,43 @@ details {
 }
 
 #shop button {
-  width: 200px;
-  height: 250px;
+  width: 170px;
+  height: 300px;
 
   display: flex;
   flex-direction: column;   
 
-  
-  text-align: center;
+  border: 2px solid black;
+  box-shadow: none;
+  border-radius: 2px;
 
-  background-color: rgb(36, 36, 36);
+
+  padding: 0;
+
+  background-color: rgb(91, 91, 91);
   color: white;
+}
+
+#shop button:focus{
+  outline: none;
+}
+
+.upgradeText {
+  background-color: rgb(48, 48, 48);
+  padding: 10px;
+  flex-grow: 1; 
+  margin: 5px;
+  font-family: "Arimo", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 5px;
+  font-style: normal;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 5px;
+}
+.stars{
+  background-color: #171717;
+  padding: 10px;
 }
 
 #progressContainer {
