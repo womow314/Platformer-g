@@ -78,7 +78,7 @@ localStorage.setItem('skillCoinsSpent', localStorage.getItem('skillCoinsSpent') 
 localStorage.setItem('repeatFire', localStorage.getItem('repeatFire') || "1")
 
 localStorage.setItem('forceMod', localStorage.getItem('forceMod') || "1");
-
+const base = Number(localStorage.getItem('localPower'))
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 let guardians = []
@@ -126,7 +126,7 @@ function pause() {
   document.querySelector('#pauseButton').innerText = "Pause";
   if (isPaused) canvas.style.opacity = '0.3';
   if (isPaused) document.querySelector('#pauseButton').innerText = "Paused";
-  document.querySelector('#shop').style.opacity = '0'
+  
 }
 let isPaused = false
 
@@ -286,7 +286,7 @@ const upgradeDefinitions = {
         name: "Hi-Power Bullet",
         image: "images/Screen Shot 2026-05-04 at 2.50.58 PM.png",
         passive: true,
-        levels: Array.from({ length: 5 }, (_, i) => `Increase power +${i + 1}`)
+        levels: Array.from({ length: 5 }, (_, i) => `Increase power +${(i + 1)*10}%`)
     },
 
     speed: {
@@ -647,7 +647,7 @@ function shop() {
     
   let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
   
-  let earnedCoins = Math.round(kills / 50);
+  let earnedCoins = Math.round(kills / 5);
   let totalCoins = currentCoins + earnedCoins;
   
   localStorage.setItem('killCoins', String(totalCoins));
@@ -671,8 +671,8 @@ function buy(choice) {
   switch (selectedUpgrade) {
 
     case "power":
-      bulletPower += 1;
-      ballsFacts.damage += 1
+      bulletPower += base / 10;
+      ballsFacts.damage += base / 10
       document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
       break;
 
@@ -1140,7 +1140,7 @@ function summonWave(){
       case 540:
         spawnWave("level7", 20)
         spawnWave("level6", 60)
-        spawnEnemy('elite1', 300)
+        spawnEnemy('elite1', 800)
         break
       case 560:
         spawnWave("level4", 300)
@@ -1162,7 +1162,7 @@ function summonWave(){
         break
       case 600:
         enemies = []
-        spawnEnemy('boss1', 800)
+        spawnEnemy('boss1', 1800)
         bossOnBoard=true
         break
       case 601:

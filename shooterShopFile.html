@@ -71,13 +71,12 @@
             `Upgrade health ${localStorage.getItem('localHealth')} => ${Number(localStorage.getItem('localHealth')) + 10}. ${localStorage.getItem('localHealthCost')} KC`;
 
         document.querySelector('#powerBtn').innerText =
-            `Upgrade power ${localStorage.getItem('localPower')} => ${Number(localStorage.getItem('localPower')) + 1}. ${localStorage.getItem('localPowerCost')} KC`;
+            `Upgrade power ${Number(localStorage.getItem('localPower')).toFixed(1)} => ${(Number(localStorage.getItem('localPower')) + 0.2 ).toFixed(1)}. ${localStorage.getItem('localPowerCost')} KC`;
 
         document.querySelector('#killMOD').innerText = `+${localStorage.getItem('killModifyer')} seconds at start`
         skillCoins = Math.floor(Number(localStorage.getItem('mostKillsWithMod'))/10) - Number(localStorage.getItem('skillCoinsSpent'))
         document.querySelector('#skillCoins').innerText = `${skillCoins} skill coins`
-        document.querySelector('#rapid').innerText = `x${Number(localStorage.getItem('repeatFire')) + 1} split amount`
-        document.querySelector('#force').innerText = `x${Number(localStorage.getItem('forceMod')) + 1} Force Field damage`
+
 
         if (Number(localStorage.getItem('repeatFire')) > 1) {
             document.querySelector('#force').style.display = 'block'
@@ -128,7 +127,7 @@
 
                 localStorage.setItem(
                     'localPower',
-                    String(Number(localStorage.getItem('localPower')) + 1)
+                    String(Number(localStorage.getItem('localPower')) + 0.2).toFixed(1)
                 );
 
                 localStorage.setItem(
