@@ -284,7 +284,7 @@ const DEFAULT_ICON = "images/pixil-frame-0 (30).png";
 const upgradeDefinitions = {
     power: {
         name: "Hi-Power Bullet",
-        image: "images/pixil-frame-0 (36).png",
+        image: "images/pixil-frame-0 (37).png",
         passive: true,
         levels: Array.from({ length: 5 }, (_, i) => `Increase power +${(i + 1)*10}%`)
     },
@@ -347,7 +347,7 @@ const upgradeDefinitions = {
 
     rapid: {
         name: "Shotgun",
-        image: "images/pixil-frame-0 (37).png",
+        image: "images/pixil-frame-0 (36).png",
         levels: Array(5).fill("Shoot an extra bullet")
     },
 
@@ -1619,7 +1619,7 @@ function update() { //----------------------------------------------------------
 
       if (bulletHitsEnemy(ball, enemy)) {
 
-        enemy.health -= bulletPower/50 *bulletSpeed/10;
+        enemy.health -= bulletPower/28 *bulletSpeed/10;
 
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
