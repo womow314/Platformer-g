@@ -88,7 +88,7 @@ let magnetRange = 30;
 const MAX_UPGRADE = 6;
 let health = Number(localStorage.getItem('localHealth'));
 let MaxHealth = health
-const MAXHEALTHBASE = health
+let MAXHEALTHBASE = health
 localStorage.setItem('currentScore', '0')
 document.getElementById('statsHealth').innerText = `Max Health: ${health}`
 
@@ -214,6 +214,7 @@ function playShootSound() {
   shootSound.currentTime = 0;
   shootSound.play();
 }
+gaurdMod = 0.5
 
 const mobHurtSound = document.getElementById("mobHurt");
 function playMobHurtSound() {
@@ -485,9 +486,7 @@ function displayUpgrades() {
     upgrade => upgrades[upgrade] < MAX_UPGRADE
   );
 
-  if (possibleUpgrades.length === 0) {
-    return;
-  }
+
 
   if (possibleUpgrades.length === 0) {
     upgradeMenuOpen = false;
@@ -798,6 +797,7 @@ function buy(choice) {
       lightningMult+= 0.4
       break
     case "guardian":
+      gaurdMod += 0.1
       switch (upgrades.guardian){
       case 1:
         guardians.push({x: 0, y: 0, turn: 0, time: 0})
@@ -845,7 +845,7 @@ function buy(choice) {
       break
     case "fitness":
       MaxHealth += MAXHEALTHBASE / 5
-      document.getElementById('statsHealth').innerText = `Max Health: ${health}`
+      document.getElementById('statsHealth').innerText = `Max Health: ${MaxHealth}`
 
     
 
@@ -941,16 +941,26 @@ document.addEventListener('keydown', (event) => {
   if (event.key === '-') {
     time = prompt("LOl you found the secret hack. Please enter the mod time: ")
   }
-});
-
-document.addEventListener('keydown', (event) => {
   if (event.key === '=') {
     value = prompt("LOl you found the secret hack. Want some coins? Dont do more than 1000 :3")
     for (let i = 0; i <value; i ++){
       CoinsOnGround.push({x: player.x, y: player.y, value: 1})
     }
   }
+  if (event.key === "t"){
+    let mode = prompt("What mode do you want? Famine (1), Hardcore (2)")
+      if (mode === "1") {
+        coinsToUpgrade *= 2
+        coinsToUpgrade += 5
+      }
+      if (mode === "2") {
+        MaxHealth = 1
+        health= 1
+        MAXHEALTHBASE = 1
+      }
+  }
 });
+
 
 window.addEventListener("keydown", function(e) {
     if (["KeyQ"].indexOf(e.code) > -1) {
@@ -1490,7 +1500,7 @@ function update() { //----------------------------------------------------------
 
           enemy.x -= 0.5*dx
           enemy.y -= 0.5 * dy
-          enemy.health -= bulletPower/40
+          enemy.health -= bulletPower/20 *gaurdMod
           if (enemy.health <= 0) {
             enemies.splice(i, 1);
             kills += 1;
