@@ -114,7 +114,7 @@ function bindButton(id, key) {
   btn.addEventListener('mousedown', () => keys[key] = true);
   btn.addEventListener('mouseup', () => keys[key] = false);
 }
-
+let swarm = false
 
 bindButton("left", "ArrowLeft");
 bindButton("right", "ArrowRight");
@@ -631,6 +631,7 @@ let lightningMaxCooldown = 300
 let gaurdSize = 40
 
 keys = {};
+let fullArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian', 'exo', 'fitness']
 let energyDrinkEffect = 0;
 
 function inRange(obj1, obj2, range) {
@@ -682,7 +683,7 @@ let totalUpgradesCompleteed = 0;
 let rocketCooldown = Infinity;
 
 function buy(choice) {
-  upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian', 'exo', 'fitness']
+  upgradeArray = fullArray
 
   playBuySound();
 
@@ -948,7 +949,7 @@ document.addEventListener('keydown', (event) => {
     }
   }
   if (event.key === "t"){
-    let mode = prompt("What mode do you want? Famine (1), Hardcore (2)")
+    let mode = prompt("What mode do you want? Famine (1), Hardcore (2), Swarm (3), Pasifisct (4)")
       if (mode === "1") {
         coinsToUpgrade *= 2
         coinsToUpgrade += 5
@@ -957,6 +958,19 @@ document.addEventListener('keydown', (event) => {
         MaxHealth = 1
         health= 1
         MAXHEALTHBASE = 1
+        upgrades.fitness = 6
+        upgrades.energy = 6
+      }
+      if (mode === "3") {
+        swarm = true
+      }
+      if (mode === "4") {
+        bulletCooldown = Infinity
+        guardians.push({x: 0, y: 0, turn: 0, time: 0})
+        guardians.push({x: 0, y: 0, turn: Math.PI, time: 0})
+        gaurdMod += 0.1
+        upgrades.guardian = 2
+        upgrades.rapid = 6
       }
   }
 });
@@ -1042,6 +1056,15 @@ function spawnWave(type, amount){
 let time = localStorage.getItem('killModifyer')
 
 setInterval(() => {
+  if(!bossOnBoard) {if(!isPaused) {time ++;
+
+  summonWave()}}
+
+
+}, 1000);
+
+setInterval(() => {
+  if (!swarm) {return;}
   if(!bossOnBoard) {if(!isPaused) {time ++;
 
   summonWave()}}
