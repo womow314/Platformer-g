@@ -78,7 +78,7 @@ localStorage.setItem('skillCoinsSpent', localStorage.getItem('skillCoinsSpent') 
 localStorage.setItem('repeatFire', localStorage.getItem('repeatFire') || "1")
 
 localStorage.setItem('forceMod', localStorage.getItem('forceMod') || "1");
-
+const base = Number(localStorage.getItem('localPower'))
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 let guardians = []
@@ -88,6 +88,7 @@ let magnetRange = 30;
 const MAX_UPGRADE = 6;
 let health = Number(localStorage.getItem('localHealth'));
 let MaxHealth = health
+const MAXHEALTHBASE = health
 localStorage.setItem('currentScore', '0')
 document.getElementById('statsHealth').innerText = `Max Health: ${health}`
 
@@ -126,7 +127,7 @@ function pause() {
   document.querySelector('#pauseButton').innerText = "Pause";
   if (isPaused) canvas.style.opacity = '0.3';
   if (isPaused) document.querySelector('#pauseButton').innerText = "Paused";
-  document.querySelector('#shop').style.opacity = '0'
+  
 }
 let isPaused = false
 
@@ -246,6 +247,7 @@ let ballsFacts = {
   size: 20
 }
 let bolts = 0
+let lightningMult = 1.8
 
 let rocketCooldownDecreaser = 0
 
@@ -268,7 +270,8 @@ let upgrades = {
     drill: 1,
     lightning: 1,
     guardian: 1,
-    exo: 1
+    exo: 1,
+    fitness: 1
 }
 
 let balls = []
@@ -284,25 +287,28 @@ const DEFAULT_ICON = "images/pixil-frame-0 (30).png";
 const upgradeDefinitions = {
     power: {
         name: "Hi-Power Bullet",
-        image: "images/Screen Shot 2026-05-04 at 2.50.58 PM.png",
+        image: "images/pixil-frame-0 (37).png",
         passive: true,
-        levels: Array.from({ length: 5 }, (_, i) => `Increase power +${i + 1}`)
+        levels: Array.from({ length: 5 }, (_, i) => `Increase power +${(i + 1)*10}%`)
     },
 
     speed: {
         name: "Ammo thruster",
+        image: "images/pixil-frame-0 (32).png",
         passive: true,
         levels: Array.from({ length: 5 }, (_, i) => `Increase projectile speed ${(i + 1) * 10}%`)
     },
 
     size: {
         name: "HE Fuel",
+        image: "images/pixil-frame-0 (41).png",
         passive: true,
         levels: Array.from({ length: 5 }, (_, i) => `Increase all weapon and ammo range ${(i + 1) * 10}%`)
     },
 
     cooldown: {
         name: "Power cube",
+        image: "images/pixil-frame-0 (39).png",
         passive: true,
         levels: Array(5).fill("Decrease all attack cooldown")
     },
@@ -310,6 +316,7 @@ const upgradeDefinitions = {
     playerSpeed: {
         name: "Sport shoes",
         passive: true,
+        image: "images/pixil-frame-0 (40).png",
         levels: [
             "Player Speed 5 => 6",
             "Player Speed 6 => 7",
@@ -344,20 +351,28 @@ const upgradeDefinitions = {
         ]
     },
 
+    fitness: {
+        name: "Fitness book",
+        image: "images/pixil-frame-0 (42).png",
+        levels: Array.from({ length: 5 }, (_, i) => `+${(i + 1)*20}% Max HP`)
+    },
+
     rapid: {
         name: "Shotgun",
-        image: "images/Screen Shot 2026-05-04 at 2.50.58 PM.png",
+        image: "images/pixil-frame-0 (36).png",
         levels: Array(5).fill("Shoot an extra bullet")
     },
 
     energy: {
         name: "Energy drink",
+        image: "images/pixil-frame-0 (35).png",
         passive: true,
         levels: Array.from({ length: 5 }, (_, i) => `+${i + 1}% hp 10/sec`)
     },
 
     rocket: {
         name: "RPG",
+        image: "images/pixil-frame-0 (38).png",
         levels: [
             "Shoot a rocket every 5 seconds",
             "Decrease rocket shoot time to 4 seconds",
@@ -393,7 +408,7 @@ const upgradeDefinitions = {
 
     lightning: {
         name: "Tesla coil",
-        image: 'images/pixil-frame-0 (26).png',
+        image: 'images/pixil-frame-0 (34).png',
         levels: [
             "Summon a lightning shower: 1 bolt",
             "Add another bolt",
@@ -473,6 +488,15 @@ function displayUpgrades() {
   if (possibleUpgrades.length === 0) {
     return;
   }
+
+  if (possibleUpgrades.length === 0) {
+    upgradeMenuOpen = false;
+    isPaused = false;
+    document.querySelector('#shop').style.opacity = '0';
+    document.querySelector('#mobileControls').style.display = 'block';
+    canvas.style.opacity = '1';
+    return;
+}
 
   possibleUpgrades.sort(() => Math.random() - 0.5);
 
@@ -647,7 +671,7 @@ function shop() {
     
   let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
   
-  let earnedCoins = Math.round(kills / 50);
+  let earnedCoins = Math.round(kills / 5);
   let totalCoins = currentCoins + earnedCoins;
   
   localStorage.setItem('killCoins', String(totalCoins));
@@ -659,7 +683,7 @@ let totalUpgradesCompleteed = 0;
 let rocketCooldown = Infinity;
 
 function buy(choice) {
-  upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian', 'exo']
+  upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian', 'exo', 'fitness']
 
   playBuySound();
 
@@ -671,8 +695,9 @@ function buy(choice) {
   switch (selectedUpgrade) {
 
     case "power":
-      bulletPower += 1;
-      ballsFacts.damage += 1
+      bulletPower += base / 10;
+      ballsFacts.damage += base / 10
+      lightningMult+= 0.2
       document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
       break;
 
@@ -770,6 +795,7 @@ function buy(choice) {
       break
     case "lightning":
       bolts +=1
+      lightningMult+= 0.4
       break
     case "guardian":
       switch (upgrades.guardian){
@@ -816,6 +842,11 @@ function buy(choice) {
     case "exo":
       gaurdianCooldown += 60
       rocketExplosionMod += 20
+      break
+    case "fitness":
+      MaxHealth += MAXHEALTHBASE / 5
+      document.getElementById('statsHealth').innerText = `Max Health: ${health}`
+
     
 
   }
@@ -1140,7 +1171,7 @@ function summonWave(){
       case 540:
         spawnWave("level7", 20)
         spawnWave("level6", 60)
-        spawnEnemy('elite1', 300)
+        spawnEnemy('elite1', 800)
         break
       case 560:
         spawnWave("level4", 300)
@@ -1162,7 +1193,7 @@ function summonWave(){
         break
       case 600:
         enemies = []
-        spawnEnemy('boss1', 800)
+        spawnEnemy('boss1', 1800)
         bossOnBoard=true
         break
       case 601:
@@ -1203,7 +1234,7 @@ function shootLightning(){
     let bolt = {x: mob.x+ mob.size/2, y: mob.y+ mob.size/2, size: 40}
     for(let enemy of enemies){
       if (bulletHitsEnemy(bolt, enemy)){
-        enemy.health -= 2*bulletPower
+        enemy.health -= bulletPower*lightningMult
       }
     }
     lightningBolts.push({x: mob.x, y: mob.y, time: 30})
@@ -1617,7 +1648,7 @@ function update() { //----------------------------------------------------------
 
       if (bulletHitsEnemy(ball, enemy)) {
 
-        enemy.health -= bulletPower/50 *bulletSpeed/10;
+        enemy.health -= bulletPower/10 *bulletSpeed/10;
 
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
