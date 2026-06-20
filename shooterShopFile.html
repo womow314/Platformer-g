@@ -68,7 +68,7 @@
             `Base power: ${localStorage.getItem('localPower')}`;
 
         document.querySelector('#healthBtn').innerText =
-            `Upgrade health ${localStorage.getItem('localHealth')} => ${Number(localStorage.getItem('localHealth')) + 10}. ${localStorage.getItem('localHealthCost')} KC`;
+            `Upgrade health ${localStorage.getItem('localHealth')} => ${Number(localStorage.getItem('localHealth')) + 5}. ${localStorage.getItem('localHealthCost')} KC`;
 
         document.querySelector('#powerBtn').innerText =
             `Upgrade power ${Number(localStorage.getItem('localPower')).toFixed(1)} => ${(Number(localStorage.getItem('localPower')) + 0.2 ).toFixed(1)}. ${localStorage.getItem('localPowerCost')} KC`;
@@ -98,7 +98,7 @@
 
                 localStorage.setItem(
                     'localHealth',
-                    String(Number(localStorage.getItem('localHealth')) + 10)
+                    String(Number(localStorage.getItem('localHealth')) + 5)
                 );
 
                 localStorage.setItem(

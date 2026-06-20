@@ -88,6 +88,7 @@ let magnetRange = 30;
 const MAX_UPGRADE = 6;
 let health = Number(localStorage.getItem('localHealth'));
 let MaxHealth = health
+const MAXHEALTHBASE = helath
 localStorage.setItem('currentScore', '0')
 document.getElementById('statsHealth').innerText = `Max Health: ${health}`
 
@@ -246,6 +247,7 @@ let ballsFacts = {
   size: 20
 }
 let bolts = 0
+let lightningMult = 1.8
 
 let rocketCooldownDecreaser = 0
 
@@ -346,6 +348,11 @@ const upgradeDefinitions = {
             "Increased force field range and power",
             "Increased force field range and power"
         ]
+    },
+
+    fitness: {
+        name: "Fitness book",
+        levels: Array.from({ length: 5 }, (_, i) => `+${(i + 1)*20}% Max HP`)
     },
 
     rapid: {
@@ -665,7 +672,7 @@ let totalUpgradesCompleteed = 0;
 let rocketCooldown = Infinity;
 
 function buy(choice) {
-  upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian', 'exo']
+  upgradeArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian', 'exo', 'fitness']
 
   playBuySound();
 
@@ -679,6 +686,7 @@ function buy(choice) {
     case "power":
       bulletPower += base / 10;
       ballsFacts.damage += base / 10
+      lightningMult+= 0.2
       document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
       break;
 
@@ -776,6 +784,7 @@ function buy(choice) {
       break
     case "lightning":
       bolts +=1
+      lightningMult+= 0.4
       break
     case "guardian":
       switch (upgrades.guardian){
@@ -822,6 +831,9 @@ function buy(choice) {
     case "exo":
       gaurdianCooldown += 60
       rocketExplosionMod += 20
+      break
+    case "fitness":
+      MaxHealth += MAXHEALTHBASE / 5
     
 
   }
@@ -1209,7 +1221,7 @@ function shootLightning(){
     let bolt = {x: mob.x+ mob.size/2, y: mob.y+ mob.size/2, size: 40}
     for(let enemy of enemies){
       if (bulletHitsEnemy(bolt, enemy)){
-        enemy.health -= 2*bulletPower
+        enemy.health -= bulletPower*lightningMult
       }
     }
     lightningBolts.push({x: mob.x, y: mob.y, time: 30})
@@ -1623,7 +1635,7 @@ function update() { //----------------------------------------------------------
 
       if (bulletHitsEnemy(ball, enemy)) {
 
-        enemy.health -= bulletPower/28 *bulletSpeed/10;
+        enemy.health -= bulletPower/10 *bulletSpeed/10;
 
         if (enemy.health <= 0) {
           enemies.splice(e, 1);
