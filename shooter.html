@@ -88,7 +88,7 @@ let magnetRange = 30;
 const MAX_UPGRADE = 6;
 let health = Number(localStorage.getItem('localHealth'));
 let MaxHealth = health
-const MAXHEALTHBASE = helath
+const MAXHEALTHBASE = health
 localStorage.setItem('currentScore', '0')
 document.getElementById('statsHealth').innerText = `Max Health: ${health}`
 
@@ -270,7 +270,8 @@ let upgrades = {
     drill: 1,
     lightning: 1,
     guardian: 1,
-    exo: 1
+    exo: 1,
+    fitness: 1
 }
 
 let balls = []
@@ -352,6 +353,7 @@ const upgradeDefinitions = {
 
     fitness: {
         name: "Fitness book",
+        image: "images/pixil-frame-0 (42).png",
         levels: Array.from({ length: 5 }, (_, i) => `+${(i + 1)*20}% Max HP`)
     },
 
@@ -486,6 +488,15 @@ function displayUpgrades() {
   if (possibleUpgrades.length === 0) {
     return;
   }
+
+  if (possibleUpgrades.length === 0) {
+    upgradeMenuOpen = false;
+    isPaused = false;
+    document.querySelector('#shop').style.opacity = '0';
+    document.querySelector('#mobileControls').style.display = 'block';
+    canvas.style.opacity = '1';
+    return;
+}
 
   possibleUpgrades.sort(() => Math.random() - 0.5);
 
@@ -834,6 +845,8 @@ function buy(choice) {
       break
     case "fitness":
       MaxHealth += MAXHEALTHBASE / 5
+      document.getElementById('statsHealth').innerText = `Max Health: ${health}`
+
     
 
   }
