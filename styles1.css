@@ -1,36 +1,37 @@
-body { 
-  margin: 0; 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  height: 100vh; 
-  background: #333333; 
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #333333;
 }
 
 canvas {
-  background: #87CEEB; 
-  border: 4px solid #fff; 
-  box-shadow: 0 0 20px rgba(0,0,0,0.5); 
-  
+  background: #87CEEB;
+  border: 4px solid #fff;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
+
 h1 {
   position: absolute;
   top: 15px;
   left: 50%;
-  transform: translate(-50%,-50%);
+  transform: translate(-50%, -50%);
   color: rgb(148, 232, 148);
 }
-b{
+
+b {
   background-color: #f6bd13;
   margin: 0;
   padding: 10px;
   color: #ffffff;
   text-shadow:
-        -1px -1px 0 #000,
-        1px -1px 0 #000,
-        -1px  1px 0 #000,
-        1px  1px 0 #000,
-        0px  1px 0 #000;
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    0px 1px 0 #000;
   border-bottom: 2px solid black;
   font-size: 15px;
   font-family: "Arimo", sans-serif;
@@ -38,6 +39,7 @@ b{
   font-weight: 6px;
   font-style: normal;
 }
+
 .upgrade-icon {
   width: 60px;
   height: 60px;
@@ -55,15 +57,15 @@ h2 {
   position: absolute;
   top: 130px;
   left: 50%;
-  transform: translate(-50%,-50%);
+  transform: translate(-50%, -50%);
   color: rgb(148, 232, 148);
 }
 
 #title {
-  position: fixed; 
-  top: 50px; 
+  position: fixed;
+  top: 50px;
   margin: 15px;
-  color: white; 
+  color: white;
   font-family: sans-serif;
 }
 
@@ -76,24 +78,27 @@ h2 {
 }
 
 #stuff {
-  position: fixed; 
-  bottom: 0; 
-  left: 0; 
+  position: fixed;
+  bottom: 0;
+  left: 0;
   margin: 15px;
-  color: white; /* Added so you can see it against the dark background */
+  color: white;
+  /* Added so you can see it against the dark background */
   font-family: sans-serif;
   font-size: 12px;
 }
 
 details {
-  position: fixed; 
-  top: 5px; 
-  left: 5px; 
+  position: fixed;
+  top: 5px;
+  left: 5px;
   margin: 15px;
-  color: white; /* Added so you can see it against the dark background */
+  color: white;
+  /* Added so you can see it against the dark background */
   font-family: sans-serif;
   font-size: 12px;
 }
+
 #stuff button {
   font-size: 12px;
 }
@@ -103,6 +108,7 @@ details {
   right: 15px;
   top: 10px;
 }
+
 #shooterShop {
   position: absolute;
   right: 15px;
@@ -127,6 +133,7 @@ details {
   right: 10px;
   display: flex;
 }
+
 #mobileControls button {
   max-width: 80px;
   width: 90vw;
@@ -135,23 +142,40 @@ details {
   height: 90vw;
 }
 
+#modes {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+}
+
+#modes button {
+  width: 150px;
+  height: 50px;
+}
+
 #homeButtons {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
+
 #homeButtons button {
   padding: 10px;
   font-size: 20px;
   border-radius: 8px;
   border: none;
-  
+
 }
 
 #shooter {
   background-color: green;
   cursor: pointer;
 }
+
 #shooter:hover {
   transform: scale(1.03);
 }
@@ -160,11 +184,12 @@ details {
   background-color: green;
   cursor: pointer;
 }
+
 #plat:hover {
   transform: scale(1.03);
 }
 
-#maze{
+#maze {
   background-color: grey;
   opacity: 25%;
 }
@@ -173,9 +198,11 @@ details {
   background-color: green;
   cursor: pointer;
 }
+
 #clicker:hover {
   transform: scale(1.03);
 }
+
 #shop {
   position: fixed;
   bottom: 20%;
@@ -198,7 +225,7 @@ details {
   height: 300px;
 
   display: flex;
-  flex-direction: column;   
+  flex-direction: column;
 
   border: 2px solid black;
   box-shadow: none;
@@ -211,14 +238,14 @@ details {
   color: white;
 }
 
-#shop button:focus{
+#shop button:focus {
   outline: none;
 }
 
 .upgradeText {
   background-color: rgb(48, 48, 48);
   padding: 10px;
-  flex-grow: 1; 
+  flex-grow: 1;
   margin: 5px;
   font-family: "Arimo", sans-serif;
   font-optical-sizing: auto;
@@ -228,7 +255,8 @@ details {
   font-size: 16px;
   font-weight: 5px;
 }
-.stars{
+
+.stars {
   background-color: #171717;
   padding: 10px;
 }
@@ -258,15 +286,16 @@ details {
   position: absolute;
   left: 10%;
   top: 50%;
-  transform: translate(-50%, -50% );
+  transform: translate(-50%, -50%);
   font-size: 70px;
   padding: 15px;
 }
 
-#clicks{
+#clicks {
   color: beige;
   font-size: 100px;
 }
+
 h3 {
   color: beige;
 }
@@ -281,25 +310,27 @@ h3 {
   width: 100%;
   aspect-ratio: 2/1;
 }
-line{
-    stroke:white;
-    stroke-width:4;
+
+line {
+  stroke: white;
+  stroke-width: 4;
 }
 
-#skillTreeButtons{
+#skillTreeButtons {
   display: flex;
-  gap: 10px;         
-  justify-content: center; 
+  gap: 10px;
+  justify-content: center;
   align-items: center;
 }
 
-#statistics{
+#statistics {
   display: flex;
   margin-top: 85px;
   flex-direction: column;
   align-items: center;
 }
-#copy{
+
+#copy {
   display: flex;
   margin-top: 85px;
   margin-left: 25px;
@@ -307,10 +338,9 @@ line{
   cursor: pointer;
 }
 
-#wiki{
+#wiki {
   background-color: green;
   cursor: pointer;
 }
-#article{
-  
-}
+
+#article {}

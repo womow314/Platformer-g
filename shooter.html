@@ -40,6 +40,12 @@
 
   <div id="gameText"></div>
 
+  <div id="modes" style="display: none;">
+    <button onclick="famine()" style="background-color: gold;">FAMINE</button>
+    <button onclick="hardcore()" style="background-color: red;">HARDCORE</button>
+    <button onclick="swarmFunc()" style="background-color: darkviolet;">SWARM</button>
+    <button onclick="pasifist()" style="background-color: midnightblue; color: azure;">PASIFIST</button>
+  </div>
 
   <div id="shop" style="display: none;">
     <button id="buy1" onclick="buy(1)">Wait for upgrade</button>
@@ -940,7 +946,7 @@
         e.preventDefault();
       }
     }, false);
-
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     document.addEventListener('keydown', (event) => {
       if (event.key === '-') {
         time = prompt("LOl you found the secret hack. Please enter the mod time: ")
@@ -952,32 +958,41 @@
         }
       }
       if (event.key === "t") {
-        let mode = prompt("What mode do you want? Famine (1), Hardcore (2), Swarm (3), Pasifisct (4)")
-        if (mode === "1") {
-          coinsToUpgrade *= 2
-          coinsToUpgrade += 5
-        }
-        if (mode === "2") {
-          MaxHealth = 1
-          health = 1
-          MAXHEALTHBASE = 1
-          upgrades.fitness = 6
-          upgrades.energy = 6
-        }
-        if (mode === "3") {
-          swarm = true
-        }
-        if (mode === "4") {
-          bulletCooldown = Infinity
-          guardians.push({ x: 0, y: 0, turn: 0, time: 0 })
-          guardians.push({ x: 0, y: 0, turn: Math.PI, time: 0 })
-          gaurdMod += 0.1
-          upgrades.guardian = 2
-          upgrades.rapid = 6
-        }
+        pause()
+        document.querySelector('#modes').style.display = 'grid'
       }
     });
+    function hideModes() {
+      document.querySelector('#modes').style.display = 'none'
+      pause()
+    }
 
+    function famine() {
+      coinsToUpgrade *= 2
+      coinsToUpgrade += 5
+      hideModes()
+    }
+    function hardcore() {
+      MaxHealth = 1
+      health = 1
+      MAXHEALTHBASE = 1
+      upgrades.fitness = 6
+      upgrades.energy = 6
+      hideModes()
+    }
+    function swarmFunc() {
+      swarm = true
+      hideModes()
+    }
+    function pasifist() {
+      bulletCooldown = Infinity
+      guardians.push({ x: 0, y: 0, turn: 0, time: 0 })
+      guardians.push({ x: 0, y: 0, turn: Math.PI, time: 0 })
+      gaurdMod += 0.1
+      upgrades.guardian = 2
+      upgrades.rapid = 6
+      hideModes()
+    }
 
     window.addEventListener("keydown", function (e) {
       if (["KeyQ"].indexOf(e.code) > -1) {
