@@ -1,17 +1,19 @@
 <!DOCTYPE html>
+
 <head>
     <title>Congratulations!</title>
-    <link rel = "stylesheet" href = "styles1.css">
+    <link rel="stylesheet" href="styles1.css">
 </head>
+
 <body>
     <h2>Congratulations, you made it!</h2>
-    <div id = "statistics">
+    <div id="statistics">
         <h3 id="score">Score: </h3>
         <h3 id="deaths">Deaths: </h3>
         <h3 id="time">Time: </h3>
     </div>
     <button onclick="copy()" id="copy">Copy to share</button>
-    <button onclick = "home()" id = "home">Home</button>
+    <button onclick="home()" id="home">Home</button>
     <script>
 
         document.getElementById('score').innerText = `Score: ${localStorage.getItem('Score')}`
@@ -23,7 +25,7 @@
         function copy() {
             navigator.clipboard.writeText(copiedText);
             copyButton.innerText = "Copied!";
-            setTimeout ( () => {
+            setTimeout(() => {
                 copyButton.innerText = "Copy to share";
             }, 800)
         }

@@ -1,1850 +1,1867 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Games.io | Shooter</title>
-    <link rel="stylesheet" href="styles1.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+  <title>Games.io | Shooter</title>
+  <link rel="stylesheet" href="styles1.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&display=swap"
+    rel="stylesheet">
 </head>
+
 <body>
-<canvas id="gameCanvas" height="600" width="1200"></canvas>
-<button onclick="home()" id="home">Home</button>
-<button onclick="shop()" id="shooterShop">Shop</button>
-<h1>HEALTH: 100%</h1>
+  <canvas id="gameCanvas" height="600" width="1200"></canvas>
+  <button onclick="home()" id="home">Home</button>
+  <button onclick="shop()" id="shooterShop">Shop</button>
+  <h1>HEALTH: 100%</h1>
 
-<div id="progressContainer">
-  <div id="progressBar"></div>
-</div>
-<div id="stuff">
-  <p id="cord">x: 0, y: 0</p>
+  <div id="progressContainer">
+    <div id="progressBar"></div>
+  </div>
+  <div id="stuff">
+    <p id="cord">x: 0, y: 0</p>
 
-  <button onclick="pause()" id="pauseButton">Pause</button>
-  
-  <details>
-    <summary>Show Stats</summary>
-    <p id="statsSpeed">Speed: 5</p>
-    <p id="statsCooldown">Bullet cooldown: 60</p>
-    <p id="statsPower">Bullet power: 1</p>
-    <p id="statsSize">Bullet size: 10</p>
-    <p id="statsBulletSpeed">Bullet speed: 10</p>
-    <p id="statsMagnet">Magnet range: 30</p>
-    <p id="statsForce">Force Field: Inactive</p>
-    <p id="statsEnergy">Energy drink: Inactive</p>
-    <p id="statsHealth">Max Health: 100</p>
-  </details>
-</div>
+    <button onclick="pause()" id="pauseButton">Pause</button>
 
-<div id="gameText"></div>
+    <details>
+      <summary>Show Stats</summary>
+      <p id="statsSpeed">Speed: 5</p>
+      <p id="statsCooldown">Bullet cooldown: 60</p>
+      <p id="statsPower">Bullet power: 1</p>
+      <p id="statsSize">Bullet size: 10</p>
+      <p id="statsBulletSpeed">Bullet speed: 10</p>
+      <p id="statsMagnet">Magnet range: 30</p>
+      <p id="statsForce">Force Field: Inactive</p>
+      <p id="statsEnergy">Energy drink: Inactive</p>
+      <p id="statsHealth">Max Health: 100</p>
+    </details>
+  </div>
 
-
-<div id="shop" style="display: none;">
-  <button id="buy1" onclick="buy(1)">Wait for upgrade</button>
-  <button id="buy2" onclick="buy(2)">Wait for upgrade</button>
-  <button id="buy3" onclick="buy(3)">Wait for upgrade</button>
-</div>
-<div id="mobileControls">
-  <button id="left">←</button>
-  <button id="right">→</button>
-  <button id="up">ꜛ</button>
-  <button id="down">↓</button>
-  <button id="shoot">𒒕</button>
-
-</div>
-
-<audio id = "collectSound" preload="auto">
-  <source src = "audio/shooter/collect.mp3" type="audio/mp3">
-  <source src = "audio/shooter/collect.ogg" type="audio/ogg">
-</audio>
-<audio id = "shootSound" preload="auto">
-  <source src = "audio/shooter/shoot.mp3" type="audio/mp3">
-  <source src = "audio/shooter/shoot.ogg" type="audio/mp3">
-</audio>
-<audio id = "mobHurt" preload="auto">
-  <source src = "audio/shooter/mob-hurt.mp3" type="audio/mp3">
-  <source src = "audio/shooter/mob-hurt.ogg" type="audio/ogg">
-</audio>
-<audio id = "buySound" preload="auto">
-  <source src = "audio/shooter/upgrade.mp3" type="audio/mp3">
-  <source src = "audio/shooter/upgrade.ogg" type="audio/ogg">
-</audio>
-
-<script>
-localStorage.setItem('localPower', localStorage.getItem('localPower') || "1")
-localStorage.setItem('killModifyer', localStorage.getItem('killModifyer') || "0")
-localStorage.setItem('localHealth', localStorage.getItem('localHealth') || "100")
-localStorage.setItem('mostKillsWithMod', localStorage.getItem('mostKillsWithMod') || "0")
-localStorage.setItem('skillCoinsSpent', localStorage.getItem('skillCoinsSpent') || "0")
-localStorage.setItem('repeatFire', localStorage.getItem('repeatFire') || "1")
-
-localStorage.setItem('forceMod', localStorage.getItem('forceMod') || "1");
-const base = Number(localStorage.getItem('localPower'))
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-let guardians = []
-let mostKills = 0;
-let killCoins = localStorage.getItem('killCoins') || 0
-let magnetRange = 30;
-const MAX_UPGRADE = 6;
-let health = Number(localStorage.getItem('localHealth'));
-let MaxHealth = health
-let MAXHEALTHBASE = health
-localStorage.setItem('currentScore', '0')
-document.getElementById('statsHealth').innerText = `Max Health: ${health}`
-
-try {
-  mostKills = Number(localStorage.getItem("mostKills")) || 0;
-} catch (e) {
-  mostKills = 0;
-}
-let upgradeMenuOpen = false;
-function bindButton(id, key) {
-  const btn = document.getElementById(id);
-
-  btn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    keys[key] = true;
-  }, { passive: false });
-
-  btn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    keys[key] = false;
-  });
-
-  btn.addEventListener('mousedown', () => keys[key] = true);
-  btn.addEventListener('mouseup', () => keys[key] = false);
-}
-let swarm = false
-
-bindButton("left", "ArrowLeft");
-bindButton("right", "ArrowRight");
-bindButton("up", "ArrowUp");
-bindButton("down", "ArrowDown");
-bindButton("shoot", "Space");
-function pause() {
-  isPaused = !isPaused;
-  canvas.style.opacity = '1';
-  document.querySelector('#pauseButton').innerText = "Pause";
-  if (isPaused) canvas.style.opacity = '0.3';
-  if (isPaused) document.querySelector('#pauseButton').innerText = "Paused";
-  
-}
-let isPaused = false
-
-const brick = new Image();
-brick.src = "images/pixil-frame-0%20(4).png";
-
-let sky = new Image();
-sky.src = "images/pixil-frame-0%20(10).png";
+  <div id="gameText"></div>
 
 
-let playerImg = new Image();
-playerImg.src = "images/pixil-frame-0%20(1).png";
+  <div id="shop" style="display: none;">
+    <button id="buy1" onclick="buy(1)">Wait for upgrade</button>
+    <button id="buy2" onclick="buy(2)">Wait for upgrade</button>
+    <button id="buy3" onclick="buy(3)">Wait for upgrade</button>
+  </div>
+  <div id="mobileControls">
+    <button id="left">←</button>
+    <button id="right">→</button>
+    <button id="up">ꜛ</button>
+    <button id="down">↓</button>
+    <button id="shoot">𒒕</button>
 
-let enemyBasic = new Image();
-enemyBasic.src = "images/pixil-frame-0%20(12).png";
+  </div>
 
-let enemyLevel2 = new Image();
-enemyLevel2.src = "images/pixil-frame-0%20(14).png"
+  <audio id="collectSound" preload="auto">
+    <source src="audio/shooter/collect.mp3" type="audio/mp3">
+    <source src="audio/shooter/collect.ogg" type="audio/ogg">
+  </audio>
+  <audio id="shootSound" preload="auto">
+    <source src="audio/shooter/shoot.mp3" type="audio/mp3">
+    <source src="audio/shooter/shoot.ogg" type="audio/mp3">
+  </audio>
+  <audio id="mobHurt" preload="auto">
+    <source src="audio/shooter/mob-hurt.mp3" type="audio/mp3">
+    <source src="audio/shooter/mob-hurt.ogg" type="audio/ogg">
+  </audio>
+  <audio id="buySound" preload="auto">
+    <source src="audio/shooter/upgrade.mp3" type="audio/mp3">
+    <source src="audio/shooter/upgrade.ogg" type="audio/ogg">
+  </audio>
 
-let enemyLevel3 = new Image();
-enemyLevel3.src = "images/pixil-frame-0%20(15).png"
+  <script>
+    localStorage.setItem('localPower', localStorage.getItem('localPower') || "1")
+    localStorage.setItem('killModifyer', localStorage.getItem('killModifyer') || "0")
+    localStorage.setItem('localHealth', localStorage.getItem('localHealth') || "100")
+    localStorage.setItem('mostKillsWithMod', localStorage.getItem('mostKillsWithMod') || "0")
+    localStorage.setItem('skillCoinsSpent', localStorage.getItem('skillCoinsSpent') || "0")
+    localStorage.setItem('repeatFire', localStorage.getItem('repeatFire') || "1")
 
-let enemyLevel4 = new Image();
-enemyLevel4.src = "images/pixil-frame-0%20(16).png"
+    localStorage.setItem('forceMod', localStorage.getItem('forceMod') || "1");
+    const base = Number(localStorage.getItem('localPower'))
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let guardians = []
+    let mostKills = 0;
+    let killCoins = localStorage.getItem('killCoins') || 0
+    let magnetRange = 30;
+    const MAX_UPGRADE = 6;
+    let health = Number(localStorage.getItem('localHealth'));
+    let MaxHealth = health
+    let MAXHEALTHBASE = health
+    localStorage.setItem('currentScore', '0')
+    document.getElementById('statsHealth').innerText = `Max Health: ${health}`
 
-let boxIMG = new Image();
-boxIMG.src = "images/pixil-frame-0 (1) (2).png"
+    try {
+      mostKills = Number(localStorage.getItem("mostKills")) || 0;
+    } catch (e) {
+      mostKills = 0;
+    }
+    let upgradeMenuOpen = false;
+    function bindButton(id, key) {
+      const btn = document.getElementById(id);
 
-let enemyLevel5 = new Image();
-enemyLevel5.src = "images/pixil-frame-0%20(19).png"
+      btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        keys[key] = true;
+      }, { passive: false });
 
-let enemyLevel6 = new Image();
-enemyLevel6.src = "images/pixil-frame-0%20(20).png"
+      btn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        keys[key] = false;
+      });
 
-let enemyLevel7 = new Image();
-enemyLevel7.src = "images/astronought (1).png"
+      btn.addEventListener('mousedown', () => keys[key] = true);
+      btn.addEventListener('mouseup', () => keys[key] = false);
+    }
+    let swarm = false
 
-let enemyLevel8 = new Image();
-enemyLevel8.src = "images/pixil-frame-0 (24).png"
+    bindButton("left", "ArrowLeft");
+    bindButton("right", "ArrowRight");
+    bindButton("up", "ArrowUp");
+    bindButton("down", "ArrowDown");
+    bindButton("shoot", "Space");
+    function pause() {
+      isPaused = !isPaused;
+      canvas.style.opacity = '1';
+      document.querySelector('#pauseButton').innerText = "Pause";
+      if (isPaused) canvas.style.opacity = '0.3';
+      if (isPaused) document.querySelector('#pauseButton').innerText = "Paused";
 
-let elite1 = new Image();
-elite1.src = "images/pixil-frame-0 (25).png"
+    }
+    let isPaused = false
 
-let lightning = new Image();
-lightning.src = "images/pixil-frame-0 (26).png"
+    const brick = new Image();
+    brick.src = "images/pixil-frame-0%20(4).png";
 
-let gaurd = new Image();
-gaurd.src = "images/guard.png"
-
-const bulletIMG = new Image();
-bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
-
-const drillIMG = new Image();
-drillIMG.src = "images/drill.png";
-
-
-const rocketIMG = new Image();
-rocketIMG.src = "images/rocket.png";
-
-const soccorBallIMG = new Image();
-soccorBallIMG.src = "images/pixil-frame-0%20(23).png";
-
-const pausedIMG = new Image();
-pausedIMG.src = "images/Screen Shot 2026-05-05 at 8.37.53 AM.png"
-
-const coinImg = new Image();
-coinImg.src = "images/pixil-frame-0%20(17).png"
-
-const forceField = new Image();
-forceField.src = "images/pixil-frame-0%20(18).png"
-
-
-const boom = new Image();
-boom.src = "images/pixil-frame-0%20(22).png"
-
-const collectSound = document.getElementById("collectSound");
-function playCollectSound() {
-  collectSound.currentTime = 0;
-  collectSound.play();
-}
-
-const shootSound = document.getElementById("shootSound");
-function playShootSound() {
-  shootSound.currentTime = 0;
-  shootSound.play();
-}
-gaurdMod = 0.5
-
-const mobHurtSound = document.getElementById("mobHurt");
-function playMobHurtSound() {
-  mobHurtSound.currentTime = 0;
-  mobHurtSound.play();
-}
-
-const buySound = document.getElementById("buySound")
-function playBuySound() {
-  buySound.currentTime = 0;
-  buySound.play();
-}
-
-const boss1 = new Image();
-boss1.src = "images/BOSS.png" 
-
-let kills = 0;
-let CoinsOnGround = []
-let rockets = []
-let rocketFacts = {
-  cooldown: Infinity,
-  damage: Number(localStorage.getItem('localPower'))*3,
-  explosionMod: 30,
-  speed: 3
-}
-let blades = 0
+    let sky = new Image();
+    sky.src = "images/pixil-frame-0%20(10).png";
 
 
-let ballsFacts = {
-  damage: Math.max(Number(localStorage.getItem('localPower'))/2, 1),
-  size: 20
-}
-let bolts = 0
-let lightningMult = 1.8
+    let playerImg = new Image();
+    playerImg.src = "images/pixil-frame-0%20(1).png";
 
-let rocketCooldownDecreaser = 0
+    let enemyBasic = new Image();
+    enemyBasic.src = "images/pixil-frame-0%20(12).png";
 
-let coinsToUpgrade = 2;
-forceFieldRange = 0;
-let forcePower = 0.03
-document.querySelector('#shop').style.opacity = '0'
-let upgrades = {
-    power: 1,
-    speed: 1,
-    size: 1,
-    cooldown: 1,
-    playerSpeed: 1,
-    magnet: 1,
-    forceField: 1,
-    rapid: 1,
-    energy: 1,
-    rocket: 1,
-    balls: 1,
-    drill: 1,
-    lightning: 1,
-    guardian: 1,
-    exo: 1,
-    fitness: 1
-}
+    let enemyLevel2 = new Image();
+    enemyLevel2.src = "images/pixil-frame-0%20(14).png"
 
-let balls = []
-let drills = []
+    let enemyLevel3 = new Image();
+    enemyLevel3.src = "images/pixil-frame-0%20(15).png"
 
-setInterval(() => {
-  if(!isPaused) spawnBox();
-}, 40000);
+    let enemyLevel4 = new Image();
+    enemyLevel4.src = "images/pixil-frame-0%20(16).png"
+
+    let boxIMG = new Image();
+    boxIMG.src = "images/pixil-frame-0 (1) (2).png"
+
+    let enemyLevel5 = new Image();
+    enemyLevel5.src = "images/pixil-frame-0%20(19).png"
+
+    let enemyLevel6 = new Image();
+    enemyLevel6.src = "images/pixil-frame-0%20(20).png"
+
+    let enemyLevel7 = new Image();
+    enemyLevel7.src = "images/astronought (1).png"
+
+    let enemyLevel8 = new Image();
+    enemyLevel8.src = "images/pixil-frame-0 (24).png"
+
+    let elite1 = new Image();
+    elite1.src = "images/pixil-frame-0 (25).png"
+
+    let lightning = new Image();
+    lightning.src = "images/pixil-frame-0 (26).png"
+
+    let gaurd = new Image();
+    gaurd.src = "images/guard.png"
+
+    const bulletIMG = new Image();
+    bulletIMG.src = "images/Screen Shot 2026-05-04 at 2.50.58 PM.png";
+
+    const drillIMG = new Image();
+    drillIMG.src = "images/drill.png";
 
 
-const DEFAULT_ICON = "images/pixil-frame-0 (30).png";
+    const rocketIMG = new Image();
+    rocketIMG.src = "images/rocket.png";
 
-const upgradeDefinitions = {
-    power: {
+    const soccorBallIMG = new Image();
+    soccorBallIMG.src = "images/pixil-frame-0%20(23).png";
+
+    const pausedIMG = new Image();
+    pausedIMG.src = "images/Screen Shot 2026-05-05 at 8.37.53 AM.png"
+
+    const coinImg = new Image();
+    coinImg.src = "images/pixil-frame-0%20(17).png"
+
+    const forceField = new Image();
+    forceField.src = "images/pixil-frame-0%20(18).png"
+
+
+    const boom = new Image();
+    boom.src = "images/pixil-frame-0%20(22).png"
+
+    const collectSound = document.getElementById("collectSound");
+    function playCollectSound() {
+      collectSound.currentTime = 0;
+      collectSound.play();
+    }
+
+    const shootSound = document.getElementById("shootSound");
+    function playShootSound() {
+      shootSound.currentTime = 0;
+      shootSound.play();
+    }
+    gaurdMod = 0.5
+
+    const mobHurtSound = document.getElementById("mobHurt");
+    function playMobHurtSound() {
+      mobHurtSound.currentTime = 0;
+      mobHurtSound.play();
+    }
+
+    const buySound = document.getElementById("buySound")
+    function playBuySound() {
+      buySound.currentTime = 0;
+      buySound.play();
+    }
+
+    const boss1 = new Image();
+    boss1.src = "images/BOSS.png"
+
+    let kills = 0;
+    let CoinsOnGround = []
+    let rockets = []
+    let rocketFacts = {
+      cooldown: Infinity,
+      damage: Number(localStorage.getItem('localPower')) * 3,
+      explosionMod: 30,
+      speed: 3
+    }
+    let blades = 0
+
+
+    let ballsFacts = {
+      damage: Math.max(Number(localStorage.getItem('localPower')) / 2, 1),
+      size: 20
+    }
+    let bolts = 0
+    let lightningMult = 1.8
+
+    let rocketCooldownDecreaser = 0
+
+    let coinsToUpgrade = 2;
+    forceFieldRange = 0;
+    let forcePower = 0.03
+    document.querySelector('#shop').style.opacity = '0'
+    let upgrades = {
+      power: 1,
+      speed: 1,
+      size: 1,
+      cooldown: 1,
+      playerSpeed: 1,
+      magnet: 1,
+      forceField: 1,
+      rapid: 1,
+      energy: 1,
+      rocket: 1,
+      balls: 1,
+      drill: 1,
+      lightning: 1,
+      guardian: 1,
+      exo: 1,
+      fitness: 1
+    }
+
+    let balls = []
+    let drills = []
+
+    setInterval(() => {
+      if (!isPaused) spawnBox();
+    }, 40000);
+
+
+    const DEFAULT_ICON = "images/pixil-frame-0 (30).png";
+
+    const upgradeDefinitions = {
+      power: {
         name: "Hi-Power Bullet",
         image: "images/pixil-frame-0 (37).png",
         passive: true,
-        levels: Array.from({ length: 5 }, (_, i) => `Increase power +${(i + 1)*10}%`)
-    },
+        levels: Array.from({ length: 5 }, (_, i) => `Increase power +${(i + 1) * 10}%`)
+      },
 
-    speed: {
+      speed: {
         name: "Ammo thruster",
         image: "images/pixil-frame-0 (32).png",
         passive: true,
         levels: Array.from({ length: 5 }, (_, i) => `Increase projectile speed ${(i + 1) * 10}%`)
-    },
+      },
 
-    size: {
+      size: {
         name: "HE Fuel",
         image: "images/pixil-frame-0 (41).png",
         passive: true,
         levels: Array.from({ length: 5 }, (_, i) => `Increase all weapon and ammo range ${(i + 1) * 10}%`)
-    },
+      },
 
-    cooldown: {
+      cooldown: {
         name: "Power cube",
         image: "images/pixil-frame-0 (39).png",
         passive: true,
         levels: Array(5).fill("Decrease all attack cooldown")
-    },
+      },
 
-    playerSpeed: {
+      playerSpeed: {
         name: "Sport shoes",
         passive: true,
         image: "images/pixil-frame-0 (40).png",
         levels: [
-            "Player Speed 5 => 6",
-            "Player Speed 6 => 7",
-            "Player Speed 7 => 8",
-            "Player Speed 8 => 9",
-            "Player Speed 9 => 10"
+          "Player Speed 5 => 6",
+          "Player Speed 6 => 7",
+          "Player Speed 7 => 8",
+          "Player Speed 8 => 9",
+          "Player Speed 9 => 10"
         ]
-    },
+      },
 
-    magnet: {
+      magnet: {
         name: "Hi-Powered Magnet",
         passive: true,
         image: "images/pixil-frame-0 (31).png",
         levels: [
-            "Increase magnet range 30 => 50",
-            "Increase magnet range 50 => 70",
-            "Increase magnet range 70 => 90",
-            "Increase magnet range 90 => 110",
-            "Increase magnet range 110 => 130"
+          "Increase magnet range 30 => 50",
+          "Increase magnet range 50 => 70",
+          "Increase magnet range 70 => 90",
+          "Increase magnet range 90 => 110",
+          "Increase magnet range 110 => 130"
         ]
-    },
+      },
 
-    forceField: {
+      forceField: {
         name: "ForceField",
         image: "images/pixil-frame-0 (18).png",
         levels: [
-            "Generate a dissolving force field",
-            "Increased force field range and power",
-            "Increased force field range and power",
-            "Increased force field range and power",
-            "Increased force field range and power"
+          "Generate a dissolving force field",
+          "Increased force field range and power",
+          "Increased force field range and power",
+          "Increased force field range and power",
+          "Increased force field range and power"
         ]
-    },
+      },
 
-    fitness: {
+      fitness: {
         name: "Fitness book",
         image: "images/pixil-frame-0 (42).png",
-        levels: Array.from({ length: 5 }, (_, i) => `+${(i + 1)*20}% Max HP`)
-    },
+        levels: Array.from({ length: 5 }, (_, i) => `+${(i + 1) * 20}% Max HP`)
+      },
 
-    rapid: {
+      rapid: {
         name: "Shotgun",
         image: "images/pixil-frame-0 (36).png",
         levels: Array(5).fill("Shoot an extra bullet")
-    },
+      },
 
-    energy: {
+      energy: {
         name: "Energy drink",
         image: "images/pixil-frame-0 (35).png",
         passive: true,
         levels: Array.from({ length: 5 }, (_, i) => `+${i + 1}% hp 10/sec`)
-    },
+      },
 
-    rocket: {
+      rocket: {
         name: "RPG",
         image: "images/pixil-frame-0 (38).png",
         levels: [
-            "Shoot a rocket every 5 seconds",
-            "Decrease rocket shoot time to 4 seconds",
-            "Increase rocket damage",
-            "Increase explosion range",
-            "Decrease shoot time to 3 seconds"
+          "Shoot a rocket every 5 seconds",
+          "Decrease rocket shoot time to 4 seconds",
+          "Increase rocket damage",
+          "Increase explosion range",
+          "Decrease shoot time to 3 seconds"
         ]
-    },
+      },
 
-    balls: {
+      balls: {
         name: "Soccer Ball",
         image: "images/pixil-frame-0 (23).png",
         levels: [
-            "Shoot a soccer ball that bounces off the screen and enemies",
-            "Shoot another ball",
-            "Increase soccer damage",
-            "Shoot another ball",
-            "Increase ball size"
+          "Shoot a soccer ball that bounces off the screen and enemies",
+          "Shoot another ball",
+          "Increase soccer damage",
+          "Shoot another ball",
+          "Increase ball size"
         ]
-    },
+      },
 
-    drill: {
+      drill: {
         name: "Drill shot",
         image: "images/drill.png",
         levels: [
-            "Shoot a drill that bounces around the screen",
-            "Shoot another drill",
-            "Shoot another drill",
-            "Shoot another drill",
-            "Shoot another drill"
+          "Shoot a drill that bounces around the screen",
+          "Shoot another drill",
+          "Shoot another drill",
+          "Shoot another drill",
+          "Shoot another drill"
         ]
-    },
+      },
 
-    lightning: {
+      lightning: {
         name: "Tesla coil",
         image: 'images/pixil-frame-0 (34).png',
         levels: [
-            "Summon a lightning shower: 1 bolt",
-            "Add another bolt",
-            "Add another bolt",
-            "Add another bolt",
-            "Add another bolt"
+          "Summon a lightning shower: 1 bolt",
+          "Add another bolt",
+          "Add another bolt",
+          "Add another bolt",
+          "Add another bolt"
         ]
-    },
+      },
 
-    guardian: {
+      guardian: {
         name: "Guardian",
         image: "images/guard.png",
         levels: [
-            "Spawn 2 circles that spin around the player dealing damage",
-            "Add a 3rd circle",
-            "Add a 4th circle",
-            "Add a 5th circle",
-            "Add a 6th circle"
+          "Spawn 2 circles that spin around the player dealing damage",
+          "Add a 3rd circle",
+          "Add a 4th circle",
+          "Add a 5th circle",
+          "Add a 6th circle"
         ]
-    },
+      },
 
-    exo: {
+      exo: {
         name: "Exo Bracer",
         passive: true,
         image: "images/pixil-frame-0 (29).png",
         levels: [
-            "Overtime effect +20%",
-            "Overtime effect +40%",
-            "Overtime effect +60%",
-            "Overtime effect +80%",
-            "Overtime effect +100%"
+          "Overtime effect +20%",
+          "Overtime effect +40%",
+          "Overtime effect +60%",
+          "Overtime effect +80%",
+          "Overtime effect +100%"
         ]
-    }
-};
+      }
+    };
 
-function getUpgradeText(upgradeName, level) {
-    const upgrade = upgradeDefinitions[upgradeName];
+    function getUpgradeText(upgradeName, level) {
+      const upgrade = upgradeDefinitions[upgradeName];
 
-    if (!upgrade) {
+      if (!upgrade) {
         console.error(`Unknown upgrade: ${upgradeName}`);
         return "";
-    }
+      }
 
-    if (level < 0 || level >= upgrade.levels.length) {
+      if (level < 0 || level >= upgrade.levels.length) {
         console.error(`Invalid level ${level} for ${upgradeName}`);
         return "";
-    }
+      }
 
-    const imageSrc = upgrade.image || DEFAULT_ICON;
+      const imageSrc = upgrade.image || DEFAULT_ICON;
 
-    const stars =
+      const stars =
         "⭐️".repeat(level + 1) +
         "⬛️".repeat(5 - (level + 1));
 
-    return `
+      return `
         <b${upgrade.passive ? ' class="passive"' : ''}>${upgrade.name}</b> <img class="upgrade-icon" src="${imageSrc}"> <div class="upgradeText">${upgrade.levels[level]}</div><div class='stars'>${stars} </div>`
-}
+    }
 
-let upgradeArray = ['forceField', 'rapid', 'rocket', 'balls', 'drill', 'lightning', 'guardian']
-let avaibleUpgrades = []
+    let upgradeArray = ['forceField', 'rapid', 'rocket', 'balls', 'drill', 'lightning', 'guardian']
+    let avaibleUpgrades = []
 
-function displayUpgrades() {
+    function displayUpgrades() {
 
-  if (upgradeMenuOpen) return;
-  upgradeMenuOpen = true;
+      if (upgradeMenuOpen) return;
+      upgradeMenuOpen = true;
 
-  document.querySelector('#shop').style.opacity = '0.95'
+      document.querySelector('#shop').style.opacity = '0.95'
 
-  avaibleUpgrades = [];
+      avaibleUpgrades = [];
 
-  document.querySelector('#mobileControls').style.display = 'none'
+      document.querySelector('#mobileControls').style.display = 'none'
 
-  let possibleUpgrades = upgradeArray.filter(
-    upgrade => upgrades[upgrade] < MAX_UPGRADE
-  );
-
-
-
-  if (possibleUpgrades.length === 0) {
-    upgradeMenuOpen = false;
-    isPaused = false;
-    document.querySelector('#shop').style.opacity = '0';
-    document.querySelector('#mobileControls').style.display = 'block';
-    canvas.style.opacity = '1';
-    return;
-}
-
-  possibleUpgrades.sort(() => Math.random() - 0.5);
-
-  let selected = possibleUpgrades.slice(0, 3);
-
-  for (let i = 0; i < selected.length; i++) {
-
-    let upgrade = selected[i];
-
-    document.getElementById(`buy${i+1}`).innerHTML = getUpgradeText(upgrade, upgrades[upgrade]-1)
-
-    avaibleUpgrades.push(upgrade);
-  }
-
-  isPaused = true;
-  canvas.style.opacity = '0.3';
-  if(document.querySelector('#buy1').innerText === document.querySelector('#buy2').innerText === document.querySelector('#buy3').innerText ){
-    isPaused = false
-    document.querySelector('#mobileControls').style.display = 'block'
-    canvas.style.opacity = '1'
-    document.querySelector('#shop').style.opacity = '0'
-  }
-}
-let bossSpawned = false;
-
-decreaseCooldownCost = 3;
-
-const player = {
-  x: 30,
-  y: 120,
-  dx: 0,
-  dy: 0,
-  speed: 5,
-  currentSpeed: 5,
-  direction: "e"
-};
-
-let energyDrinkCooldown = 800
-enemies = []
-
-function spawnEnemy(type="basic", mod=0, is=false, degree = 0) {
-  
-  const minRadius = 800;
-  const maxRadius = 1000;
-  let angle;
-  if( is){
-     angle = degree
-  }
-  else { angle = Math.random() * Math.PI * 2;}
-  const radius = minRadius + Math.random() * (maxRadius - minRadius);
-
-  const px = player.x + Math.cos(angle) * radius;
-  const py = player.y + Math.sin(angle) * radius;
-
-  let Ehealth;
-  let typeImage;
-  let enemySize
-  if(type === "basic") {
-    Ehealth = 1
-    enemySize = 90
-    typeImage = enemyBasic
-  } else if (type === "level2") {
-    Ehealth = 3
-    typeImage = enemyLevel2
-    enemySize = 30
-  } else if (type === "level3") {
-    Ehealth = 8
-    typeImage = enemyLevel3
-    enemySize = 50
-  } else if (type === "level4") {
-    Ehealth = 16
-    typeImage = enemyLevel4
-    enemySize = 40
-  } else if (type === "level5") {
-    Ehealth = 0.5
-    typeImage = enemyLevel5
-    enemySize = 20
-  } else if (type === "boss1") {
-    Ehealth = 300
-    typeImage = boss1
-    enemySize = 200
-  } else if (type === "level6") {
-    Ehealth = 40
-    typeImage = enemyLevel6
-    enemySize = 40
-  } else if (type === "level7") {
-    Ehealth = 130
-    typeImage = enemyLevel7
-    enemySize = 30
-  } else if (type === "level8") {
-    Ehealth = 240
-    typeImage = enemyLevel8
-    enemySize = 80
-  } else if (type === "elite1") {
-    Ehealth = 180
-    typeImage = elite1
-    enemySize = 50
-  }
-  if (type === "boss1") {
-    console.trace("BOSS SPAWNED");
-  }
-  enemies.push({x:px, y:py, health: Ehealth+mod, image: typeImage, enemyType: type, size: enemySize})
-}
-let bulletFireAmount = 1
-boxes = []
-
-let elite1Spawned = false
-
-function spawnBox() {
-  const minRadius = 400;
-  const maxRadius = 600;
-
-  const angle = Math.random() * Math.PI * 2;
-  const radius = minRadius + Math.random() * (maxRadius - minRadius);
-
-  const x = player.x + Math.cos(angle) * radius;
-  const y = player.y + Math.sin(angle) * radius;
-
-  boxes.push({
-    x: x,
-    y: y,
-    size: 20
-  });
-}
-spawnEnemy()
-
-for(let i = 0; i < 20; i++){
-  px = Math.random()*1770-1000
-  py = Math.random()*1530 - 770
-  CoinsOnGround.push({x: px, y: py, value: 0.5})
-}
-let lightningMaxCooldown = 300
-let gaurdSize = 40
-
-keys = {};
-let fullArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian', 'exo', 'fitness']
-let energyDrinkEffect = 0;
-
-function inRange(obj1, obj2, range) {
-  if (!obj1 || !obj2) return false;
-
-  const x1 = obj1.x + 15;
-  const y1 = obj1.y + 15;
-
-  const x2 = obj2.x + obj2.size / 2;
-  const y2 = obj2.y + obj2.size / 2;
-
-  const dx = x1 - x2;
-  const dy = y1 - y2;
-
-  const enemyRadius = obj2.size / 2;
-  const fieldRadius = range / 2;
-
-  return dx * dx + dy * dy < (fieldRadius + enemyRadius) * (fieldRadius + enemyRadius);
-}
-
-let bulletCooldown = 0;
-let bulletCooldownMax = 120
-let gaurdianCooldown = 0
-let rocketExplosionMod= 0
-
-function clearText() {
-  setTimeout(() => {
-    document.querySelector('#gameText').innerText = ``
-  }, 3000);
-}
+      let possibleUpgrades = upgradeArray.filter(
+        upgrade => upgrades[upgrade] < MAX_UPGRADE
+      );
 
 
-function home() {
-  window.location.href = "index.html";
-} 
-function shop() {
-    
-  let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
-  
-  let earnedCoins = Math.round(kills / 5);
-  let totalCoins = currentCoins + earnedCoins;
-  
-  localStorage.setItem('killCoins', String(totalCoins));
-  window.location.href = "shooterShopFile.html";
-} 
-let totalUpgradesCompleteed = 0;
 
-
-let rocketCooldown = Infinity;
-
-function buy(choice) {
-  upgradeArray = fullArray
-
-  playBuySound();
-
-  let selectedUpgrade = avaibleUpgrades[choice - 1];
-
-  if (!selectedUpgrade) return;
-  upgradeMenuOpen = false;
-
-  switch (selectedUpgrade) {
-
-    case "power":
-      bulletPower += base / 10;
-      ballsFacts.damage += base / 10
-      lightningMult+= 0.2
-      document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
-      break;
-
-    case "speed":
-      bulletSpeed *= 1.1;
-      rocketFacts.speed *= 1.1
-      document.getElementById('statsBulletSpeed').innerText = `Bullet speed: ${Math.round(bulletSpeed)}`
-      break;
-
-    case "size":
-      ballsFacts.size += 2
-      forceFieldRange += 10;
-      gaurdSize+=5
-      updateBalls()
-      bulletSize += 2;
-      rocketFacts.explosionMod += 3
-      document.getElementById('statsSize').innerText = `Bullet Size: ${bulletSize}`
-      break;
-
-    case "cooldown":
-      bulletCooldownMax = Math.max(5, bulletCooldownMax - 20);
-      rocketCooldownDecreaser += 20
-      lightningMaxCooldown -= 30
-      document.getElementById('statsCooldown').innerText = `Bullet cooldown: ${bulletCooldownMax}`
-      break;
-
-    case "playerSpeed":
-      player.speed += 1;
-      document.getElementById('statsSpeed').innerText = `Speed: ${player.speed}`
-      break;
-
-    case "magnet":
-      magnetRange += 20;
-      document.getElementById('statsMagnet').innerText = `Magnet range: ${magnetRange}`
-      break;
-
-    case "forceField":
-      if (upgrades.forceField === 1) forceFieldRange += 40;
-      forceFieldRange += 30;
-      forcePower += 0.01
-      document.getElementById('statsForce').innerText = `Force Field range: ${forceFieldRange}`
-      break;
-
-    case "rapid":
-      bulletFireAmount += 1
-      break;
-
-    case "energy":
-      energyDrinkEffect += MaxHealth/100;
-      document.getElementById('statsEnergy').innerText = `+${energyDrinkEffect} hp 10/sec`
-      break;
-
-    case "rocket":
-      switch (upgrades.rocket) {
-        case 1:
-          rocketFacts.cooldown = 320 - rocketCooldownDecreaser;
-          rocketCooldown = 2
-          break;
-        case 2:
-          rocketFacts.cooldown = 260- rocketCooldownDecreaser;
-          break;
-        case 3: 
-          rocketFacts.damage = bulletPower*6;
-          break;
-        case 4:
-          rocketFacts.explosionMod += 20;
-          break;
-        case 5: 
-          rocketFacts.cooldown = 200 - rocketCooldownDecreaser
-          break;
+      if (possibleUpgrades.length === 0) {
+        upgradeMenuOpen = false;
+        isPaused = false;
+        document.querySelector('#shop').style.opacity = '0';
+        document.querySelector('#mobileControls').style.display = 'block';
+        canvas.style.opacity = '1';
+        return;
       }
-      break
-    case "balls":
-      switch (upgrades.balls) {
-        case 1: 
-          balls.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size})
-          break
-        case 2:
-          balls.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size})
-          break
-        case 3:
-          ballsFacts.damage *= 2
-          break
-        case 4:
-          balls.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size})
-          break
-        case 5:
-          ballsFacts.size += 10
+
+      possibleUpgrades.sort(() => Math.random() - 0.5);
+
+      let selected = possibleUpgrades.slice(0, 3);
+
+      for (let i = 0; i < selected.length; i++) {
+
+        let upgrade = selected[i];
+
+        document.getElementById(`buy${i + 1}`).innerHTML = getUpgradeText(upgrade, upgrades[upgrade] - 1)
+
+        avaibleUpgrades.push(upgrade);
+      }
+
+      isPaused = true;
+      canvas.style.opacity = '0.3';
+      if (document.querySelector('#buy1').innerText === document.querySelector('#buy2').innerText === document.querySelector('#buy3').innerText) {
+        isPaused = false
+        document.querySelector('#mobileControls').style.display = 'block'
+        canvas.style.opacity = '1'
+        document.querySelector('#shop').style.opacity = '0'
+      }
+    }
+    let bossSpawned = false;
+
+    decreaseCooldownCost = 3;
+
+    const player = {
+      x: 30,
+      y: 120,
+      dx: 0,
+      dy: 0,
+      speed: 5,
+      currentSpeed: 5,
+      direction: "e"
+    };
+
+    let energyDrinkCooldown = 800
+    enemies = []
+
+    function spawnEnemy(type = "basic", mod = 0, is = false, degree = 0) {
+
+      const minRadius = 800;
+      const maxRadius = 1000;
+      let angle;
+      if (is) {
+        angle = degree
+      }
+      else { angle = Math.random() * Math.PI * 2; }
+      const radius = minRadius + Math.random() * (maxRadius - minRadius);
+
+      const px = player.x + Math.cos(angle) * radius;
+      const py = player.y + Math.sin(angle) * radius;
+
+      let Ehealth;
+      let typeImage;
+      let enemySize
+      if (type === "basic") {
+        Ehealth = 1
+        enemySize = 90
+        typeImage = enemyBasic
+      } else if (type === "level2") {
+        Ehealth = 3
+        typeImage = enemyLevel2
+        enemySize = 30
+      } else if (type === "level3") {
+        Ehealth = 8
+        typeImage = enemyLevel3
+        enemySize = 50
+      } else if (type === "level4") {
+        Ehealth = 16
+        typeImage = enemyLevel4
+        enemySize = 40
+      } else if (type === "level5") {
+        Ehealth = 0.5
+        typeImage = enemyLevel5
+        enemySize = 20
+      } else if (type === "boss1") {
+        Ehealth = 300
+        typeImage = boss1
+        enemySize = 200
+      } else if (type === "level6") {
+        Ehealth = 40
+        typeImage = enemyLevel6
+        enemySize = 40
+      } else if (type === "level7") {
+        Ehealth = 130
+        typeImage = enemyLevel7
+        enemySize = 30
+      } else if (type === "level8") {
+        Ehealth = 240
+        typeImage = enemyLevel8
+        enemySize = 80
+      } else if (type === "elite1") {
+        Ehealth = 180
+        typeImage = elite1
+        enemySize = 50
+      }
+      if (type === "boss1") {
+        console.trace("BOSS SPAWNED");
+      }
+      enemies.push({ x: px, y: py, health: Ehealth + mod, image: typeImage, enemyType: type, size: enemySize })
+    }
+    let bulletFireAmount = 1
+    boxes = []
+
+    let elite1Spawned = false
+
+    function spawnBox() {
+      const minRadius = 400;
+      const maxRadius = 600;
+
+      const angle = Math.random() * Math.PI * 2;
+      const radius = minRadius + Math.random() * (maxRadius - minRadius);
+
+      const x = player.x + Math.cos(angle) * radius;
+      const y = player.y + Math.sin(angle) * radius;
+
+      boxes.push({
+        x: x,
+        y: y,
+        size: 20
+      });
+    }
+    spawnEnemy()
+
+    for (let i = 0; i < 20; i++) {
+      px = Math.random() * 1770 - 1000
+      py = Math.random() * 1530 - 770
+      CoinsOnGround.push({ x: px, y: py, value: 0.5 })
+    }
+    let lightningMaxCooldown = 300
+    let gaurdSize = 40
+
+    keys = {};
+    let fullArray = ['power', 'speed', 'size', 'cooldown', 'playerSpeed', 'magnet', 'forceField', 'rapid', 'energy', 'rocket', 'balls', 'drill', 'lightning', 'guardian', 'exo', 'fitness']
+    let energyDrinkEffect = 0;
+
+    function inRange(obj1, obj2, range) {
+      if (!obj1 || !obj2) return false;
+
+      const x1 = obj1.x + 15;
+      const y1 = obj1.y + 15;
+
+      const x2 = obj2.x + obj2.size / 2;
+      const y2 = obj2.y + obj2.size / 2;
+
+      const dx = x1 - x2;
+      const dy = y1 - y2;
+
+      const enemyRadius = obj2.size / 2;
+      const fieldRadius = range / 2;
+
+      return dx * dx + dy * dy < (fieldRadius + enemyRadius) * (fieldRadius + enemyRadius);
+    }
+
+    let bulletCooldown = 0;
+    let bulletCooldownMax = 120
+    let gaurdianCooldown = 0
+    let rocketExplosionMod = 0
+
+    function clearText() {
+      setTimeout(() => {
+        document.querySelector('#gameText').innerText = ``
+      }, 3000);
+    }
+
+
+    function home() {
+      window.location.href = "index.html";
+    }
+    function shop() {
+
+      let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
+
+      let earnedCoins = Math.round(kills / 5);
+      let totalCoins = currentCoins + earnedCoins;
+
+      localStorage.setItem('killCoins', String(totalCoins));
+      window.location.href = "shooterShopFile.html";
+    }
+    let totalUpgradesCompleteed = 0;
+
+
+    let rocketCooldown = Infinity;
+
+    function buy(choice) {
+      upgradeArray = fullArray
+
+      playBuySound();
+
+      let selectedUpgrade = avaibleUpgrades[choice - 1];
+
+      if (!selectedUpgrade) return;
+      upgradeMenuOpen = false;
+
+      switch (selectedUpgrade) {
+
+        case "power":
+          bulletPower += base / 10;
+          ballsFacts.damage += base / 10
+          lightningMult += 0.2
+          document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
+          break;
+
+        case "speed":
+          bulletSpeed *= 1.1;
+          rocketFacts.speed *= 1.1
+          document.getElementById('statsBulletSpeed').innerText = `Bullet speed: ${Math.round(bulletSpeed)}`
+          break;
+
+        case "size":
+          ballsFacts.size += 2
+          forceFieldRange += 10;
+          gaurdSize += 5
           updateBalls()
-          break
-      }
-      break
-    case "drill":
-      drills.push({x: player.x, y: player.y, dx: 0.64278760968, dy: -0.76604444311, size: 20})
-      break
-    case "lightning":
-      bolts +=1
-      lightningMult+= 0.4
-      break
-    case "guardian":
-      gaurdMod += 0.1
-      switch (upgrades.guardian){
-      case 1:
-        guardians.push({x: 0, y: 0, turn: 0, time: 0})
-        guardians.push({x: 0, y: 0, turn: Math.PI, time: 0})
-        break
+          bulletSize += 2;
+          rocketFacts.explosionMod += 3
+          document.getElementById('statsSize').innerText = `Bullet Size: ${bulletSize}`
+          break;
 
-      case 2:
-        guardians = []
-        guardians.push({x: 0, y: 0, turn: 0})
-        guardians.push({x: 0, y: 0, turn: 4*Math.PI/3, time: 0})
-        guardians.push({x: 0, y: 0, turn: 2*Math.PI/3, time: 0})
-        break
-      
-      case 3:
-        guardians = []
-        guardians.push({x: 0, y: 0, turn: 0, time: 0})
-        guardians.push({x: 0, y: 0, turn: Math.PI/2, time: 0})
-        guardians.push({x: 0, y: 0, turn: Math.PI, time: 0})
-        guardians.push({x: 0, y: 0, turn: 3*Math.PI/2, time: 0})
-        break
+        case "cooldown":
+          bulletCooldownMax = Math.max(5, bulletCooldownMax - 20);
+          rocketCooldownDecreaser += 20
+          lightningMaxCooldown -= 30
+          document.getElementById('statsCooldown').innerText = `Bullet cooldown: ${bulletCooldownMax}`
+          break;
 
-      case 4:
-        guardians = []
-        guardians.push({x: 0, y: 0, turn: 0})
-        guardians.push({x: 0, y: 0, turn: 8*Math.PI/5, time: 0})
-        guardians.push({x: 0, y: 0, turn: 6*Math.PI/5, time: 0})
-        guardians.push({x: 0, y: 0, turn: 4*Math.PI/5, time: 0})
-        guardians.push({x: 0, y: 0, turn: 2*Math.PI/5, time: 0})
-        break
-      
-      case 5:
-        guardians = []
-        guardians.push({x: 0, y: 0, turn: 0})
-        guardians.push({x: 0, y: 0, turn: 10*Math.PI/6, time: 0})
-        guardians.push({x: 0, y: 0, turn: 8*Math.PI/6, time: 0})
-        guardians.push({x: 0, y: 0, turn: 6*Math.PI/6, time: 0})
-        guardians.push({x: 0, y: 0, turn: 4*Math.PI/6, time: 0})
-        guardians.push({x: 0, y: 0, turn: 2*Math.PI/6, time: 0})
-        break
-      }
-      break
-    case "exo":
-      gaurdianCooldown += 60
-      rocketExplosionMod += 20
-      break
-    case "fitness":
-      MaxHealth += MAXHEALTHBASE / 5
-      document.getElementById('statsHealth').innerText = `Max Health: ${MaxHealth}`
+        case "playerSpeed":
+          player.speed += 1;
+          document.getElementById('statsSpeed').innerText = `Speed: ${player.speed}`
+          break;
 
-    
+        case "magnet":
+          magnetRange += 20;
+          document.getElementById('statsMagnet').innerText = `Magnet range: ${magnetRange}`
+          break;
 
-  }
+        case "forceField":
+          if (upgrades.forceField === 1) forceFieldRange += 40;
+          forceFieldRange += 30;
+          forcePower += 0.01
+          document.getElementById('statsForce').innerText = `Force Field range: ${forceFieldRange}`
+          break;
 
-  document.querySelector('#buy1').innerText = 'Wait for upgrade'
-  document.querySelector('#buy2').innerText = 'Wait for upgrade'
-  document.querySelector('#buy3').innerText = 'Wait for upgrade'
+        case "rapid":
+          bulletFireAmount += 1
+          break;
 
-  if (upgrades[selectedUpgrade] < 6) {
-    upgrades[selectedUpgrade] += 1;
-  }
-  avaibleUpgrades = []
+        case "energy":
+          energyDrinkEffect += MaxHealth / 100;
+          document.getElementById('statsEnergy').innerText = `+${energyDrinkEffect} hp 10/sec`
+          break;
 
-  isPaused = false
-  document.querySelector('#mobileControls').style.display = 'block'
-  canvas.style.opacity = '1'
-  document.querySelector('#shop').style.opacity = '0'
-}
-function updateBalls(){
-  for(ball of balls) {
-    ball.size = ballsFacts.size
-  }
-}
-
-
-function shootBullet() {
-  playShootSound();
-  let ptarget = getClosestMob()
-  if (!ptarget) return;
-  let dx = ptarget.x +ptarget.size/2 - player.x;
-  let dy = ptarget.y+ptarget.size/2 - player.y;
-
-  let dist = Math.sqrt(dx * dx + dy * dy);
-
-  let pdx = dx / dist;
-  let pdy = dy / dist;
-
-  addBullet(player.x, player.y, pdx, pdy, bulletSize);
-}
-
-function dropXP(enemy) {
-if (enemy.enemyType === "level2") {
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1})
-}
-if (enemy.enemyType === "basic") {
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 0.5})
-}
-if (enemy.enemyType === "level5") {
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 0.5})
-}
-if (enemy.enemyType === "level3"){
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 1.5})
-}
-if (enemy.enemyType === "level4"){
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 2})
-}
-if(enemy.enemyType === "boss1"){
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: coinsToUpgrade})
-  bossOnBoard = false
-  for (let c = CoinsOnGround.length - 1; c >= 0; c --) {
-    coin = CoinsOnGround[c]
-    CoinsOnGround.splice(c, 1)
-    coins+= coin.value
-  }
-}
-if(enemy.enemyType === "elite1"){
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*30, y: enemy.y+enemy.size/2+ Math.random()*30, value: coinsToUpgrade})
-  mobSpawnCooldown = 0
-}
-if (enemy.enemyType === "level6"){
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 2.5})
-}
-if (enemy.enemyType === "level7"){
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 4.5})
-}
-if (enemy.enemyType === "level8"){
-  CoinsOnGround.push({x: enemy.x+enemy.size/2 + Math.random()*10, y: enemy.y+enemy.size/2+ Math.random()*10, value: 6.5})
-}
-}
-
-
-window.addEventListener('keydown', e => keys[e.code] = true);
-window.addEventListener('keyup', e => keys[e.code] = false);
-
-window.addEventListener("keydown", function(e) {
-    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].indexOf(e.code) > -1) {
-        e.preventDefault();
-    }
-}, false);
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === '-') {
-    time = prompt("LOl you found the secret hack. Please enter the mod time: ")
-  }
-  if (event.key === '=') {
-    value = prompt("LOl you found the secret hack. Want some coins? Dont do more than 1000 :3")
-    for (let i = 0; i <value; i ++){
-      CoinsOnGround.push({x: player.x, y: player.y, value: 1})
-    }
-  }
-  if (event.key === "t"){
-    let mode = prompt("What mode do you want? Famine (1), Hardcore (2), Swarm (3), Pasifisct (4)")
-      if (mode === "1") {
-        coinsToUpgrade *= 2
-        coinsToUpgrade += 5
-      }
-      if (mode === "2") {
-        MaxHealth = 1
-        health= 1
-        MAXHEALTHBASE = 1
-        upgrades.fitness = 6
-        upgrades.energy = 6
-      }
-      if (mode === "3") {
-        swarm = true
-      }
-      if (mode === "4") {
-        bulletCooldown = Infinity
-        guardians.push({x: 0, y: 0, turn: 0, time: 0})
-        guardians.push({x: 0, y: 0, turn: Math.PI, time: 0})
-        gaurdMod += 0.1
-        upgrades.guardian = 2
-        upgrades.rapid = 6
-      }
-  }
-});
-
-
-window.addEventListener("keydown", function(e) {
-    if (["KeyQ"].indexOf(e.code) > -1) {
-        pause()
-    }
-}, false);
-
-let bullets = []
-let walls = []
-function addBullet (px, py, pdx, pdy, BSIZE) {
-  bullets.push({x:px, y:py, dx:pdx, dy:pdy, size: BSIZE})
-}
-function addWall(px, py, w, h) {
-  walls.push({x:px, y:py, width:w, height:h})
-}
-
-
-
-function bulletHitsEnemy(bullet, enemy) {
-  const bulletRadius = bullet.size / 2;
-  const enemyRadius = enemy.size / 2;
-
-  const bulletCenterX = bullet.x + bulletRadius;
-  const bulletCenterY = bullet.y + bulletRadius;
-
-  const enemyCenterX = enemy.x + enemyRadius;
-  const enemyCenterY = enemy.y + enemyRadius;
-
-  const dx = bulletCenterX - enemyCenterX;
-  const dy = bulletCenterY - enemyCenterY;
-
-  const distanceSquared = dx * dx + dy * dy;
-  const radiusSum = bulletRadius + enemyRadius;
-
-  return distanceSquared <= radiusSum * radiusSum;
-}
-
-function getClosestMob() {
-  let closest = null;
-  let closestDist = Infinity;
-
-  for (let enemy of enemies) {
-    let dist = (enemy.x - player.x) * (enemy.x - player.x) + (enemy.y - player.y) * (enemy.y - player.y);
-
-    if (dist < closestDist) {
-      closestDist = dist;
-      closest = enemy;
-    }
-  }
-
-  return closest;
-}
-
-
-
-let bulletSpeed = 10
-let bulletSize = 10
-let lightningCooldown = 0
-let increasePowerCost = 5
-let mobSpawnCooldown = 300
-let MobsOnBoard = 3
-let increaseSpeedCost = 5
-let coins = 0
-let bulletPower = Number(localStorage.getItem('localPower'))
-
-const MobSpeed = 1
-
-document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
-
-
-function spawnWave(type, amount){
-  const angle = Math.random() * Math.PI * 2;
-  const increment = Math.PI * 2/amount
-  for (let i = 0; i <amount; i ++) {
-    spawnEnemy(type, 0, true, angle+increment*i)
-  }
-}
-
-let time = localStorage.getItem('killModifyer')
-
-setInterval(() => {
-  if(!bossOnBoard) {if(!isPaused) {time ++;
-
-  summonWave()}}
-
-
-}, 1000);
-
-setInterval(() => {
-  if (!swarm) {return;}
-  if(!bossOnBoard) {if(!isPaused) {time ++;
-
-  summonWave()}}
-
-
-}, 1000);
-let bossOnBoard = false
-function summonWave(){
-
-    switch (time) {
-      case 1:
-        spawnWave("basic", 14)
-        break
-      case 10:
-        spawnWave("basic", 5)
-        break
-      case 20:
-        spawnWave("basic", 8)
-        break
-      case 30:
-        spawnWave("basic", 5)
-        spawnWave("level2", 5)
-        break
-      case 45:
-        spawnWave("basic", 4)
-        spawnWave("level2", 5)
-        break
-      case 60:
-        spawnWave("basic", 5)
-        spawnWave("level2", 6)
-        break
-      case 75:
-        spawnWave("basic", 6)
-        spawnWave("level2", 7)
-        break
-      case 90:
-        spawnWave("basic", 4)
-        spawnWave("level2", 6)
-        break
-      case 100:
-        spawnWave("basic", 4)
-        spawnWave("level2", 6)
-        break
-      case 110: 
-        spawnWave("basic", 80)
-        break
-      case 130:
-        spawnWave("basic", 70)
-        break
-      case 150:
-        spawnWave("level2", 50)
-        break
-      case 170:
-        spawnWave("level2", 40)
-        break
-      case 190:
-        spawnEnemy('elite1')
-        spawnWave("level2", 30)
-        spawnWave("level3", 10)
-        break
-      case 210:
-        spawnWave("level3", 40)
-        break
-      case 230:
-        spawnWave("level5", 130)
-        break
-      case 235:
-        spawnWave("basic", 50)
-      case 240:
-        spawnWave("level5", 90)
-        break
-      case 245:
-        spawnWave("level5", 70)
-        break
-      case 250:
-        spawnWave("basic", 90)
-        break
-      case 260:
-        spawnWave("level2", 30)
-        break
-      case 265:
-        spawnWave("level5", 80)
-        break
-      case 275:
-        spawnWave("level4", 30)
-        break
-      case 285:
-        spawnWave("level4", 10)
-        break
-      case 300:
-        enemies = []
-        spawnEnemy('boss1')
-        bossOnBoard=true
-        break
-      case 301:
-        spawnWave("level4", 40)
-        break
-      case 310:
-        spawnWave("level4", 30)
-        break
-      case 325:
-        spawnWave("level4", 30)
-        break
-      case 340:
-        spawnWave("level6", 20)
-        break
-      case 360:
-        spawnWave("level4", 80)
-        break
-      case 380:
-        spawnWave("level4", 80)
-        spawnEnemy('elite1', 100)
-        break
-      case 400:
-        spawnWave("level6", 60)
-        break
-      case 420:
-        spawnWave("level6", 60)
-        break
-      case 440:
-        spawnWave("level6", 60)
-        break
-      case 460:
-        spawnWave("level7", 20)
-        break
-      case 480:
-        spawnWave("level7", 20)
-        break
-      case 500:
-        spawnWave("level7", 20)
-        spawnWave("level5", 100)
-        break
-      case 520:
-        spawnWave("level7", 20)
-        spawnWave("level6", 60)
-        break
-      case 540:
-        spawnWave("level7", 20)
-        spawnWave("level6", 60)
-        spawnEnemy('elite1', 800)
-        break
-      case 560:
-        spawnWave("level4", 300)
-        break
-      case 565:
-        spawnWave("level4", 10)
-        break
-      case 570:
-        spawnWave("level4", 10)
-        break
-      case 575:
-        spawnWave("level4", 10)
-        break
-      case 580:
-        spawnWave("level4", 10)
-        break
-      case 585:
-        spawnWave("level4", 10)
-        break
-      case 600:
-        enemies = []
-        spawnEnemy('boss1', 1800)
-        bossOnBoard=true
-        break
-      case 601:
-        spawnWave("level6", 50)
-        break
-      default:
-        if (time > 601 && time < 630 && time % 2 === 0){
-          spawnWave("level6", 30)
-        } else if (time > 630 && time < 660 && time % 3 === 0){
-          spawnWave("level6", 50)
-        } else if (time > 660 && time < 700 && time % 1 === 0){
-          spawnWave("level7", 20)
-        } else if (time > 700 && time % 1 === 0){
-          spawnWave("level7", 10)
-          spawnWave("level8", 10)
-        } 
-
-      
-    }
-}
-
-function getRandomVisibleMob() {
-  let visibleMobs = enemies.filter(enemy =>
-    enemy.x + enemy.size > scrollX &&
-    enemy.x < scrollX + canvas.width &&
-    enemy.y + enemy.size > scrollY &&
-    enemy.y < scrollY + canvas.height
-  );
-
-  if (visibleMobs.length === 0) return null;
-
-  return visibleMobs[Math.floor(Math.random() * visibleMobs.length)];
-}
-
-function shootLightning(){
-  let mob = getRandomVisibleMob()
-  if (mob){
-    let bolt = {x: mob.x+ mob.size/2, y: mob.y+ mob.size/2, size: 40}
-    for(let enemy of enemies){
-      if (bulletHitsEnemy(bolt, enemy)){
-        enemy.health -= bulletPower*lightningMult
-      }
-    }
-    lightningBolts.push({x: mob.x, y: mob.y, time: 30})
-  }
-}
-
-let gaurdiansInactive = false
-let lightningBolts = []
-
-function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  let killsWithMod = kills + Number(localStorage.getItem('killModifyer'))
-  document.querySelector(('h1')).innerText = `HEALTH: ${health}`
-  document.querySelector('h1').style.color = `rgb(${255 - (health * (255/MaxHealth))}, ${health * (255/MaxHealth)}, 0)`
-  document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills} + ${localStorage.getItem('killModifyer')} Modifier, Most Kills: ${mostKills}, Time: ${time}`
-  let progressPercent = (coins / coinsToUpgrade) * 100;
-  document.getElementById("progressBar").style.width = `${progressPercent}%`;
-  if (isPaused) return;
-  player.dx = 0; player.dy = 0;
-  player.currentSpeed = player.speed
-  if(keys['ShiftRight']||keys['ShiftLeft']) player.currentSpeed = player.speed *1.5;
-  if (keys['KeyW']||keys['ArrowUp']) {player.dy = -player.currentSpeed; player.direction = "n"}
-  if (keys['KeyS']||keys['ArrowDown']) {player.dy = player.currentSpeed; player.direction = "s"}
-  if (keys['KeyA']||keys['ArrowLeft']) {player.dx = -player.currentSpeed; player.direction = "e"}
-  if (keys['KeyD']||keys['ArrowRight']) {player.dx = player.currentSpeed; player.direction = "w"}
-  
-  MobsOnBoard = enemies.length
-  bulletCooldown -= 1
-  energyDrinkCooldown -= 1
-  if (energyDrinkCooldown <=0 && health <= MaxHealth - energyDrinkEffect) {
-    health += energyDrinkEffect
-    energyDrinkCooldown = 700
-  }
-  lightningCooldown -= 1
-  if (lightningCooldown < 0){
-    lightningCooldown = lightningMaxCooldown
-    if(bolts >= 1 ){
-      shootLightning()
-    }
-    setTimeout(() => {
-      if(bolts >= 2 ){
-        shootLightning()
-      }
-    }, 200);
-
-    setTimeout(() => {
-      if(bolts >= 3 ){
-        shootLightning()
-      }
-    }, 400);
-
-    setTimeout(() => {
-      if(bolts >= 4 ){
-        shootLightning()
-      }
-    }, 600);
-
-    setTimeout(() => {
-      if(bolts >= 5 ){
-        shootLightning()
-      }
-    }, 800);
-
-  }
-  for(let bolt of lightningBolts){
-    bolt.time -= 1
-  }
-  for (let guardian of guardians){
-    guardian.x = player.x + Math.cos(guardian.turn)*100 + 15 -gaurdSize/2
-    guardian.y = player.y + Math.sin(guardian.turn)*100 + 15 - gaurdSize/2
-    guardian.turn += 0.03
-    guardian.time += 1
-    guardian.size = gaurdSize
-    if (guardian.time < 300){
-      gaurdiansInactive = false
-    } else{
-      gaurdiansInactive = true
-    }
-    if (guardian.time > 600-gaurdianCooldown){
-      guardian.time = 0
-    }
-  }
-
-
-  rocketCooldown--;
-  if (coins >= coinsToUpgrade) {
-    coins -= coinsToUpgrade
-    let increaseAmount = totalUpgradesCompleteed/10 +1
-    coinsToUpgrade += increaseAmount
-    totalUpgradesCompleteed+= 1
-    displayUpgrades()
-  }
-
-  for (box of boxes) {
-    if (inRange(player, box, magnetRange)) {
-      let roll = Math.floor(Math.random()*3)
-      boxes.splice(boxes.indexOf(box), 1)
-      switch (roll) {
-        case 0:
-          for (let c = CoinsOnGround.length - 1; c >= 0; c --) {
-            coin = CoinsOnGround[c]
-            CoinsOnGround.splice(c, 1)
-            coins+= coin.value
+        case "rocket":
+          switch (upgrades.rocket) {
+            case 1:
+              rocketFacts.cooldown = 320 - rocketCooldownDecreaser;
+              rocketCooldown = 2
+              break;
+            case 2:
+              rocketFacts.cooldown = 260 - rocketCooldownDecreaser;
+              break;
+            case 3:
+              rocketFacts.damage = bulletPower * 6;
+              break;
+            case 4:
+              rocketFacts.explosionMod += 20;
+              break;
+            case 5:
+              rocketFacts.cooldown = 200 - rocketCooldownDecreaser
+              break;
           }
-          
-          document.querySelector('#gameText').innerText = `Magnet!`
-          clearText()
-          break;
-        case 1:
-          health += Math.round(MaxHealth/3)
-          document.querySelector('#gameText').innerText = `Foooooood`
-          if (health >MaxHealth) health = MaxHealth;
-          clearText()
-          break;
-        case 2:
-          let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
-          let earnedCoins = Math.floor(Math.random()*17);
-          let totalCoins = currentCoins + earnedCoins;
+          break
+        case "balls":
+          switch (upgrades.balls) {
+            case 1:
+              balls.push({ x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size })
+              break
+            case 2:
+              balls.push({ x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size })
+              break
+            case 3:
+              ballsFacts.damage *= 2
+              break
+            case 4:
+              balls.push({ x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size })
+              break
+            case 5:
+              ballsFacts.size += 10
+              updateBalls()
+              break
+          }
+          break
+        case "drill":
+          drills.push({ x: player.x, y: player.y, dx: 0.64278760968, dy: -0.76604444311, size: 20 })
+          break
+        case "lightning":
+          bolts += 1
+          lightningMult += 0.4
+          break
+        case "guardian":
+          gaurdMod += 0.1
+          switch (upgrades.guardian) {
+            case 1:
+              guardians.push({ x: 0, y: 0, turn: 0, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: Math.PI, time: 0 })
+              break
 
-          document.querySelector('#gameText').innerText = `Earned ${earnedCoins} kill coins`
-          clearText()
-          
-          localStorage.setItem('killCoins', String(totalCoins));
-          break;
+            case 2:
+              guardians = []
+              guardians.push({ x: 0, y: 0, turn: 0 })
+              guardians.push({ x: 0, y: 0, turn: 4 * Math.PI / 3, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: 2 * Math.PI / 3, time: 0 })
+              break
+
+            case 3:
+              guardians = []
+              guardians.push({ x: 0, y: 0, turn: 0, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: Math.PI / 2, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: Math.PI, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: 3 * Math.PI / 2, time: 0 })
+              break
+
+            case 4:
+              guardians = []
+              guardians.push({ x: 0, y: 0, turn: 0 })
+              guardians.push({ x: 0, y: 0, turn: 8 * Math.PI / 5, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: 6 * Math.PI / 5, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: 4 * Math.PI / 5, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: 2 * Math.PI / 5, time: 0 })
+              break
+
+            case 5:
+              guardians = []
+              guardians.push({ x: 0, y: 0, turn: 0 })
+              guardians.push({ x: 0, y: 0, turn: 10 * Math.PI / 6, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: 8 * Math.PI / 6, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: 6 * Math.PI / 6, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: 4 * Math.PI / 6, time: 0 })
+              guardians.push({ x: 0, y: 0, turn: 2 * Math.PI / 6, time: 0 })
+              break
+          }
+          break
+        case "exo":
+          gaurdianCooldown += 60
+          rocketExplosionMod += 20
+          break
+        case "fitness":
+          MaxHealth += MAXHEALTHBASE / 5
+          document.getElementById('statsHealth').innerText = `Max Health: ${MaxHealth}`
+
+
+
+      }
+
+      document.querySelector('#buy1').innerText = 'Wait for upgrade'
+      document.querySelector('#buy2').innerText = 'Wait for upgrade'
+      document.querySelector('#buy3').innerText = 'Wait for upgrade'
+
+      if (upgrades[selectedUpgrade] < 6) {
+        upgrades[selectedUpgrade] += 1;
+      }
+      avaibleUpgrades = []
+
+      isPaused = false
+      document.querySelector('#mobileControls').style.display = 'block'
+      canvas.style.opacity = '1'
+      document.querySelector('#shop').style.opacity = '0'
+    }
+    function updateBalls() {
+      for (ball of balls) {
+        ball.size = ballsFacts.size
       }
     }
-  }
 
-  if (rocketFacts.cooldown !== Infinity && rocketCooldown <= 0) {
 
-    let target = getClosestMob();
-    if (target){
+    function shootBullet() {
+      playShootSound();
+      let ptarget = getClosestMob()
+      if (!ptarget) return;
+      let dx = ptarget.x + ptarget.size / 2 - player.x;
+      let dy = ptarget.y + ptarget.size / 2 - player.y;
 
-    let dx = player.x - target.x;
-    let dy = player.y - target.y;
+      let dist = Math.sqrt(dx * dx + dy * dy);
 
-    let tdx = (player.x - target.x)/ Math.sqrt(dx * dx + dy * dy)
-    let tdy = (player.y - target.y)/ Math.sqrt(dx * dx + dy * dy)
+      let pdx = dx / dist;
+      let pdy = dy / dist;
 
-    if (target) {
-      rockets.push({
-        x: player.x,
-        y: player.y,
-        dx: tdx,
-        dy: tdy,
-        size: rocketFacts.explosionMod,
-        photo: rocketIMG
-      }); 
-
-      rocketCooldown = rocketFacts.cooldown;
+      addBullet(player.x, player.y, pdx, pdy, bulletSize);
     }
-    }
-  }
 
-  for (let r = rockets.length - 1; r >= 0; r--) {
-
-    let rocket = rockets[r];
-
-    if (!rocket) continue;
-
-    rocket.x -= rocket.dx * rocketFacts.speed;
-    rocket.y -= rocket.dy * rocketFacts.speed;
-
-    for (let e = enemies.length - 1; e >= 0; e--) {
-      let enemy = enemies[e];
-
-      if (bulletHitsEnemy(rocket, enemy)) {
-
-        const timeAfterHit = rocketFacts.explosionMod*6.5
-
-        enemy.health -= (rocketFacts.damage*60)/timeAfterHit;
-
-        rocket.photo = boom
-
-        if (enemy.health <= 0) {
-          enemies.splice(e, 1);
-          kills += 1;
-          dropXP(enemy)
+    function dropXP(enemy) {
+      if (enemy.enemyType === "level2") {
+        CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 1 })
+      }
+      if (enemy.enemyType === "basic") {
+        CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 0.5 })
+      }
+      if (enemy.enemyType === "level5") {
+        CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 0.5 })
+      }
+      if (enemy.enemyType === "level3") {
+        CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 1.5 })
+      }
+      if (enemy.enemyType === "level4") {
+        CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 2 })
+      }
+      if (enemy.enemyType === "boss1") {
+        CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 30, y: enemy.y + enemy.size / 2 + Math.random() * 30, value: coinsToUpgrade })
+        bossOnBoard = false
+        for (let c = CoinsOnGround.length - 1; c >= 0; c--) {
+          coin = CoinsOnGround[c]
+          CoinsOnGround.splice(c, 1)
+          coins += coin.value
         }
-
-        setTimeout(()=>{
-          rockets.splice(r, 1);
-        }, timeAfterHit+rocketExplosionMod)
-
-        
-        break;
+      }
+      if (enemy.enemyType === "elite1") {
+        CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 30, y: enemy.y + enemy.size / 2 + Math.random() * 30, value: coinsToUpgrade })
+        mobSpawnCooldown = 0
+      }
+      if (enemy.enemyType === "level6") {
+        CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 2.5 })
+      }
+      if (enemy.enemyType === "level7") {
+        CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 4.5 })
+      }
+      if (enemy.enemyType === "level8") {
+        CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 6.5 })
       }
     }
-  }
-  
-  if ( bulletCooldown <= 0) {
-    bulletCooldown = Math.max(bulletCooldownMax, 2)
-    shootBullet()
-    const timeDelay = 150 - bulletCooldownMax/2
-    setTimeout(() => {
-      if(bulletFireAmount > 1) {
-        shootBullet()
+
+
+    window.addEventListener('keydown', e => keys[e.code] = true);
+    window.addEventListener('keyup', e => keys[e.code] = false);
+
+    window.addEventListener("keydown", function (e) {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].indexOf(e.code) > -1) {
+        e.preventDefault();
+      }
+    }, false);
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === '-') {
+        time = prompt("LOl you found the secret hack. Please enter the mod time: ")
+      }
+      if (event.key === '=') {
+        value = prompt("LOl you found the secret hack. Want some coins? Dont do more than 1000 :3")
+        for (let i = 0; i < value; i++) {
+          CoinsOnGround.push({ x: player.x, y: player.y, value: 1 })
+        }
+      }
+      if (event.key === "t") {
+        let mode = prompt("What mode do you want? Famine (1), Hardcore (2), Swarm (3), Pasifisct (4)")
+        if (mode === "1") {
+          coinsToUpgrade *= 2
+          coinsToUpgrade += 5
+        }
+        if (mode === "2") {
+          MaxHealth = 1
+          health = 1
+          MAXHEALTHBASE = 1
+          upgrades.fitness = 6
+          upgrades.energy = 6
+        }
+        if (mode === "3") {
+          swarm = true
+        }
+        if (mode === "4") {
+          bulletCooldown = Infinity
+          guardians.push({ x: 0, y: 0, turn: 0, time: 0 })
+          guardians.push({ x: 0, y: 0, turn: Math.PI, time: 0 })
+          gaurdMod += 0.1
+          upgrades.guardian = 2
+          upgrades.rapid = 6
+        }
+      }
+    });
+
+
+    window.addEventListener("keydown", function (e) {
+      if (["KeyQ"].indexOf(e.code) > -1) {
+        pause()
+      }
+    }, false);
+
+    let bullets = []
+    let walls = []
+    function addBullet(px, py, pdx, pdy, BSIZE) {
+      bullets.push({ x: px, y: py, dx: pdx, dy: pdy, size: BSIZE })
+    }
+    function addWall(px, py, w, h) {
+      walls.push({ x: px, y: py, width: w, height: h })
+    }
+
+
+
+    function bulletHitsEnemy(bullet, enemy) {
+      const bulletRadius = bullet.size / 2;
+      const enemyRadius = enemy.size / 2;
+
+      const bulletCenterX = bullet.x + bulletRadius;
+      const bulletCenterY = bullet.y + bulletRadius;
+
+      const enemyCenterX = enemy.x + enemyRadius;
+      const enemyCenterY = enemy.y + enemyRadius;
+
+      const dx = bulletCenterX - enemyCenterX;
+      const dy = bulletCenterY - enemyCenterY;
+
+      const distanceSquared = dx * dx + dy * dy;
+      const radiusSum = bulletRadius + enemyRadius;
+
+      return distanceSquared <= radiusSum * radiusSum;
+    }
+
+    function getClosestMob() {
+      let closest = null;
+      let closestDist = Infinity;
+
+      for (let enemy of enemies) {
+        let dist = (enemy.x - player.x) * (enemy.x - player.x) + (enemy.y - player.y) * (enemy.y - player.y);
+
+        if (dist < closestDist) {
+          closestDist = dist;
+          closest = enemy;
+        }
+      }
+
+      return closest;
+    }
+
+
+
+    let bulletSpeed = 10
+    let bulletSize = 10
+    let lightningCooldown = 0
+    let increasePowerCost = 5
+    let mobSpawnCooldown = 300
+    let MobsOnBoard = 3
+    let increaseSpeedCost = 5
+    let coins = 0
+    let bulletPower = Number(localStorage.getItem('localPower'))
+
+    const MobSpeed = 1
+
+    document.getElementById('statsPower').innerText = `Bullet power: ${bulletPower}`
+
+
+    function spawnWave(type, amount) {
+      const angle = Math.random() * Math.PI * 2;
+      const increment = Math.PI * 2 / amount
+      for (let i = 0; i < amount; i++) {
+        spawnEnemy(type, 0, true, angle + increment * i)
+      }
+    }
+
+    let time = localStorage.getItem('killModifyer')
+
+    setInterval(() => {
+      if (!bossOnBoard) {
+        if (!isPaused) {
+          time++;
+
+          summonWave()
+        }
+      }
+
+
+    }, 1000);
+
+    setInterval(() => {
+      if (!swarm) { return; }
+      if (!bossOnBoard) {
+        if (!isPaused) {
+          time++;
+
+          summonWave()
+        }
+      }
+
+
+    }, 1000);
+    let bossOnBoard = false
+    function summonWave() {
+
+      switch (time) {
+        case 1:
+          spawnWave("basic", 14)
+          break
+        case 10:
+          spawnWave("basic", 5)
+          break
+        case 20:
+          spawnWave("basic", 8)
+          break
+        case 30:
+          spawnWave("basic", 5)
+          spawnWave("level2", 5)
+          break
+        case 45:
+          spawnWave("basic", 4)
+          spawnWave("level2", 5)
+          break
+        case 60:
+          spawnWave("basic", 5)
+          spawnWave("level2", 6)
+          break
+        case 75:
+          spawnWave("basic", 6)
+          spawnWave("level2", 7)
+          break
+        case 90:
+          spawnWave("basic", 4)
+          spawnWave("level2", 6)
+          break
+        case 100:
+          spawnWave("basic", 4)
+          spawnWave("level2", 6)
+          break
+        case 110:
+          spawnWave("basic", 80)
+          break
+        case 130:
+          spawnWave("basic", 70)
+          break
+        case 150:
+          spawnWave("level2", 50)
+          break
+        case 170:
+          spawnWave("level2", 40)
+          break
+        case 190:
+          spawnEnemy('elite1')
+          spawnWave("level2", 30)
+          spawnWave("level3", 10)
+          break
+        case 210:
+          spawnWave("level3", 40)
+          break
+        case 230:
+          spawnWave("level5", 130)
+          break
+        case 235:
+          spawnWave("basic", 50)
+        case 240:
+          spawnWave("level5", 90)
+          break
+        case 245:
+          spawnWave("level5", 70)
+          break
+        case 250:
+          spawnWave("basic", 90)
+          break
+        case 260:
+          spawnWave("level2", 30)
+          break
+        case 265:
+          spawnWave("level5", 80)
+          break
+        case 275:
+          spawnWave("level4", 30)
+          break
+        case 285:
+          spawnWave("level4", 10)
+          break
+        case 300:
+          enemies = []
+          spawnEnemy('boss1')
+          bossOnBoard = true
+          break
+        case 301:
+          spawnWave("level4", 40)
+          break
+        case 310:
+          spawnWave("level4", 30)
+          break
+        case 325:
+          spawnWave("level4", 30)
+          break
+        case 340:
+          spawnWave("level6", 20)
+          break
+        case 360:
+          spawnWave("level4", 80)
+          break
+        case 380:
+          spawnWave("level4", 80)
+          spawnEnemy('elite1', 100)
+          break
+        case 400:
+          spawnWave("level6", 60)
+          break
+        case 420:
+          spawnWave("level6", 60)
+          break
+        case 440:
+          spawnWave("level6", 60)
+          break
+        case 460:
+          spawnWave("level7", 20)
+          break
+        case 480:
+          spawnWave("level7", 20)
+          break
+        case 500:
+          spawnWave("level7", 20)
+          spawnWave("level5", 100)
+          break
+        case 520:
+          spawnWave("level7", 20)
+          spawnWave("level6", 60)
+          break
+        case 540:
+          spawnWave("level7", 20)
+          spawnWave("level6", 60)
+          spawnEnemy('elite1', 800)
+          break
+        case 560:
+          spawnWave("level4", 300)
+          break
+        case 565:
+          spawnWave("level4", 10)
+          break
+        case 570:
+          spawnWave("level4", 10)
+          break
+        case 575:
+          spawnWave("level4", 10)
+          break
+        case 580:
+          spawnWave("level4", 10)
+          break
+        case 585:
+          spawnWave("level4", 10)
+          break
+        case 600:
+          enemies = []
+          spawnEnemy('boss1', 1800)
+          bossOnBoard = true
+          break
+        case 601:
+          spawnWave("level6", 50)
+          break
+        default:
+          if (time > 601 && time < 630 && time % 2 === 0) {
+            spawnWave("level6", 30)
+          } else if (time > 630 && time < 660 && time % 3 === 0) {
+            spawnWave("level6", 50)
+          } else if (time > 660 && time < 700 && time % 1 === 0) {
+            spawnWave("level7", 20)
+          } else if (time > 700 && time % 1 === 0) {
+            spawnWave("level7", 10)
+            spawnWave("level8", 10)
+          }
+
+
+      }
+    }
+
+    function getRandomVisibleMob() {
+      let visibleMobs = enemies.filter(enemy =>
+        enemy.x + enemy.size > scrollX &&
+        enemy.x < scrollX + canvas.width &&
+        enemy.y + enemy.size > scrollY &&
+        enemy.y < scrollY + canvas.height
+      );
+
+      if (visibleMobs.length === 0) return null;
+
+      return visibleMobs[Math.floor(Math.random() * visibleMobs.length)];
+    }
+
+    function shootLightning() {
+      let mob = getRandomVisibleMob()
+      if (mob) {
+        let bolt = { x: mob.x + mob.size / 2, y: mob.y + mob.size / 2, size: 40 }
+        for (let enemy of enemies) {
+          if (bulletHitsEnemy(bolt, enemy)) {
+            enemy.health -= bulletPower * lightningMult
+          }
+        }
+        lightningBolts.push({ x: mob.x, y: mob.y, time: 30 })
+      }
+    }
+
+    let gaurdiansInactive = false
+    let lightningBolts = []
+
+    function update() { //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      let killsWithMod = kills + Number(localStorage.getItem('killModifyer'))
+      document.querySelector(('h1')).innerText = `HEALTH: ${health}`
+      document.querySelector('h1').style.color = `rgb(${255 - (health * (255 / MaxHealth))}, ${health * (255 / MaxHealth)}, 0)`
+      document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills} + ${localStorage.getItem('killModifyer')} Modifier, Most Kills: ${mostKills}, Time: ${time}`
+      let progressPercent = (coins / coinsToUpgrade) * 100;
+      document.getElementById("progressBar").style.width = `${progressPercent}%`;
+      if (isPaused) return;
+      player.dx = 0; player.dy = 0;
+      player.currentSpeed = player.speed
+      if (keys['ShiftRight'] || keys['ShiftLeft']) player.currentSpeed = player.speed * 1.5;
+      if (keys['KeyW'] || keys['ArrowUp']) { player.dy = -player.currentSpeed; player.direction = "n" }
+      if (keys['KeyS'] || keys['ArrowDown']) { player.dy = player.currentSpeed; player.direction = "s" }
+      if (keys['KeyA'] || keys['ArrowLeft']) { player.dx = -player.currentSpeed; player.direction = "e" }
+      if (keys['KeyD'] || keys['ArrowRight']) { player.dx = player.currentSpeed; player.direction = "w" }
+
+      MobsOnBoard = enemies.length
+      bulletCooldown -= 1
+      energyDrinkCooldown -= 1
+      if (energyDrinkCooldown <= 0 && health <= MaxHealth - energyDrinkEffect) {
+        health += energyDrinkEffect
+        energyDrinkCooldown = 700
+      }
+      lightningCooldown -= 1
+      if (lightningCooldown < 0) {
+        lightningCooldown = lightningMaxCooldown
+        if (bolts >= 1) {
+          shootLightning()
+        }
         setTimeout(() => {
-        if(bulletFireAmount > 2) {
-          shootBullet()
-          setTimeout(() => {
-          if(bulletFireAmount > 3) {
+          if (bolts >= 2) {
+            shootLightning()
+          }
+        }, 200);
+
+        setTimeout(() => {
+          if (bolts >= 3) {
+            shootLightning()
+          }
+        }, 400);
+
+        setTimeout(() => {
+          if (bolts >= 4) {
+            shootLightning()
+          }
+        }, 600);
+
+        setTimeout(() => {
+          if (bolts >= 5) {
+            shootLightning()
+          }
+        }, 800);
+
+      }
+      for (let bolt of lightningBolts) {
+        bolt.time -= 1
+      }
+      for (let guardian of guardians) {
+        guardian.x = player.x + Math.cos(guardian.turn) * 100 + 15 - gaurdSize / 2
+        guardian.y = player.y + Math.sin(guardian.turn) * 100 + 15 - gaurdSize / 2
+        guardian.turn += 0.03
+        guardian.time += 1
+        guardian.size = gaurdSize
+        if (guardian.time < 300) {
+          gaurdiansInactive = false
+        } else {
+          gaurdiansInactive = true
+        }
+        if (guardian.time > 600 - gaurdianCooldown) {
+          guardian.time = 0
+        }
+      }
+
+
+      rocketCooldown--;
+      if (coins >= coinsToUpgrade) {
+        coins -= coinsToUpgrade
+        let increaseAmount = totalUpgradesCompleteed / 10 + 1
+        coinsToUpgrade += increaseAmount
+        totalUpgradesCompleteed += 1
+        displayUpgrades()
+      }
+
+      for (box of boxes) {
+        if (inRange(player, box, magnetRange)) {
+          let roll = Math.floor(Math.random() * 3)
+          boxes.splice(boxes.indexOf(box), 1)
+          switch (roll) {
+            case 0:
+              for (let c = CoinsOnGround.length - 1; c >= 0; c--) {
+                coin = CoinsOnGround[c]
+                CoinsOnGround.splice(c, 1)
+                coins += coin.value
+              }
+
+              document.querySelector('#gameText').innerText = `Magnet!`
+              clearText()
+              break;
+            case 1:
+              health += Math.round(MaxHealth / 3)
+              document.querySelector('#gameText').innerText = `Foooooood`
+              if (health > MaxHealth) health = MaxHealth;
+              clearText()
+              break;
+            case 2:
+              let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
+              let earnedCoins = Math.floor(Math.random() * 17);
+              let totalCoins = currentCoins + earnedCoins;
+
+              document.querySelector('#gameText').innerText = `Earned ${earnedCoins} kill coins`
+              clearText()
+
+              localStorage.setItem('killCoins', String(totalCoins));
+              break;
+          }
+        }
+      }
+
+      if (rocketFacts.cooldown !== Infinity && rocketCooldown <= 0) {
+
+        let target = getClosestMob();
+        if (target) {
+
+          let dx = player.x - target.x;
+          let dy = player.y - target.y;
+
+          let tdx = (player.x - target.x) / Math.sqrt(dx * dx + dy * dy)
+          let tdy = (player.y - target.y) / Math.sqrt(dx * dx + dy * dy)
+
+          if (target) {
+            rockets.push({
+              x: player.x,
+              y: player.y,
+              dx: tdx,
+              dy: tdy,
+              size: rocketFacts.explosionMod,
+              photo: rocketIMG
+            });
+
+            rocketCooldown = rocketFacts.cooldown;
+          }
+        }
+      }
+
+      for (let r = rockets.length - 1; r >= 0; r--) {
+
+        let rocket = rockets[r];
+
+        if (!rocket) continue;
+
+        rocket.x -= rocket.dx * rocketFacts.speed;
+        rocket.y -= rocket.dy * rocketFacts.speed;
+
+        for (let e = enemies.length - 1; e >= 0; e--) {
+          let enemy = enemies[e];
+
+          if (bulletHitsEnemy(rocket, enemy)) {
+
+            const timeAfterHit = rocketFacts.explosionMod * 6.5
+
+            enemy.health -= (rocketFacts.damage * 60) / timeAfterHit;
+
+            rocket.photo = boom
+
+            if (enemy.health <= 0) {
+              enemies.splice(e, 1);
+              kills += 1;
+              dropXP(enemy)
+            }
+
+            setTimeout(() => {
+              rockets.splice(r, 1);
+            }, timeAfterHit + rocketExplosionMod)
+
+
+            break;
+          }
+        }
+      }
+
+      if (bulletCooldown <= 0) {
+        bulletCooldown = Math.max(bulletCooldownMax, 2)
+        shootBullet()
+        const timeDelay = 150 - bulletCooldownMax / 2
+        setTimeout(() => {
+          if (bulletFireAmount > 1) {
             shootBullet()
             setTimeout(() => {
-              if(bulletFireAmount > 4) {
+              if (bulletFireAmount > 2) {
                 shootBullet()
                 setTimeout(() => {
-                if(bulletFireAmount > 5) {
-                  shootBullet()
-            }}, timeDelay);
-          }}, timeDelay);
-        }}, timeDelay);
-      }}, timeDelay);
-    }}, timeDelay);
-    
-  }
-  
-  for (let i = enemies.length - 1; i >= 0; i--) {
-      let enemy = enemies[i];
+                  if (bulletFireAmount > 3) {
+                    shootBullet()
+                    setTimeout(() => {
+                      if (bulletFireAmount > 4) {
+                        shootBullet()
+                        setTimeout(() => {
+                          if (bulletFireAmount > 5) {
+                            shootBullet()
+                          }
+                        }, timeDelay);
+                      }
+                    }, timeDelay);
+                  }
+                }, timeDelay);
+              }
+            }, timeDelay);
+          }
+        }, timeDelay);
 
-      // Remove dead enemies
-      if (enemy.health <= 0) {
+      }
+
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        let enemy = enemies[i];
+
+        // Remove dead enemies
+        if (enemy.health <= 0) {
           enemies.splice(i, 1);
           kills += 1;
           dropXP(enemy);
           continue;
-      }
+        }
 
-      // Move toward player
-      let dx = player.x - enemy.x;
-      let dy = player.y - enemy.y;
+        // Move toward player
+        let dx = player.x - enemy.x;
+        let dy = player.y - enemy.y;
 
-      let dist = Math.sqrt(dx * dx + dy * dy);
+        let dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (dist > 0) {
+        if (dist > 0) {
           dx /= dist;
           dy /= dist;
 
           enemy.x += dx * MobSpeed;
           enemy.y += dy * MobSpeed;
-          if( enemy.enemyType === 'level5'){
+          if (enemy.enemyType === 'level5') {
             enemy.x += dx * MobSpeed;
             enemy.y += dy * MobSpeed;
           }
-      }
+        }
 
-      for (let gaurd of guardians){
-        if (gaurd.x < enemy.x + enemy.size && gaurd.x + gaurd.size > enemy.x && gaurd.y < enemy.y + enemy.size && gaurd.y + gaurd.size > enemy.y && !gaurdiansInactive){
+        for (let gaurd of guardians) {
+          if (gaurd.x < enemy.x + enemy.size && gaurd.x + gaurd.size > enemy.x && gaurd.y < enemy.y + enemy.size && gaurd.y + gaurd.size > enemy.y && !gaurdiansInactive) {
 
-          enemy.x -= 0.5*dx
-          enemy.y -= 0.5 * dy
-          enemy.health -= bulletPower/20 *gaurdMod
+            enemy.x -= 0.5 * dx
+            enemy.y -= 0.5 * dy
+            enemy.health -= bulletPower / 20 * gaurdMod
+            if (enemy.health <= 0) {
+              enemies.splice(i, 1);
+              kills += 1;
+              dropXP(enemy);
+              continue;
+            }
+          }
+        }
+
+        // Enemy separation
+        for (let j = i - 1; j >= 0; j--) {
+
+          let other = enemies[j];
+
+          let dx2 = enemy.x - other.x;
+          let dy2 = enemy.y - other.y;
+
+          let dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+          let minDist = (enemy.size + other.size) / 2;
+
+          if (dist2 < minDist && dist2 > 0) {
+            dx2 /= dist2;
+            dy2 /= dist2;
+
+            let push = (minDist - dist2) * 0.5;
+
+            enemy.x += dx2 * push;
+            enemy.y += dy2 * push;
+          }
+        }
+
+        // Force field damage
+        if (inRange(player, enemy, forceFieldRange)) {
+
+          enemy.health -=
+            forcePower * bulletPower;
+
           if (enemy.health <= 0) {
             enemies.splice(i, 1);
             kills += 1;
             dropXP(enemy);
             continue;
-        }
-        }
-      }
-
-      // Enemy separation
-      for (let j = i - 1; j >= 0; j--) {
-
-        let other = enemies[j];
-
-        let dx2 = enemy.x - other.x;
-        let dy2 = enemy.y - other.y;
-
-        let dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-
-        let minDist = (enemy.size + other.size) / 2;
-
-        if (dist2 < minDist && dist2 > 0) {
-          dx2 /= dist2;
-          dy2 /= dist2;
-
-          let push = (minDist - dist2) * 0.5;
-
-          enemy.x += dx2 * push;
-          enemy.y += dy2 * push;
-        }
-      }
-
-      // Force field damage
-      if (inRange(player, enemy, forceFieldRange)) {
-
-          enemy.health -=
-              forcePower * bulletPower;
-
-          if (enemy.health <= 0) {
-              enemies.splice(i, 1);
-              kills += 1;
-              dropXP(enemy);
-              continue;
           }
-      }
+        }
 
-      // Player collision
-      if (
+        // Player collision
+        if (
           player.x < enemy.x + enemy.size &&
           player.x + 30 > enemy.x &&
           player.y < enemy.y + enemy.size &&
           player.y + 30 > enemy.y
-      ) {
+        ) {
           health -= 1;
 
           if (health <= 0) {
-              localStorage.setItem('currentScore', kills);
-              window.location.href = "death.html";
+            localStorage.setItem('currentScore', kills);
+            window.location.href = "death.html";
           }
-      }
-  }
-
-  for(ball of balls){
-      
-    ball.x += ball.dx*(player.speed+3);
-    ball.y += ball.dy*(player.speed+3);
-
-    if (ball.x + ball.size > scrollX + canvas.width) {
-      ball.x = scrollX + canvas.width - ball.size-15;
-      ball.dx *= -1;
-    }
-
-    if (ball.x < scrollX) {
-      ball.x = scrollX+15;
-      ball.dx *= -1;
-    }
-
-    if (ball.y + ball.size > scrollY + canvas.height) {
-      ball.y = scrollY + canvas.height - ball.size;
-      ball.dy *= -1;
-    }
-
-    if (ball.y < scrollY) {
-      ball.y = scrollY;
-      ball.dy *= -1;
-    }
-
-    for (let ball1 of balls) {
-      if (ball1 === ball) {
-        continue;
-      }
-      if (ball.x === ball1.x && ball.y === ball.y) {
-        balls.splice(balls.indexOf(ball), 1)
-        balls.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size})
-      }
-    }
-
-    for (let e = enemies.length - 1; e >= 0; e--) {
-
-      let enemy = enemies[e];
-
-      if (bulletHitsEnemy(ball, enemy)) {
-        ball.dx = -ball.dx
-        ball.dy = -ball.dy
-
-        enemy.health -= ballsFacts.damage;
-
-        if (enemy.health <= 0) {
-          enemies.splice(e, 1);
-          kills += 1;
-          dropXP(enemy);
         }
       }
-    }
-  }
 
-  for(ball of drills){
-      
-    ball.x += ball.dx*5;
-    ball.y += ball.dy*5;
+      for (ball of balls) {
 
-    if (ball.x + ball.size > scrollX + canvas.width) {
-      ball.x = scrollX + canvas.width - ball.size-15;
-      ball.dx *= -1;
-    }
+        ball.x += ball.dx * (player.speed + 3);
+        ball.y += ball.dy * (player.speed + 3);
 
-    if (ball.x < scrollX) {
-      ball.x = scrollX+15;
-      ball.dx *= -1;
-    }
+        if (ball.x + ball.size > scrollX + canvas.width) {
+          ball.x = scrollX + canvas.width - ball.size - 15;
+          ball.dx *= -1;
+        }
 
-    if (ball.y + ball.size > scrollY + canvas.height) {
-      ball.y = scrollY + canvas.height - ball.size;
-      ball.dy *= -1;
-    }
+        if (ball.x < scrollX) {
+          ball.x = scrollX + 15;
+          ball.dx *= -1;
+        }
 
-    if (ball.y < scrollY) {
-      ball.y = scrollY;
-      ball.dy *= -1;
-    }
+        if (ball.y + ball.size > scrollY + canvas.height) {
+          ball.y = scrollY + canvas.height - ball.size;
+          ball.dy *= -1;
+        }
 
-    for (let ball1 of drills) {
-      if (ball1 === ball) {
-        continue;
-      }
-      if (ball.x === ball1.x && ball.y === ball.y) {
-        drills.splice(drills.indexOf(ball), 1)
-        drills.push({x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size})
-      }
-    }
+        if (ball.y < scrollY) {
+          ball.y = scrollY;
+          ball.dy *= -1;
+        }
 
-    for (let e = enemies.length - 1; e >= 0; e--) {
+        for (let ball1 of balls) {
+          if (ball1 === ball) {
+            continue;
+          }
+          if (ball.x === ball1.x && ball.y === ball.y) {
+            balls.splice(balls.indexOf(ball), 1)
+            balls.push({ x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size })
+          }
+        }
 
-      let enemy = enemies[e];
+        for (let e = enemies.length - 1; e >= 0; e--) {
 
-      if (bulletHitsEnemy(ball, enemy)) {
+          let enemy = enemies[e];
 
-        enemy.health -= bulletPower/10 *bulletSpeed/10;
+          if (bulletHitsEnemy(ball, enemy)) {
+            ball.dx = -ball.dx
+            ball.dy = -ball.dy
 
-        if (enemy.health <= 0) {
-          enemies.splice(e, 1);
-          kills += 1;
-          dropXP(enemy);
+            enemy.health -= ballsFacts.damage;
+
+            if (enemy.health <= 0) {
+              enemies.splice(e, 1);
+              kills += 1;
+              dropXP(enemy);
+            }
+          }
         }
       }
-    }
-  }
-  
-  
-  for (let i = bullets.length - 1; i >= 0; i--) {
-    bullet = bullets[i]
-    bullet.x += bullet.dx * bulletSpeed
-    bullet.y += bullet.dy * bulletSpeed
-    if (Math.abs(player.x - bullet.x) > 2000 || Math.abs(player.y - bullet.y) > 2000) {
-      bullets.splice(i, 1)
-    }
-    for (let e = 0; e < enemies.length; e ++) {
-      enemy = enemies[e]
-      if (bulletHitsEnemy(bullet, enemy)) {
-        bullets.splice(i, 1)
-        enemy.health -= bulletPower
-        playMobHurtSound();
-        if (enemy.health <= 0) {
-          enemies.splice(e, 1);
-          kills +=1
-          dropXP(enemy)
+
+      for (ball of drills) {
+
+        ball.x += ball.dx * 5;
+        ball.y += ball.dy * 5;
+
+        if (ball.x + ball.size > scrollX + canvas.width) {
+          ball.x = scrollX + canvas.width - ball.size - 15;
+          ball.dx *= -1;
+        }
+
+        if (ball.x < scrollX) {
+          ball.x = scrollX + 15;
+          ball.dx *= -1;
+        }
+
+        if (ball.y + ball.size > scrollY + canvas.height) {
+          ball.y = scrollY + canvas.height - ball.size;
+          ball.dy *= -1;
+        }
+
+        if (ball.y < scrollY) {
+          ball.y = scrollY;
+          ball.dy *= -1;
+        }
+
+        for (let ball1 of drills) {
+          if (ball1 === ball) {
+            continue;
+          }
+          if (ball.x === ball1.x && ball.y === ball.y) {
+            drills.splice(drills.indexOf(ball), 1)
+            drills.push({ x: player.x, y: player.y, dx: -0.64278760968, dy: 0.76604444311, size: ballsFacts.size })
+          }
+        }
+
+        for (let e = enemies.length - 1; e >= 0; e--) {
+
+          let enemy = enemies[e];
+
+          if (bulletHitsEnemy(ball, enemy)) {
+
+            enemy.health -= bulletPower / 10 * bulletSpeed / 10;
+
+            if (enemy.health <= 0) {
+              enemies.splice(e, 1);
+              kills += 1;
+              dropXP(enemy);
+            }
+          }
         }
       }
-    }
-  }
-
-  for (let i = 0; i < CoinsOnGround.length; i ++){
-    coin = CoinsOnGround[i]
-    if ((coin.x - player.x)*(coin.x - player.x)+(coin.y - player.y)*(coin.y - player.y) < magnetRange*magnetRange) {
-      CoinsOnGround.splice(i, 1)
-      playCollectSound();
-      coins+= coin.value
-
-    }
-
-  }
-  
-  player.x += player.dx
-  for (let wall of walls) {
-    if (player.x < wall.x + wall.width && player.x + 30 > wall.x && player.y < wall.y + wall.height && player.y + 30 > wall.y) {
-      player.x -= player.dx;
-    }
-  }
-  
-  player.y += player.dy
-  for (let wall of walls) {
-    if (player.x < wall.x + wall.width && player.x + 30 > wall.x && player.y < wall.y + wall.height && player.y + 30 > wall.y) {
-      player.y -= player.dy;
-    }
-  }
-  
-  scrollX = player.x - 0.5*canvas.width;
-  scrollY = player.y - 0.5*canvas.height;
-  if (kills > mostKills) {
-    mostKills = kills;
-    localStorage.setItem("mostKills", mostKills);
-  }
-
-  localStorage.setItem("mostKillsWithMod", String(Number(localStorage.getItem('killModifyer')) +Number(localStorage.getItem('mostKills'))));
-  
-};
-let pattern;
-
-sky.onload = () => {
-
-    const patternCanvas = document.createElement('canvas');
-    patternCanvas.width = 21;
-    patternCanvas.height = 21;
-
-    const patternCtx = patternCanvas.getContext('2d');
-
-    patternCtx.drawImage(sky, 0, 0, 21, 21);
-
-    pattern = ctx.createPattern(patternCanvas, 'repeat');
-};
 
 
-function draw() {
-    
-    //ctx.drawImage(pausedIMG, 0, 0, canvas.width, canvas.height)
-
-    ctx.save();
-    if (isPaused) return;
-    
-    ctx.translate(-scrollX, -scrollY);
-    
-    ctx.fillStyle = pattern;
-    ctx.fillRect(scrollX, scrollY, canvas.width, canvas.height);
-
-    ctx.drawImage(forceField, player.x-forceFieldRange/2+15, player.y-forceFieldRange/2+15, forceFieldRange, forceFieldRange);
-    ctx.drawImage(playerImg, player.x, player.y, 30, 30);
-
-    
-    //ctx.fillStyle = '#287271';
-    //ctx.fillRect(20, 20, 40, 40);
-    
-    walls.forEach(wall => {
-      for (let b = 0; b < wall.width; b += 10) {
-        for (let d = 0; d < wall.height; d += 10) {
-          ctx.drawImage(brick, wall.x + b, wall.y+d, 10, 10);
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        bullet = bullets[i]
+        bullet.x += bullet.dx * bulletSpeed
+        bullet.y += bullet.dy * bulletSpeed
+        if (Math.abs(player.x - bullet.x) > 2000 || Math.abs(player.y - bullet.y) > 2000) {
+          bullets.splice(i, 1)
+        }
+        for (let e = 0; e < enemies.length; e++) {
+          enemy = enemies[e]
+          if (bulletHitsEnemy(bullet, enemy)) {
+            bullets.splice(i, 1)
+            enemy.health -= bulletPower
+            playMobHurtSound();
+            if (enemy.health <= 0) {
+              enemies.splice(e, 1);
+              kills += 1
+              dropXP(enemy)
+            }
+          }
         }
       }
-    });
-    
-    bullets.forEach(bullet => {
+
+      for (let i = 0; i < CoinsOnGround.length; i++) {
+        coin = CoinsOnGround[i]
+        if ((coin.x - player.x) * (coin.x - player.x) + (coin.y - player.y) * (coin.y - player.y) < magnetRange * magnetRange) {
+          CoinsOnGround.splice(i, 1)
+          playCollectSound();
+          coins += coin.value
+
+        }
+
+      }
+
+      player.x += player.dx
+      for (let wall of walls) {
+        if (player.x < wall.x + wall.width && player.x + 30 > wall.x && player.y < wall.y + wall.height && player.y + 30 > wall.y) {
+          player.x -= player.dx;
+        }
+      }
+
+      player.y += player.dy
+      for (let wall of walls) {
+        if (player.x < wall.x + wall.width && player.x + 30 > wall.x && player.y < wall.y + wall.height && player.y + 30 > wall.y) {
+          player.y -= player.dy;
+        }
+      }
+
+      scrollX = player.x - 0.5 * canvas.width;
+      scrollY = player.y - 0.5 * canvas.height;
+      if (kills > mostKills) {
+        mostKills = kills;
+        localStorage.setItem("mostKills", mostKills);
+      }
+
+      localStorage.setItem("mostKillsWithMod", String(Number(localStorage.getItem('killModifyer')) + Number(localStorage.getItem('mostKills'))));
+
+    };
+    let pattern;
+
+    sky.onload = () => {
+
+      const patternCanvas = document.createElement('canvas');
+      patternCanvas.width = 21;
+      patternCanvas.height = 21;
+
+      const patternCtx = patternCanvas.getContext('2d');
+
+      patternCtx.drawImage(sky, 0, 0, 21, 21);
+
+      pattern = ctx.createPattern(patternCanvas, 'repeat');
+    };
+
+
+    function draw() {
+
+      //ctx.drawImage(pausedIMG, 0, 0, canvas.width, canvas.height)
+
+      ctx.save();
+      if (isPaused) return;
+
+      ctx.translate(-scrollX, -scrollY);
+
+      ctx.fillStyle = pattern;
+      ctx.fillRect(scrollX, scrollY, canvas.width, canvas.height);
+
+      ctx.drawImage(forceField, player.x - forceFieldRange / 2 + 15, player.y - forceFieldRange / 2 + 15, forceFieldRange, forceFieldRange);
+      ctx.drawImage(playerImg, player.x, player.y, 30, 30);
+
+
+      //ctx.fillStyle = '#287271';
+      //ctx.fillRect(20, 20, 40, 40);
+
+      walls.forEach(wall => {
+        for (let b = 0; b < wall.width; b += 10) {
+          for (let d = 0; d < wall.height; d += 10) {
+            ctx.drawImage(brick, wall.x + b, wall.y + d, 10, 10);
+          }
+        }
+      });
+
+      bullets.forEach(bullet => {
         ctx.drawImage(bulletIMG, bullet.x, bullet.y, bulletSize, bulletSize);
-    });
+      });
 
-    balls.forEach(ball => {
-      ctx.drawImage(soccorBallIMG, ball.x, ball.y, ball.size, ball.size);
-    });
+      balls.forEach(ball => {
+        ctx.drawImage(soccorBallIMG, ball.x, ball.y, ball.size, ball.size);
+      });
 
-    lightningBolts.forEach(bolt => {
-      if (bolt.time < 0) return;
-      ctx.drawImage(lightning, bolt.x, bolt.y, 40, 40);
-    });
+      lightningBolts.forEach(bolt => {
+        if (bolt.time < 0) return;
+        ctx.drawImage(lightning, bolt.x, bolt.y, 40, 40);
+      });
 
-    drills.forEach(drill => {
-      ctx.drawImage(drillIMG, drill.x, drill.y, 20, 20);
-    });
+      drills.forEach(drill => {
+        ctx.drawImage(drillIMG, drill.x, drill.y, 20, 20);
+      });
 
-    boxes.forEach(box => {
+      boxes.forEach(box => {
         ctx.drawImage(boxIMG, box.x, box.y, 20, 20);
-    });
-  
-    guardians.forEach(grd => {
-        if(gaurdiansInactive) return;
+      });
+
+      guardians.forEach(grd => {
+        if (gaurdiansInactive) return;
         ctx.drawImage(gaurd, grd.x, grd.y, gaurdSize, gaurdSize);
-    });
+      });
 
-    rockets.forEach(rocket => {
+      rockets.forEach(rocket => {
         ctx.drawImage(rocket.photo, rocket.x, rocket.y, rocketFacts.explosionMod, rocketFacts.explosionMod);
-    });
-    
-    enemies.forEach(enemy => {
-        if (!inRange(player, enemy, canvas.width+100)) return;
+      });
+
+      enemies.forEach(enemy => {
+        if (!inRange(player, enemy, canvas.width + 100)) return;
         ctx.drawImage(enemy.image, enemy.x, enemy.y, enemy.size, enemy.size);
-    });
+      });
 
-    CoinsOnGround.forEach(coin => {
-        ctx.drawImage(coinImg, coin.x, coin.y, Math.min(5+(coin.value)*2, 60), Math.min(5+(coin.value)*2, 60));
-    });
-    
-    
-    
-    ctx.restore(); 
-}
+      CoinsOnGround.forEach(coin => {
+        ctx.drawImage(coinImg, coin.x, coin.y, Math.min(5 + (coin.value) * 2, 60), Math.min(5 + (coin.value) * 2, 60));
+      });
 
-function loop() {
-    update();
-    draw();
-    requestAnimationFrame(loop);
-    
-}
 
-loop();
-</script>
+
+      ctx.restore();
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+
+    }
+
+    loop();
+  </script>
 </body>
+
 </html>
