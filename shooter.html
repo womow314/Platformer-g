@@ -45,6 +45,10 @@
     <button onclick="hardcore()" style="background-color: red;">HARDCORE</button>
     <button onclick="swarmFunc()" style="background-color: darkviolet;">SWARM</button>
     <button onclick="pasifist()" style="background-color: midnightblue; color: azure;">PASIFIST</button>
+    <button onclick="vampireFunc()" style="background-color: rgb(0, 0, 0); color: rgb(255, 0, 0);">VAMPIRE</button>
+    <button onclick="black()" style="background-color: rgb(0, 0, 0); color: white;">BLACKOUT</button>
+    <button onclick="fifa()" style="background-color: rgb(255, 255, 255); color: rgb(172, 173, 255);">OLYMPICS</button>
+    <button onclick="blurFunc()" style="background-color: rgb(225, 255, 0); color: rgb(255, 253, 160);">BLURY</button>
   </div>
 
   <div id="shop" style="display: none;">
@@ -211,6 +215,11 @@
 
     const boom = new Image();
     boom.src = "images/pixil-frame-0%20(22).png"
+
+    let vampire = false
+    let blackout = false
+    let speedUp = false
+    let blury = false
 
     const collectSound = document.getElementById("collectSound");
     function playCollectSound() {
@@ -984,6 +993,31 @@
       swarm = true
       hideModes()
     }
+    function vampireFunc() {
+      vampire = true
+      MaxHealth = MAXHEALTHBASE/5
+      health = MaxHealth
+      upgrades.energy = 6
+      upgrades.fitness = 6
+      hideModes()
+    }
+    function black() {
+      blackout = true
+      hideModes()
+    }
+
+    function blurFunc() {
+      console.log("BLURY CLICKED");
+      blury = true
+      hideModes()
+    }
+    function fifa() {
+      speedUp = true
+      console.log("fifa CLICKED");
+      player.speed *= 2
+      hideModes()
+    }
+
     function pasifist() {
       bulletCooldown = Infinity
       guardians.push({ x: 0, y: 0, turn: 0, time: 0 })
@@ -1310,7 +1344,7 @@
       //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
       let killsWithMod = kills + Number(localStorage.getItem('killModifyer'))
-      document.querySelector(('h1')).innerText = `HEALTH: ${health}`
+      document.querySelector(('h1')).innerText = `HEALTH: ${Math.round(health, 1)}`
       document.querySelector('h1').style.color = `rgb(${255 - (health * (255 / MaxHealth))}, ${health * (255 / MaxHealth)}, 0)`
       document.querySelector("#cord").innerText = `Enemies on board: ${MobsOnBoard}, Kills: ${kills} + ${localStorage.getItem('killModifyer')} Modifier, Most Kills: ${mostKills}, Time: ${time}`
       let progressPercent = (coins / coinsToUpgrade) * 100;
@@ -1547,6 +1581,10 @@
             enemy.x += dx * MobSpeed;
             enemy.y += dy * MobSpeed;
           }
+          if (speedUp) {
+            enemy.x += dx * MobSpeed;
+            enemy.y += dy * MobSpeed;
+          }
         }
 
         for (let gaurd of guardians) {
@@ -1752,6 +1790,9 @@
           CoinsOnGround.splice(i, 1)
           playCollectSound();
           coins += coin.value
+          if (vampire) {
+            health += 0.2
+          }
 
         }
 
@@ -1805,9 +1846,11 @@
       if (isPaused) return;
 
       ctx.translate(-scrollX, -scrollY);
-
-      ctx.fillStyle = pattern;
-      ctx.fillRect(scrollX, scrollY, canvas.width, canvas.height);
+      ctx.fillStyle = "rgb(0,0,0)"
+      if (!blackout) {
+        ctx.fillStyle = pattern;       
+      }
+      if (!blury) {ctx.fillRect(scrollX, scrollY, canvas.width, canvas.height);}
 
       ctx.drawImage(forceField, player.x - forceFieldRange / 2 + 15, player.y - forceFieldRange / 2 + 15, forceFieldRange, forceFieldRange);
       ctx.drawImage(playerImg, player.x, player.y, 30, 30);
