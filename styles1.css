@@ -157,6 +157,10 @@ details {
   height: 50px;
 }
 
+#modes button:hover {
+  transform: scale(1.02);
+}
+
 #homeButtons {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
