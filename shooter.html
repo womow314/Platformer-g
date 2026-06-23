@@ -1293,17 +1293,29 @@
           spawnWave("level6", 50)
           break
         default:
+          if (time === 700) { spawnEnemy('elite1', 2000)}
+          if (time === 900) {
+            enemies = []
+            spawnEnemy('boss1', 5000)
+            bossOnBoard = true}
+          if (time > 900) {
+            window.location.href = "shooterWin.html";
+          }
           if (time > 601 && time < 630 && time % 2 === 0) {
             spawnWave("level6", 30)
           } else if (time > 630 && time < 660 && time % 3 === 0) {
             spawnWave("level6", 50)
           } else if (time > 660 && time < 700 && time % 1 === 0) {
             spawnWave("level7", 20)
-          } else if (time > 700 && time % 1 === 0) {
+          } else if (time > 700 && time < 800 && time % 1 === 0) {
             spawnWave("level7", 10)
             spawnWave("level8", 10)
+          }  else if (time > 700 && time < 800 && time % 2 === 0) {
+            spawnWave("level8", 30)
+          } else if (time > 800 && time < 900 ) {
+            spawnWave("level6", 100)
+            spawnWave("level8", 20)
           }
-
 
       }
     }
