@@ -17,6 +17,8 @@ h1 {
   position: absolute;
   top: 15px;
   left: 50%;
+  background-color: #444;
+  padding: 10px;
   transform: translate(-50%, -50%);
   color: rgb(148, 232, 148);
 }
@@ -83,6 +85,8 @@ h2 {
   left: 0;
   margin: 15px;
   color: white;
+  background-color: #444;
+  padding: 5px;
   /* Added so you can see it against the dark background */
   font-family: sans-serif;
   font-size: 12px;

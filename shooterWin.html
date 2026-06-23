@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<head>
+    <title>Congratulations!</title>
+    <link rel="stylesheet" href="styles1.css">
+</head>
+
+<body>
+    <h2>Congratulations, you win!</h2>
+    <div id="statistics">
+        <h3 id="score">Score: </h3>
+        <h3 id="deaths">Deaths: </h3>
+        <h3 id="time">Time: </h3>
+    </div>
+    <button onclick="copy()" id="copy">Copy to share</button>
+    <button onclick="home()" id="home">Home</button>
+    <script>
+        let score = Number(localStorage.getItem('currentScore')) || 0;
+
+        let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
+
+        let earnedCoins = Math.round(score / 5);
+        let totalCoins = currentCoins + earnedCoins;
+
+        localStorage.setItem('killCoins', String(totalCoins));
+        document.getElementById('score').innerText = `Kills: ${score}`
+
+
+        let copyButton = document.getElementById('copy');
+        const copiedText = ("I just finished Games.io Shooter with a score of " + score);
+        function copy() {
+            navigator.clipboard.writeText(copiedText);
+            copyButton.innerText = "Copied!";
+            setTimeout(() => {
+                copyButton.innerText = "Copy to share";
+            }, 800)
+        }
+
+        function home() {
+            window.location.href = "index.html"
+        }
+    </script>
+</body>

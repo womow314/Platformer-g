@@ -89,6 +89,7 @@
     localStorage.setItem('mostKillsWithMod', localStorage.getItem('mostKillsWithMod') || "0")
     localStorage.setItem('skillCoinsSpent', localStorage.getItem('skillCoinsSpent') || "0")
     localStorage.setItem('repeatFire', localStorage.getItem('repeatFire') || "1")
+    localStorage.setItem('level', localStorage.getItem('level') || "1")
 
     localStorage.setItem('forceMod', localStorage.getItem('forceMod') || "1");
     const base = Number(localStorage.getItem('localPower'))
@@ -157,6 +158,12 @@
     let enemyBasic = new Image();
     enemyBasic.src = "images/pixil-frame-0%20(12).png";
 
+    let blob1 = new Image();
+    blob1.src = "images/pixil-frame-0%20(43).png";
+
+    let blob2 = new Image();
+    blob2.src = "images/pixil-frame-0%20(43).png";
+
     let enemyLevel2 = new Image();
     enemyLevel2.src = "images/pixil-frame-0%20(14).png"
 
@@ -183,6 +190,9 @@
 
     let elite1 = new Image();
     elite1.src = "images/pixil-frame-0 (25).png"
+
+    let sand = new Image();
+    sand.src = "images/sand.png"
 
     let lightning = new Image();
     lightning.src = "images/pixil-frame-0 (26).png"
@@ -554,7 +564,7 @@
     let energyDrinkCooldown = 800
     enemies = []
 
-    function spawnEnemy(type = "basic", mod = 0, is = false, degree = 0) {
+    function spawnEnemy(type = "basic", mod = 0, is = false, degree = 0, x= 0, y=0) {
 
       const minRadius = 800;
       const maxRadius = 1000;
@@ -562,11 +572,19 @@
       if (is) {
         angle = degree
       }
+      if (x != 0){
+
+      }
       else { angle = Math.random() * Math.PI * 2; }
       const radius = minRadius + Math.random() * (maxRadius - minRadius);
 
-      const px = player.x + Math.cos(angle) * radius;
-      const py = player.y + Math.sin(angle) * radius;
+      let px = player.x + Math.cos(angle) * radius;
+      let py = player.y + Math.sin(angle) * radius;
+
+      if (x != 0) {
+        px = x
+        py = y
+      }
 
       let Ehealth;
       let typeImage;
@@ -610,6 +628,14 @@
       } else if (type === "elite1") {
         Ehealth = 180
         typeImage = elite1
+        enemySize = 50
+      } else if (type === "blob1") {
+        Ehealth = 4
+        typeImage = blob1
+        enemySize = 50
+      } else if (type === "blob2") {
+        Ehealth = 10
+        typeImage = blob2
         enemySize = 50
       }
       if (type === "boss1") {
@@ -944,6 +970,22 @@
       if (enemy.enemyType === "level8") {
         CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 6.5 })
       }
+      if (enemy.enemyType === "blob1") {
+        setTimeout(() => {
+          spawnEnemy('level2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+        }, 10);
+      }
+      if (enemy.enemyType === "blob2") {
+        setTimeout(() => {
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+        }, 10);
+      }
     }
 
 
@@ -1133,178 +1175,223 @@
     }, 1000);
     let bossOnBoard = false
     function summonWave() {
-
-      switch (time) {
-        case 1:
-          spawnWave("basic", 14)
-          break
-        case 10:
-          spawnWave("basic", 5)
-          break
-        case 20:
-          spawnWave("basic", 8)
-          break
-        case 30:
-          spawnWave("basic", 5)
-          spawnWave("level2", 5)
-          break
-        case 45:
-          spawnWave("basic", 4)
-          spawnWave("level2", 5)
-          break
-        case 60:
-          spawnWave("basic", 5)
-          spawnWave("level2", 6)
-          break
-        case 75:
-          spawnWave("basic", 6)
-          spawnWave("level2", 7)
-          break
-        case 90:
-          spawnWave("basic", 4)
-          spawnWave("level2", 6)
-          break
-        case 100:
-          spawnWave("basic", 4)
-          spawnWave("level2", 6)
-          break
-        case 110:
-          spawnWave("basic", 80)
-          break
-        case 130:
-          spawnWave("basic", 70)
-          break
-        case 150:
-          spawnWave("level2", 50)
-          break
-        case 170:
-          spawnWave("level2", 40)
-          break
-        case 190:
-          spawnEnemy('elite1')
-          spawnWave("level2", 30)
-          spawnWave("level3", 10)
-          break
-        case 210:
-          spawnWave("level3", 40)
-          break
-        case 230:
-          spawnWave("level5", 130)
-          break
-        case 235:
-          spawnWave("basic", 50)
-        case 240:
-          spawnWave("level5", 90)
-          break
-        case 245:
-          spawnWave("level5", 70)
-          break
-        case 250:
-          spawnWave("basic", 90)
-          break
-        case 260:
-          spawnWave("level2", 30)
-          break
-        case 265:
-          spawnWave("level5", 80)
-          break
-        case 275:
-          spawnWave("level4", 30)
-          break
-        case 285:
-          spawnWave("level4", 10)
-          break
-        case 300:
-          enemies = []
-          spawnEnemy('boss1')
-          bossOnBoard = true
-          break
-        case 301:
-          spawnWave("level4", 40)
-          break
-        case 310:
-          spawnWave("level4", 30)
-          break
-        case 325:
-          spawnWave("level4", 30)
-          break
-        case 340:
-          spawnWave("level6", 20)
-          break
-        case 360:
-          spawnWave("level4", 80)
-          break
-        case 380:
-          spawnWave("level4", 80)
-          spawnEnemy('elite1', 100)
-          break
-        case 400:
-          spawnWave("level6", 60)
-          break
-        case 420:
-          spawnWave("level6", 60)
-          break
-        case 440:
-          spawnWave("level6", 60)
-          break
-        case 460:
-          spawnWave("level7", 20)
-          break
-        case 480:
-          spawnWave("level7", 20)
-          break
-        case 500:
-          spawnWave("level7", 20)
-          spawnWave("level5", 100)
-          break
-        case 520:
-          spawnWave("level7", 20)
-          spawnWave("level6", 60)
-          break
-        case 540:
-          spawnWave("level7", 20)
-          spawnWave("level6", 60)
-          spawnEnemy('elite1', 800)
-          break
-        case 560:
-          spawnWave("level4", 300)
-          break
-        case 565:
-          spawnWave("level4", 10)
-          break
-        case 570:
-          spawnWave("level4", 10)
-          break
-        case 575:
-          spawnWave("level4", 10)
-          break
-        case 580:
-          spawnWave("level4", 10)
-          break
-        case 585:
-          spawnWave("level4", 10)
-          break
-        case 600:
-          enemies = []
-          spawnEnemy('boss1', 1800)
-          bossOnBoard = true
-          break
-        case 601:
-          spawnWave("level6", 50)
-          break
-        default:
-          if (time > 601 && time < 630 && time % 2 === 0) {
-            spawnWave("level6", 30)
-          } else if (time > 630 && time < 660 && time % 3 === 0) {
-            spawnWave("level6", 50)
-          } else if (time > 660 && time < 700 && time % 1 === 0) {
+      if (localStorage.getItem("level") === "1"){
+        switch (time) {
+          case 1:
+            spawnWave("basic", 14)
+            break
+          case 10:
+            spawnWave("basic", 5)
+            break
+          case 20:
+            spawnWave("basic", 8)
+            break
+          case 30:
+            spawnWave("basic", 5)
+            spawnWave("level2", 5)
+            break
+          case 45:
+            spawnWave("basic", 4)
+            spawnWave("level2", 5)
+            break
+          case 60:
+            spawnWave("basic", 5)
+            spawnWave("level2", 6)
+            break
+          case 75:
+            spawnWave("basic", 6)
+            spawnWave("level2", 7)
+            break
+          case 90:
+            spawnWave("basic", 4)
+            spawnWave("level2", 6)
+            break
+          case 100:
+            spawnWave("basic", 4)
+            spawnWave("level2", 6)
+            break
+          case 110:
+            spawnWave("basic", 80)
+            break
+          case 130:
+            spawnWave("basic", 70)
+            break
+          case 150:
+            spawnWave("level2", 50)
+            break
+          case 170:
+            spawnWave("level2", 40)
+            break
+          case 190:
+            spawnEnemy('elite1')
+            spawnWave("level2", 30)
+            spawnWave("level3", 10)
+            break
+          case 210:
+            spawnWave("level3", 40)
+            break
+          case 230:
+            spawnWave("level5", 130)
+            break
+          case 235:
+            spawnWave("basic", 50)
+          case 240:
+            spawnWave("level5", 90)
+            break
+          case 245:
+            spawnWave("level5", 70)
+            break
+          case 250:
+            spawnWave("basic", 90)
+            break
+          case 260:
+            spawnWave("level2", 30)
+            break
+          case 265:
+            spawnWave("level5", 80)
+            break
+          case 275:
+            spawnWave("level4", 30)
+            break
+          case 285:
+            spawnWave("level4", 10)
+            break
+          case 300:
+            enemies = []
+            spawnEnemy('boss1')
+            bossOnBoard = true
+            break
+          case 301:
+            spawnWave("level4", 40)
+            break
+          case 310:
+            spawnWave("level4", 30)
+            break
+          case 325:
+            spawnWave("level4", 30)
+            break
+          case 340:
+            spawnWave("level6", 20)
+            break
+          case 360:
+            spawnWave("level4", 80)
+            break
+          case 380:
+            spawnWave("level4", 80)
+            spawnEnemy('elite1', 100)
+            break
+          case 400:
+            spawnWave("level6", 60)
+            break
+          case 420:
+            spawnWave("level6", 60)
+            break
+          case 440:
+            spawnWave("level6", 60)
+            break
+          case 460:
             spawnWave("level7", 20)
-          } else if (time > 700 && time % 1 === 0) {
-            spawnWave("level7", 10)
-            spawnWave("level8", 10)
-          }
+            break
+          case 480:
+            spawnWave("level7", 20)
+            break
+          case 500:
+            spawnWave("level7", 20)
+            spawnWave("level5", 100)
+            break
+          case 520:
+            spawnWave("level7", 20)
+            spawnWave("level6", 60)
+            break
+          case 540:
+            spawnWave("level7", 20)
+            spawnWave("level6", 60)
+            spawnEnemy('elite1', 800)
+            break
+          case 560:
+            spawnWave("level4", 300)
+            break
+          case 565:
+            spawnWave("level4", 10)
+            break
+          case 570:
+            spawnWave("level4", 10)
+            break
+          case 575:
+            spawnWave("level4", 10)
+            break
+          case 580:
+            spawnWave("level4", 10)
+            break
+          case 585:
+            spawnWave("level4", 10)
+            break
+          case 600:
+            enemies = []
+            spawnEnemy('boss1', 1800)
+            bossOnBoard = true
+            break
+          case 601:
+            spawnWave("level6", 50)
+            break
+          default:
+            if (time === 700) { spawnEnemy('elite1', 2000)}
+            if (time === 900) {
+              enemies = []
+              spawnEnemy('boss1', 5000)
+              bossOnBoard = true}
+            if (time > 900) {
+              window.location.href = "shooterWin.html";
+              localStorage.setItem('level', "2")
+            }
+            if (time > 601 && time < 630 && time % 2 === 0) {
+              spawnWave("level6", 30)
+            } else if (time > 630 && time < 660 && time % 3 === 0) {
+              spawnWave("level6", 50)
+            } else if (time > 660 && time < 700 && time % 1 === 0) {
+              spawnWave("level7", 20)
+            } else if (time > 700 && time < 800 && time % 1 === 0) {
+              spawnWave("level7", 10)
+              spawnWave("level8", 10)
+            }  else if (time > 700 && time < 800 && time % 2 === 0) {
+              spawnWave("level8", 30)
+            } else if (time > 800 && time < 900 ) {
+              spawnWave("level6", 40)
+              spawnWave("level8", 20)
+            }
+        
 
-
+      }
+      } else {
+        switch (time) {
+          case 1:
+            spawnWave('blob1', 5)
+            break
+          case 10:
+            spawnWave('blob1', 5)
+            break
+          case 15:
+            spawnWave('blob1', 5)
+            break
+          case 20:
+            spawnWave('blob1', 5)
+            break
+          case 30:
+            spawnWave('blob1', 5)
+            spawnWave('blob2', 5)
+            break
+          case 40:
+            spawnWave('blob1', 4)
+            spawnWave('blob2', 6)
+            break
+          case 50:
+            spawnWave('blob1', 3)
+            spawnWave('blob2', 8)
+            break
+          case 65:
+            spawnWave('blob2', 15)
+            break
+        }
       }
     }
 
@@ -1825,6 +1912,7 @@
     let pattern;
 
     sky.onload = () => {
+      if(localStorage.getItem('level') != "1") {return}
 
       const patternCanvas = document.createElement('canvas');
       patternCanvas.width = 21;
@@ -1833,6 +1921,20 @@
       const patternCtx = patternCanvas.getContext('2d');
 
       patternCtx.drawImage(sky, 0, 0, 21, 21);
+
+      pattern = ctx.createPattern(patternCanvas, 'repeat');
+    };
+
+    sand.onload = () => {
+      if (localStorage.getItem('level') != "2") { return }
+
+      const patternCanvas = document.createElement('canvas');
+      patternCanvas.width = 84;
+      patternCanvas.height = 80;
+
+      const patternCtx = patternCanvas.getContext('2d');
+
+      patternCtx.drawImage(sand, 0, 0, 84, 80);
 
       pattern = ctx.createPattern(patternCanvas, 'repeat');
     };
