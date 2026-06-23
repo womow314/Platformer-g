@@ -161,6 +161,9 @@
     let blob1 = new Image();
     blob1.src = "images/pixil-frame-0%20(43).png";
 
+    let blob2 = new Image();
+    blob2.src = "images/pixil-frame-0%20(43).png";
+
     let enemyLevel2 = new Image();
     enemyLevel2.src = "images/pixil-frame-0%20(14).png"
 
@@ -630,6 +633,10 @@
         Ehealth = 4
         typeImage = blob1
         enemySize = 50
+      } else if (type === "blob2") {
+        Ehealth = 10
+        typeImage = blob2
+        enemySize = 50
       }
       if (type === "boss1") {
         console.trace("BOSS SPAWNED");
@@ -969,6 +976,14 @@
           spawnEnemy('level2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
           spawnEnemy('level2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
           spawnEnemy('level2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+        }, 10);
+      }
+      if (enemy.enemyType === "blob2") {
+        setTimeout(() => {
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
         }, 10);
       }
     }
@@ -1360,6 +1375,21 @@
             break
           case 20:
             spawnWave('blob1', 5)
+            break
+          case 30:
+            spawnWave('blob1', 5)
+            spawnWave('blob2', 5)
+            break
+          case 40:
+            spawnWave('blob1', 4)
+            spawnWave('blob2', 6)
+            break
+          case 50:
+            spawnWave('blob1', 3)
+            spawnWave('blob2', 8)
+            break
+          case 65:
+            spawnWave('blob2', 15)
             break
         }
       }
