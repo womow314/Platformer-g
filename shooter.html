@@ -89,6 +89,7 @@
     localStorage.setItem('mostKillsWithMod', localStorage.getItem('mostKillsWithMod') || "0")
     localStorage.setItem('skillCoinsSpent', localStorage.getItem('skillCoinsSpent') || "0")
     localStorage.setItem('repeatFire', localStorage.getItem('repeatFire') || "1")
+    localStorage.setItem('level', localStorage.getItem('level') || "1")
 
     localStorage.setItem('forceMod', localStorage.getItem('forceMod') || "1");
     const base = Number(localStorage.getItem('localPower'))
@@ -183,6 +184,9 @@
 
     let elite1 = new Image();
     elite1.src = "images/pixil-frame-0 (25).png"
+
+    let sand = new Image();
+    sand.src = "images/sand.png"
 
     let lightning = new Image();
     lightning.src = "images/pixil-frame-0 (26).png"
@@ -554,7 +558,7 @@
     let energyDrinkCooldown = 800
     enemies = []
 
-    function spawnEnemy(type = "basic", mod = 0, is = false, degree = 0) {
+    function spawnEnemy(type = "basic", mod = 0, is = false, degree = 0, x= 0, y=0) {
 
       const minRadius = 800;
       const maxRadius = 1000;
@@ -562,11 +566,19 @@
       if (is) {
         angle = degree
       }
+      if (x != 0){
+
+      }
       else { angle = Math.random() * Math.PI * 2; }
       const radius = minRadius + Math.random() * (maxRadius - minRadius);
 
-      const px = player.x + Math.cos(angle) * radius;
-      const py = player.y + Math.sin(angle) * radius;
+      let px = player.x + Math.cos(angle) * radius;
+      let py = player.y + Math.sin(angle) * radius;
+
+      if (x != 0) {
+        px = x
+        py = y
+      }
 
       let Ehealth;
       let typeImage;
@@ -1300,6 +1312,7 @@
             bossOnBoard = true}
           if (time > 900) {
             window.location.href = "shooterWin.html";
+            localStorage.setItem('level', "2")
           }
           if (time > 601 && time < 630 && time % 2 === 0) {
             spawnWave("level6", 30)
@@ -1313,7 +1326,7 @@
           }  else if (time > 700 && time < 800 && time % 2 === 0) {
             spawnWave("level8", 30)
           } else if (time > 800 && time < 900 ) {
-            spawnWave("level6", 100)
+            spawnWave("level6", 40)
             spawnWave("level8", 20)
           }
 
@@ -1837,6 +1850,7 @@
     let pattern;
 
     sky.onload = () => {
+      if(localStorage.getItem('level') != "1") {return}
 
       const patternCanvas = document.createElement('canvas');
       patternCanvas.width = 21;
@@ -1845,6 +1859,20 @@
       const patternCtx = patternCanvas.getContext('2d');
 
       patternCtx.drawImage(sky, 0, 0, 21, 21);
+
+      pattern = ctx.createPattern(patternCanvas, 'repeat');
+    };
+
+    sand.onload = () => {
+      if (localStorage.getItem('level') != "2") { return }
+
+      const patternCanvas = document.createElement('canvas');
+      patternCanvas.width = 84;
+      patternCanvas.height = 80;
+
+      const patternCtx = patternCanvas.getContext('2d');
+
+      patternCtx.drawImage(sand, 0, 0, 84, 80);
 
       pattern = ctx.createPattern(patternCanvas, 'repeat');
     };
