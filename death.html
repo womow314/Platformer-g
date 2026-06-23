@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>You died!</title>
-    <link rel="stylesheet" href="styles1.css" />
+  <title>You died!</title>
+  <link rel="stylesheet" href="styles1.css" />
 </head>
+
 <body>
- <h1 id="deathMessage">YOU DIED ☠️ Kills: 0</h1>
- <button onclick="home()" id="home">Home</button>
- <button onclick="window.location.href = 'shooterShopFile.html';" id="shooterShop">Shop</button>
+  <h1 id="deathMessage">YOU DIED ☠️ Kills: 0</h1>
+  <button onclick="home()" id="home">Home</button>
+  <button onclick="window.location.href = 'shooterShopFile.html';" id="shooterShop">Shop</button>
   <script>
     let score = Number(localStorage.getItem('currentScore')) || 0;
-    
+
     let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
-    
-    let earnedCoins = Math.round(score / 10);
+
+    let earnedCoins = Math.round(score / 5);
     let totalCoins = currentCoins + earnedCoins;
-    
+
     localStorage.setItem('killCoins', String(totalCoins));
 
     document.getElementById('deathMessage').innerText = `YOU DIED ☠️ Kills: ${score}`;
 
     function home() {
-        window.location.href = "index.html";
+      window.location.href = "index.html";
     } 
   </script>
 </body>
+
 </html>

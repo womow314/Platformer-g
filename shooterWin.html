@@ -6,7 +6,7 @@
 </head>
 
 <body>
-    <h2>Congratulations, you made it!</h2>
+    <h2>Congratulations, you win!</h2>
     <div id="statistics">
         <h3 id="score">Score: </h3>
         <h3 id="deaths">Deaths: </h3>
@@ -15,13 +15,19 @@
     <button onclick="copy()" id="copy">Copy to share</button>
     <button onclick="home()" id="home">Home</button>
     <script>
+        let score = Number(localStorage.getItem('currentScore')) || 0;
 
-        document.getElementById('score').innerText = `Score: ${localStorage.getItem('Score')}`
-        document.getElementById('deaths').innerText = `Deaths: ${localStorage.getItem('Deaths')}`
-        document.getElementById('time').innerText = `Time: ${localStorage.getItem('Time')}`
+        let currentCoins = Number(localStorage.getItem('killCoins')) || 0;
+
+        let earnedCoins = Math.round(score / 5);
+        let totalCoins = currentCoins + earnedCoins;
+
+        localStorage.setItem('killCoins', String(totalCoins));
+        document.getElementById('score').innerText = `Kills: ${score}`
+
 
         let copyButton = document.getElementById('copy');
-        const copiedText = ("I just finished Games.io Platformer with a time of " + localStorage.getItem('Time') + "! \nScore: " + localStorage.getItem('Score') + "\nDeaths: " + localStorage.getItem('Deaths'));
+        const copiedText = ("I just finished Games.io Shooter with a score of " + score);
         function copy() {
             navigator.clipboard.writeText(copiedText);
             copyButton.innerText = "Copied!";

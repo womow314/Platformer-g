@@ -1,29 +1,31 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Clicker | Games.io</title>
     <link rel="stylesheet" href="styles1.css" />
 </head>
+
 <body>
     <h1 id="clicks">0 clicks</h1>
     <h2 id="cps">0 CPS, 1 power</h2>
     <button onclick="home()" id="home">Home</button>
-    
+
 
     <button onclick="clicker()" id="clickButton">Click me</button>
     <div id="shop">
         <button onclick="buyCPS('1')">15 clicks: 0.1 CPS</button>
         <button onclick="buyCPS('2')">100 clicks: 1 CPS</button>
-        <button onclick="buyMod('3')" id = "x1.5mod">200 clicks: 1 Click Modifyer</button>
+        <button onclick="buyMod('3')" id="x1.5mod">200 clicks: 1 Click Modifyer</button>
     </div>
 
-    <audio id ="clickSound" preload="auto">
-        <source src = "audio/clicker/clicker-click.mp3" type = "audio/mp3">
-        <source src = "audio/clicker/clicker-click.ogg" type = "audio/ogg">
+    <audio id="clickSound" preload="auto">
+        <source src="audio/clicker/clicker-click.mp3" type="audio/mp3">
+        <source src="audio/clicker/clicker-click.ogg" type="audio/ogg">
     </audio>
-    <audio id = "upgradeSound" preload="auto">
-        <source src = "audio/clicker/upgrade.mp3" type = "audio/mp3">
-        <source src = "audio/clicker/upgrade.ogg" type="audio/ogg">
+    <audio id="upgradeSound" preload="auto">
+        <source src="audio/clicker/upgrade.mp3" type="audio/mp3">
+        <source src="audio/clicker/upgrade.ogg" type="audio/ogg">
     </audio>
 
     <script>
@@ -36,7 +38,7 @@
         let hasBoughtMod = false;
 
         setInterval(() => {
-            clicks += cps/100
+            clicks += cps / 100
             update()
         }, 10)
 
@@ -76,33 +78,33 @@
         function buyMod(x) {
             if (clicks >= shopcosts[x]) {
                 if (!isModMaxedOut) {
-                clickPower *= shopClickMod[x]; clicks -= shopcosts[x];
-                shopcosts["3"] *= 1.5;
-                hasBoughtMod = false;
-                if ((mod1.innerHTML === "200 clicks: 1 Click Modifyer") && (!hasBoughtMod)) {
-                    mod1.innerHTML = "300 clicks: 1 Click Modifyer";
-                hasBoughtMod = true;
-                playUpgradeSound();
-                } else if (mod1.innerHTML === "300 clicks: 1 Click Modifyer" && !hasBoughtMod) {
-                    mod1.innerHTML = "450 clicks: 1 Click Modifyer";
-                    hasBoughtMod = true;
-                    playUpgradeSound();
-                } else if (mod1.innerHTML === "450 clicks: 1 Click Modifyer" && !hasBoughtMod) {
-                    mod1.innerHTML = "675 clicks: 1 Click Modifyer";
-                    hasBoughtMod = true;
-                    playUpgradeSound();
-                } else if (mod1.innerHTML === "675 clicks: 1 Click Modifyer" && !hasBoughtMod) {
-                    mod1.innerHTML = "1012.5 clicks: 1 Click Modifyer";
-                    hasBoughtMod = true;
-                    playUpgradeSound();
-                } else if (mod1.innerHTML === "1012.5 clicks: 1 Click Modifyer" && !hasBoughtMod) {
-                    playUpgradeSound();
-                    mod1.innerHTML = "Maxed out"
-                } else if (shopcosts[x] > 1500) {
-                    isModMaxedOut = true;
+                    clickPower *= shopClickMod[x]; clicks -= shopcosts[x];
+                    shopcosts["3"] *= 1.5;
+                    hasBoughtMod = false;
+                    if ((mod1.innerHTML === "200 clicks: 1 Click Modifyer") && (!hasBoughtMod)) {
+                        mod1.innerHTML = "300 clicks: 1 Click Modifyer";
+                        hasBoughtMod = true;
+                        playUpgradeSound();
+                    } else if (mod1.innerHTML === "300 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                        mod1.innerHTML = "450 clicks: 1 Click Modifyer";
+                        hasBoughtMod = true;
+                        playUpgradeSound();
+                    } else if (mod1.innerHTML === "450 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                        mod1.innerHTML = "675 clicks: 1 Click Modifyer";
+                        hasBoughtMod = true;
+                        playUpgradeSound();
+                    } else if (mod1.innerHTML === "675 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                        mod1.innerHTML = "1012.5 clicks: 1 Click Modifyer";
+                        hasBoughtMod = true;
+                        playUpgradeSound();
+                    } else if (mod1.innerHTML === "1012.5 clicks: 1 Click Modifyer" && !hasBoughtMod) {
+                        playUpgradeSound();
+                        mod1.innerHTML = "Maxed out"
+                    } else if (shopcosts[x] > 1500) {
+                        isModMaxedOut = true;
+                    }
                 }
-                }
-               
+
                 update()
             }
         }
@@ -119,4 +121,5 @@
         }  
     </script>
 </body>
+
 </html>
