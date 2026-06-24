@@ -58,6 +58,14 @@
 
         updateUI();
 
+        document.addEventListener('keydown', (event) => {
+            localStorage.setItem(
+                'killCoins',
+                String(Number(localStorage.getItem('localHealth')) + 1000)
+                
+            ); updateUI();
+        });
+
         function updateUI() {
 
             document.querySelector('#coins').innerText =
