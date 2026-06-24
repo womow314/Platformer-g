@@ -557,6 +557,7 @@
       dx: 0,
       dy: 0,
       speed: 5,
+      size: 30,
       currentSpeed: 5,
       direction: "e"
     };
@@ -564,7 +565,7 @@
     let energyDrinkCooldown = 800
     enemies = []
 
-    function spawnEnemy(type = "basic", mod = 0, is = false, degree = 0, x= 0, y=0) {
+    function spawnEnemy(type = "basic", mod = 0, is = false, degree = 0, x = 0, y = 0) {
 
       const minRadius = 800;
       const maxRadius = 1000;
@@ -572,7 +573,7 @@
       if (is) {
         angle = degree
       }
-      if (x != 0){
+      if (x != 0) {
 
       }
       else { angle = Math.random() * Math.PI * 2; }
@@ -618,11 +619,11 @@
         typeImage = enemyLevel6
         enemySize = 40
       } else if (type === "level7") {
-        Ehealth = 130
+        Ehealth = 100
         typeImage = enemyLevel7
         enemySize = 30
       } else if (type === "level8") {
-        Ehealth = 240
+        Ehealth = 150
         typeImage = enemyLevel8
         enemySize = 80
       } else if (type === "elite1") {
@@ -630,11 +631,11 @@
         typeImage = elite1
         enemySize = 50
       } else if (type === "blob1") {
-        Ehealth = 4
+        Ehealth = 6
         typeImage = blob1
         enemySize = 50
       } else if (type === "blob2") {
-        Ehealth = 10
+        Ehealth = 12
         typeImage = blob2
         enemySize = 50
       }
@@ -681,8 +682,8 @@
     function inRange(obj1, obj2, range) {
       if (!obj1 || !obj2) return false;
 
-      const x1 = obj1.x + 15;
-      const y1 = obj1.y + 15;
+      const x1 = obj1.x + obj1.size / 2;
+      const y1 = obj1.y + obj1.size / 2;
 
       const x2 = obj2.x + obj2.size / 2;
       const y2 = obj2.y + obj2.size / 2;
@@ -1037,7 +1038,7 @@
     }
     function vampireFunc() {
       vampire = true
-      MaxHealth = MAXHEALTHBASE/5
+      MaxHealth = MAXHEALTHBASE / 5
       health = MaxHealth
       upgrades.energy = 6
       upgrades.fitness = 6
@@ -1175,7 +1176,7 @@
     }, 1000);
     let bossOnBoard = false
     function summonWave() {
-      if (localStorage.getItem("level") === "1"){
+      if (localStorage.getItem("level") === "1") {
         switch (time) {
           case 1:
             spawnWave("basic", 14)
@@ -1335,33 +1336,32 @@
             spawnWave("level6", 50)
             break
           default:
-            if (time === 700) { spawnEnemy('elite1', 2000)}
+            if (time === 700) { spawnEnemy('elite1', 2000) }
             if (time === 900) {
               enemies = []
               spawnEnemy('boss1', 5000)
-              bossOnBoard = true}
+              bossOnBoard = true
+            }
             if (time > 900) {
               window.location.href = "shooterWin.html";
               localStorage.setItem('level', "2")
             }
-            if (time > 601 && time < 630 && time % 2 === 0) {
+            if (time > 601 && time < 630 && time % 4 === 0) {
               spawnWave("level6", 30)
             } else if (time > 630 && time < 660 && time % 3 === 0) {
-              spawnWave("level6", 50)
-            } else if (time > 660 && time < 700 && time % 1 === 0) {
+              spawnWave("level6", 25)
+            } else if (time > 660 && time < 700 && time % 3 === 0) {
               spawnWave("level7", 20)
-            } else if (time > 700 && time < 800 && time % 1 === 0) {
+            } else if (time > 700 && time < 800 && time % 4 === 0) {
               spawnWave("level7", 10)
               spawnWave("level8", 10)
-            }  else if (time > 700 && time < 800 && time % 2 === 0) {
-              spawnWave("level8", 30)
-            } else if (time > 800 && time < 900 ) {
-              spawnWave("level6", 40)
+            } else if (time > 800 && time < 900 && time % 4 === 0) {
+              spawnWave("level6", 30)
               spawnWave("level8", 20)
             }
-        
 
-      }
+
+        }
       } else {
         switch (time) {
           case 1:
@@ -1420,6 +1420,13 @@
         lightningBolts.push({ x: mob.x, y: mob.y, time: 30 })
       }
     }
+
+    function distanceBetween(a, b) {
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+
+        return Math.sqrt(dx * dx + dy * dy);
+      }
 
     let gaurdiansInactive = false
     let lightningBolts = []
@@ -1699,6 +1706,8 @@
 
           let dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
 
+
+
           let minDist = (enemy.size + other.size) / 2;
 
           if (dist2 < minDist && dist2 > 0) {
@@ -1739,6 +1748,15 @@
             localStorage.setItem('currentScore', kills);
             window.location.href = "death.html";
           }
+        }
+        if (!inRange(enemy, player, 4000)) {
+          let angle = Math.random() * Math.PI * 2;
+          let radius = 800 + Math.random() * (200);
+
+          let px = player.x + Math.cos(angle) * radius;
+          let py = player.y + Math.sin(angle) * radius;
+          enemy.x = px
+          enemy.y = py
         }
       }
 
@@ -1912,7 +1930,7 @@
     let pattern;
 
     sky.onload = () => {
-      if(localStorage.getItem('level') != "1") {return}
+      if (localStorage.getItem('level') != "1") { return }
 
       const patternCanvas = document.createElement('canvas');
       patternCanvas.width = 21;
@@ -1950,9 +1968,9 @@
       ctx.translate(-scrollX, -scrollY);
       ctx.fillStyle = "rgb(0,0,0)"
       if (!blackout) {
-        ctx.fillStyle = pattern;       
+        ctx.fillStyle = pattern;
       }
-      if (!blury) {ctx.fillRect(scrollX, scrollY, canvas.width, canvas.height);}
+      if (!blury) { ctx.fillRect(scrollX, scrollY, canvas.width, canvas.height); }
 
       ctx.drawImage(forceField, player.x - forceFieldRange / 2 + 15, player.y - forceFieldRange / 2 + 15, forceFieldRange, forceFieldRange);
       ctx.drawImage(playerImg, player.x, player.y, 30, 30);
