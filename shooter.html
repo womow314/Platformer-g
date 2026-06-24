@@ -647,6 +647,14 @@
         Ehealth = 1
         typeImage = blob3
         enemySize = 80
+      } else if (type === "blob4") {
+        Ehealth = 20
+        typeImage = blob1
+        enemySize = 100
+      } else if (type === "blob5") {
+        Ehealth = 80
+        typeImage = blob2
+        enemySize = 100
       } else if (type === "boss2") {
         Ehealth = 1000
         typeImage = boss2
@@ -1020,6 +1028,24 @@
           spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
           spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
           CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 4 })
+        }, 5);
+      }
+      if (enemy.enemyType === "blob4") {
+        setTimeout(() => {
+          spawnEnemy('blob1', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('blob1', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('blob1', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('blob1', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 6 })
+        }, 5);
+      }
+      if (enemy.enemyType === "blob5") {
+        setTimeout(() => {
+          spawnEnemy('blob2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('blob2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('blob2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('blob2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 6 })
         }, 5);
       }
     }
@@ -1486,6 +1512,38 @@
             spawnEnemy('boss2', 300)
             bossOnBoard = true
             break
+          case 301:
+            spawnWave('blob4', 40)
+            break
+          case 310:
+            spawnWave('blob4', 40)
+            break
+          case 320:
+            spawnWave('blob4', 40)
+            spawnWave('blob3', 5)
+            break
+          case 330:
+            spawnWave('blob4', 40)
+            spawnWave('blob3', 5)
+            break
+          case 340:
+            spawnWave('blob4', 40)
+            spawnWave('blob3', 5)
+            break
+          case 350:
+            spawnWave('blob4', 40)
+            spawnWave('blob3', 5)
+            spawnWave('blob2', 8)
+            break
+          case 360:
+            spawnWave('blob4', 40)
+            spawnWave('blob3', 5)
+            spawnWave('blob2', 8)
+            break
+          case 380:
+            spawnWave('blob5', 20)
+            spawnWave('blob3', 20)
+            break
         }
       }
     }
@@ -1609,7 +1667,11 @@
       if (coins >= coinsToUpgrade) {
         coins -= coinsToUpgrade
         let increaseAmount = totalUpgradesCompleteed / 10 + 1
+        if (localStorage.getItem('level') === "2") {
+          increaseAmount += totalUpgradesCompleteed / 10
+        }
         coinsToUpgrade += increaseAmount
+        
         totalUpgradesCompleteed += 1
         displayUpgrades()
       }
