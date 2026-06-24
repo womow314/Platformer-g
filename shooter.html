@@ -262,6 +262,8 @@
     const boss1 = new Image();
     boss1.src = "images/BOSS.png"
 
+    const boss2 = new Image();
+    boss2.src = "images/pixil-frame-0 (46).png"
     let kills = 0;
     let CoinsOnGround = []
     let rockets = []
@@ -645,6 +647,10 @@
         Ehealth = 1
         typeImage = blob3
         enemySize = 80
+      } else if (type === "boss2") {
+        Ehealth = 1000
+        typeImage = boss2
+        enemySize = 200
       }
       if (type === "boss1") {
         console.trace("BOSS SPAWNED");
@@ -965,6 +971,15 @@
           coins += coin.value
         }
       }
+      if (enemy.enemyType === "boss2") {
+        CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 30, y: enemy.y + enemy.size / 2 + Math.random() * 30, value: coinsToUpgrade })
+        bossOnBoard = false
+        for (let c = CoinsOnGround.length - 1; c >= 0; c--) {
+          coin = CoinsOnGround[c]
+          CoinsOnGround.splice(c, 1)
+          coins += coin.value
+        }
+      }
       if (enemy.enemyType === "elite1") {
         CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 30, y: enemy.y + enemy.size / 2 + Math.random() * 30, value: coinsToUpgrade })
         mobSpawnCooldown = 0
@@ -1181,6 +1196,12 @@
 
 
     }, 1000);
+
+    setInterval(() => {
+      if (bossOnBoard && localStorage.getItem('level') === "2") {
+        spawnEnemy('blob3', 0, false, 0, enemies[0].x - 8 + Math.random() * 16, enemies[0].y - 8 + Math.random() * 16);
+      }
+    }, 2000);
 
     setInterval(() => {
       if (!swarm) { return; }
@@ -1460,6 +1481,11 @@
           case 290:
             spawnWave('level5', 200)
             break
+          case 300:
+            enemies = []
+            spawnEnemy('boss2', 300)
+            bossOnBoard = true
+            break
         }
       }
     }
@@ -1491,11 +1517,11 @@
     }
 
     function distanceBetween(a, b) {
-        const dx = a.x - b.x;
-        const dy = a.y - b.y;
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
 
-        return Math.sqrt(dx * dx + dy * dy);
-      }
+      return Math.sqrt(dx * dx + dy * dy);
+    }
 
     let gaurdiansInactive = false
     let lightningBolts = []
