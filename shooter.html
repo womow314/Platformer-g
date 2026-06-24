@@ -162,7 +162,7 @@
     blob1.src = "images/pixil-frame-0%20(43).png";
 
     let blob2 = new Image();
-    blob2.src = "images/pixil-frame-0%20(43).png";
+    blob2.src = "images/pixil-frame-0%20(44).png";
 
     let enemyLevel2 = new Image();
     enemyLevel2.src = "images/pixil-frame-0%20(14).png"
@@ -977,15 +977,17 @@
           spawnEnemy('level2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
           spawnEnemy('level2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
           spawnEnemy('level2', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
-        }, 10);
+          CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 1.5 })
+        }, 5);
       }
       if (enemy.enemyType === "blob2") {
         setTimeout(() => {
-          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
-          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
-          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
-          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
-        }, 10);
+          spawnEnemy('level3', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level3', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level3', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level3', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 1.5 })
+        }, 5);
       }
     }
 
@@ -1367,29 +1369,40 @@
           case 1:
             spawnWave('blob1', 5)
             break
-          case 10:
-            spawnWave('blob1', 5)
-            break
           case 15:
-            spawnWave('blob1', 5)
-            break
-          case 20:
             spawnWave('blob1', 5)
             break
           case 30:
             spawnWave('blob1', 5)
+            break
+          case 45:
+            spawnWave('blob1', 5)
+            break
+          case 60:
+            spawnWave('blob1', 5)
             spawnWave('blob2', 5)
             break
-          case 40:
+          case 80:
             spawnWave('blob1', 4)
             spawnWave('blob2', 6)
             break
-          case 50:
+          case 100:
             spawnWave('blob1', 3)
             spawnWave('blob2', 8)
             break
-          case 65:
+          case 120:
             spawnWave('blob2', 15)
+            break
+          case 140:
+            spawnWave('blob1', 40)
+            break
+          case 160:
+            spawnWave('level5', 40)
+            break
+          case 180:
+            spawnEnemy('elite1', 60)
+            spawnWave('blob1', 4)
+            spawnWave('blob2', 6)
             break
         }
       }
