@@ -164,6 +164,9 @@
     let blob2 = new Image();
     blob2.src = "images/pixil-frame-0%20(44).png";
 
+    let blob3 = new Image();
+    blob3.src = "images/pixil-frame-0%20(45).png";
+
     let enemyLevel2 = new Image();
     enemyLevel2.src = "images/pixil-frame-0%20(14).png"
 
@@ -638,6 +641,10 @@
         Ehealth = 12
         typeImage = blob2
         enemySize = 50
+      } else if (type === "blob3") {
+        Ehealth = 1
+        typeImage = blob3
+        enemySize = 80
       }
       if (type === "boss1") {
         console.trace("BOSS SPAWNED");
@@ -986,7 +993,18 @@
           spawnEnemy('level3', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
           spawnEnemy('level3', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
           spawnEnemy('level3', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
-          CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 1.5 })
+          CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 2 })
+        }, 5);
+      }
+      if (enemy.enemyType === "blob3") {
+        setTimeout(() => {
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          spawnEnemy('level4', 0, false, 0, enemy.x - 8 + Math.random() * 16, enemy.y - 8 + Math.random() * 16);
+          CoinsOnGround.push({ x: enemy.x + enemy.size / 2 + Math.random() * 10, y: enemy.y + enemy.size / 2 + Math.random() * 10, value: 4 })
         }, 5);
       }
     }
@@ -1399,10 +1417,48 @@
           case 160:
             spawnWave('level5', 40)
             break
-          case 180:
+          case 170:
             spawnEnemy('elite1', 60)
             spawnWave('blob1', 4)
             spawnWave('blob2', 6)
+            break
+          case 190:
+            spawnWave('blob3', 5)
+            spawnWave('blob2', 5)
+            spawnWave('blob1', 5)
+            break
+          case 210:
+            spawnWave('blob3', 5)
+            spawnWave('blob2', 5)
+            spawnWave('blob1', 5)
+            break
+          case 220:
+            spawnWave('blob3', 5)
+            spawnWave('blob2', 5)
+            spawnWave('blob1', 5)
+            break
+          case 230:
+            spawnWave('blob3', 5)
+            spawnWave('blob2', 5)
+            spawnWave('blob1', 5)
+            break
+          case 240:
+            spawnWave('blob3', 15)
+            spawnWave('blob2', 5)
+            break
+          case 250:
+            spawnWave('blob3', 15)
+            spawnWave('blob2', 5)
+            break
+          case 260:
+            spawnWave('blob3', 15)
+            spawnWave('blob2', 5)
+            break
+          case 280:
+            spawnWave('blob3', 50)
+            break
+          case 290:
+            spawnWave('level5', 200)
             break
         }
       }
@@ -1685,6 +1741,10 @@
           enemy.x += dx * MobSpeed;
           enemy.y += dy * MobSpeed;
           if (enemy.enemyType === 'level5') {
+            enemy.x += dx * MobSpeed;
+            enemy.y += dy * MobSpeed;
+          }
+          if (enemy.enemyType === 'blob3') {
             enemy.x += dx * MobSpeed;
             enemy.y += dy * MobSpeed;
           }
