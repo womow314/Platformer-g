@@ -84,6 +84,19 @@
     }
 
     const canvas = document.getElementById('gameCanvas');
+    localStorage.setItem('platLevel', localStorage.getItem('platLevel') || "1")
+    const options = document.querySelectorAll('option')
+    function revampLevels() {
+      for (let option of options) {
+        option.innerText = 'Not available yet'
+        if (Number(option.value) <= Number(localStorage.getItem('platLevel'))){
+          option.innerText = `Level ${option.value}`
+        }
+      }
+    }
+    revampLevels()
+
+    
     const ctx = canvas.getContext('2d');
     const basegravity = 1
     let gravity = basegravity;
@@ -232,8 +245,8 @@
     }
     let cooldown = false
     let dashCooldown = 0;
-    let level = 1;
-    let printLevel = 1;
+    let level = Number(localStorage.getItem("platLevel"));
+    let printLevel = level;
     const DASH_DURATION = 1;
 
     function flipPlayerIMG() {
@@ -244,13 +257,15 @@
       playerImg.src = "images/pixil-frame-0 (1).png"
     }
 
-    function redo() {
-      level = parseInt(document.getElementById('levelSelect').value);
-      printLevel = level
-      generateWorld()
-      save = { x: 50, y: -950 };
-
-    }
+  function redo() {
+    const select = document.getElementById('levelSelect');
+    const selectedOption = select.options[select.selectedIndex];
+    if (selectedOption.innerText === 'Not available yet') return;
+    level = parseInt(selectedOption.value);
+    printLevel = level;
+    generateWorld();
+    save = { x: 50, y: -950 };
+  }
 
     let end = {
       x: 0,
@@ -643,7 +658,7 @@
           }
           if (!plat.water) { unflipPlayerIMG(); };
           if (plat.water) { gravity = -basegravity / 2; flipPlayerIMG(); continue; };
-          if (plat.check) { printLevel += 1; plat.check = false; save.x = player.x + 10; save.y = player.y; playCheckpointSound(); };
+          if (plat.check) { printLevel += 1; plat.check = false; save.x = player.x + 10; save.y = player.y; playCheckpointSound();  localStorage.setItem('platLevel', String(printLevel)); revampLevels() };
           if (gravity > 0) {
 
             if (player.dy > 0 && player.y + player.height - player.dy <= plat.y + 5) {
@@ -712,7 +727,7 @@
       ctx.fillStyle = '#287271';
       nope = false
       platforms.forEach(plat => {
-        if (plat.x > player.x + canvas.width + 200) { return; }
+        if (plat.x > player.x + canvas.width + 20 || plat.x < player.x - canvas.width - 800) { return; }
         if (plat.b) {
           for (let b = 0; b < plat.width; b += 20) {
             ctx.drawImage(slime, plat.x + b, plat.y, 20, plat.height);
