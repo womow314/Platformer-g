@@ -198,8 +198,8 @@ details {
 }
 
 #maze {
-  background-color: grey;
-  opacity: 25%;
+  background-color: green;
+  cursor: pointer;
 }
 
 #clicker {
