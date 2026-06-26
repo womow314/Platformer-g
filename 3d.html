@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple 3D Platformer</title>
+    <link rel="stylesheet" href="styles1.css" />
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #instructions {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: sans-serif;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+    <button onclick="home()" id="home">Home</button>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+
+    <div id="instructions">
+        <strong>Controls:</strong><br>
+        Move: Up arrow/Down<br>
+        Turn: Left/right arrow
+        Jump: Spacebar
+    </div>
+
+    <script>
+        function home() {
+            window.location.href = "index.html";
+        }
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 15);
+        scene.add(dirLight);
+
+        const floorGeo = new THREE.BoxGeometry(50, 2, 50);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.position.y = -1;
+        scene.add(floor);
+
+        const platGeo = new THREE.BoxGeometry(5, 1, 5);
+        const platMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+        const platforms = [];
+        const spawnPlatform = (x, y, z) => {
+            const p = new THREE.Mesh(platGeo, platMat);
+            p.position.set(x, y, z);
+            scene.add(p);
+            platforms.push(p);
+        };
+
+        let px = 0
+        let py = 2
+        let pz = -10
+        function makeNewPlatform() {
+            let roll = Math.random()
+            if (roll < 0.1) {
+                spawnPlatform(px, py, pz);
+                spawnPlatform(px, py, pz - 5);
+                px += Math.random() * 8 - 4
+                py += Math.random() * 4 - 1
+                pz -= Math.random() * 3 + 13
+            } else if (roll < 0.2) {
+                spawnPlatform(px, py, pz);
+                spawnPlatform(px, py, pz - 5);
+                spawnPlatform(px + 5, py, pz - 5);
+                spawnPlatform(px + 5, py, pz - 10);
+                px += Math.random() * 8 - 4
+                py += Math.random() * 4 - 1
+                pz -= Math.random() * 3 + 18
+            } else if (roll < 0.3) {
+                spawnPlatform(px, py, pz);
+                spawnPlatform(px + 10, py, pz);
+                spawnPlatform(px + 20, py, pz);
+                spawnPlatform(px + 30, py, pz);
+                spawnPlatform(px + 30, py, pz - 5);
+                px += Math.random() * 8 + 30
+                py += Math.random() * 4 - 1
+                pz -= Math.random() * 3 + 13
+            } else {
+                spawnPlatform(px, py, pz);
+                px += Math.random() * 8 - 4
+                py += Math.random() * 4 - 1
+                pz -= Math.random() * 3 + 8
+            }
+        }
+        for (let i = 0; i < 50; i++) {
+            makeNewPlatform()
+        }
+
+
+        const playerGeo = new THREE.BoxGeometry(1, 2, 1);
+        const playerMat = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
+        const player = new THREE.Mesh(playerGeo, playerMat);
+        player.position.set(0, 1, 0);
+        scene.add(player);
+
+        const keys = {}
+
+        let pyVelocity = 0;
+        const gravity = -0.015;
+        const jumpForce = 0.4;
+        const speed = 0.15;
+        let isGrounded = true;
+
+        let cameraAngle = 0;
+        const cameraRadius = 15;
+        const rotationSpeed = 0.03;
+
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+
+            if (keys.ArrowLeft) cameraAngle += rotationSpeed;
+            if (keys.ArrowRight) cameraAngle -= rotationSpeed;
+
+            const forwardX = Math.sin(cameraAngle);
+            const forwardZ = Math.cos(cameraAngle);
+
+            if (keys.ArrowUp) {
+                player.position.x -= forwardX * speed;
+                player.position.z -= forwardZ * speed;
+            }
+            if (keys.ArrowDown) {
+                player.position.x += forwardX * speed;
+                player.position.z += forwardZ * speed;
+            }
+
+
+            pyVelocity += gravity;
+            player.position.y += pyVelocity;
+            isGrounded = false;
+
+            if (player.position.y <= 1 && player.position.x >= -25 && player.position.x <= 25 && player.position.z >= -25 && player.position.z <= 25) {
+                player.position.y = 1;
+                pyVelocity = 0;
+                isGrounded = true;
+            }
+
+            platforms.forEach(p => {
+                const withinX = player.position.x >= p.position.x - 3 && player.position.x <= p.position.x + 3;
+                const withinZ = player.position.z >= p.position.z - 3 && player.position.z <= p.position.z + 3;
+
+                const topOfPlatform = p.position.y + 1.5;
+                const hittingTop = player.position.y <= topOfPlatform && player.position.y >= topOfPlatform + pyVelocity - 0.1;
+
+                if (withinX && withinZ && hittingTop && pyVelocity <= 0) {
+                    player.position.y = topOfPlatform;
+                    pyVelocity = 0;
+                    isGrounded = true;
+                }
+            });
+
+            if (keys["Space"] && isGrounded) {
+                pyVelocity = jumpForce;
+                isGrounded = false;
+            }
+
+            if (player.position.y < -20) {
+                player.position.set(0, 1, 0);
+                pyVelocity = 0;
+            }
+
+
+            const camX = player.position.x + Math.sin(cameraAngle) * cameraRadius;
+            const camZ = player.position.z + Math.cos(cameraAngle) * cameraRadius;
+            const camY = player.position.y + 6;
+
+            camera.position.set(camX, camY, camZ);
+            camera.lookAt(player.position);
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+
+</html>
