@@ -117,12 +117,14 @@
 
 
         const playerGeo = new THREE.BoxGeometry(1, 2, 1);
-        const playerMat = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
+        const playerMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
         const player = new THREE.Mesh(playerGeo, playerMat);
+        const sensitivity = 0.003
         player.position.set(0, 1, 0);
         scene.add(player);
 
         const keys = {}
+
 
         let pyVelocity = 0;
         const gravity = -0.015;
@@ -131,8 +133,32 @@
         let isGrounded = true;
 
         let cameraAngle = 0;
-        const cameraRadius = 15;
+        let cameraLookY = 0
+        const cameraRadius = 10;
         const rotationSpeed = 0.03;
+
+        let isFirstPerson = false
+
+        renderer.domElement.addEventListener("click", () => {
+            renderer.domElement.requestPointerLock();
+            isFirstPerson = true
+        });
+        document.addEventListener("pointerlockchange", () => {
+            if (document.pointerLockElement === renderer.domElement) {
+                isFirstPerson = true;
+            } else {
+                isFirstPerson = false;
+                cameraLookY = 0;
+            }
+        });
+        window.addEventListener("mousemove", (e) => {
+            if (document.pointerLockElement !== renderer.domElement) return;
+
+            cameraAngle -= e.movementX * sensitivity;
+            cameraLookY -= e.movementY * sensitivity;
+
+            cameraLookY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraLookY));
+        });
 
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
@@ -141,17 +167,17 @@
             requestAnimationFrame(animate);
 
 
-            if (keys.ArrowLeft) cameraAngle += rotationSpeed;
-            if (keys.ArrowRight) cameraAngle -= rotationSpeed;
+            if (keys.ArrowLeft || keys.KeyA) cameraAngle += rotationSpeed;
+            if (keys.ArrowRight || keys.KeyD) cameraAngle -= rotationSpeed;
 
             const forwardX = Math.sin(cameraAngle);
             const forwardZ = Math.cos(cameraAngle);
 
-            if (keys.ArrowUp) {
+            if (keys.ArrowUp || keys.KeyW) {
                 player.position.x -= forwardX * speed;
                 player.position.z -= forwardZ * speed;
             }
-            if (keys.ArrowDown) {
+            if (keys.ArrowDown || keys.KeyS) {
                 player.position.x += forwardX * speed;
                 player.position.z += forwardZ * speed;
             }
@@ -191,13 +217,27 @@
                 pyVelocity = 0;
             }
 
+            if (!isFirstPerson) {
+                const camX = player.position.x + Math.sin(cameraAngle) * cameraRadius;
+                const camZ = player.position.z + Math.cos(cameraAngle) * cameraRadius;
+                const camY = player.position.y + 6;
+                camera.position.set(camX, camY, camZ);
+                camera.lookAt(player.position)
 
-            const camX = player.position.x + Math.sin(cameraAngle) * cameraRadius;
-            const camZ = player.position.z + Math.cos(cameraAngle) * cameraRadius;
-            const camY = player.position.y + 6;
+            } else {
+                const camX = player.position.x;
+                const camZ = player.position.z;
+                const camY = player.position.y + 1;
+                camera.position.set(camX, camY, camZ);
 
-            camera.position.set(camX, camY, camZ);
-            camera.lookAt(player.position);
+                const lookX = player.position.x - Math.sin(cameraAngle);
+                const lookY = player.position.y + 1 + Math.sin(cameraLookY);
+                const lookZ = player.position.z - Math.cos(cameraAngle);
+
+                camera.lookAt(lookX, lookY, lookZ);
+            }
+
+
 
             renderer.render(scene, camera);
         }
