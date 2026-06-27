@@ -244,9 +244,9 @@
                 const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
 
                 const topOfPlatform = p.position.y + p.height / 2 + 1;
-                const hittingTop = player.position.y <= topOfPlatform && player.position.y >= topOfPlatform + pyVelocity - 0.1;
+                const hittingTop = player.position.y <= topOfPlatform ;
 
-                if (withinX && withinZ && hittingTop && pyVelocity <= 0) {
+                if (withinX && withinZ && hittingTop) {
                      player.position.set(0, 1, 0);
                 }
             });
