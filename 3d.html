@@ -81,6 +81,22 @@
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
         ];
+        const platMatCrack = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+        ];
+        const bouncy = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (55).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (55).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (55).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (55).png") }),
+        ];
         const lavalMat = [
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
@@ -90,13 +106,19 @@
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
         ];
         const platforms = [];
-        const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5) => {
-            const p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
+        const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, crack = false) => {
+            let p
+            if (!crack) {
+                p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
+            } else {
+                p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMatCrack);
+            }
             p.position.set(x, y, z);
             scene.add(p);
             p.width = width;
             p.height = height;
             p.depth = depth;
+            p.crack = crack
             platforms.push(p);
 
         };
@@ -109,6 +131,17 @@
             p.height = height;
             p.depth = depth;
             lavas.push(p);
+
+        };
+        bouncies = []
+        const spawnBounce = (x, y, z, width = 5, height = 1, depth = 5) => {
+            const p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), bouncy);
+            p.position.set(x, y, z);
+            scene.add(p);
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
+            bouncies.push(p);
 
         };
 
@@ -139,11 +172,12 @@
         bindButton("jump", "Space");
         function makeNewPlatform() {
             let roll = Math.random()
+            //roll = 0.79
             if (roll < 0.1) {
                 spawnPlatform(px, py, pz, 5, 1, 10);
                 for (let i = 0; i <= 4; i++) {
                     spawnLava(px + 2 - i, py + 1, pz)
-                    if (roll < 0.5) {
+                    if (roll < 0.05) {
                         spawnLava(px + 2 - i, py + 2, pz)
                     }
                 }
@@ -155,26 +189,47 @@
                 spawnPlatform(px + 5, py, pz - 10);
                 pz -= 10
             } else if (roll < 0.3) {
-                spawnPlatform(px, py, pz);
-                spawnPlatform(px + 10, py, pz);
-                spawnPlatform(px + 20, py, pz);
-                spawnPlatform(px + 30, py, pz);
-                spawnPlatform(px + 30, py, pz - 5);
+                spawnPlatform(px, py, pz, 5, 1, 5, true);
+                spawnPlatform(px + 10, py, pz, 5, 1, 5, true);
+                spawnPlatform(px + 20, py, pz, 5, 1, 5, true);
+                spawnPlatform(px + 30, py, pz, 5, 1, 5, true);
+                spawnPlatform(px + 30, py, pz, 5, 1, 10, true);
                 px += 35
                 pz -= 5
             } else if (roll < 0.5) {
                 spawnPlatform(px, py, pz);
-                spawnLava(px, py+1, pz)
+                spawnLava(px, py + 1, pz)
             } else if (roll < 0.6) {
                 spawnPlatform(px, py, pz, 11, 1, 11);
-                spawnLava(px, py + 3.5, pz, 8, 1, 6)
+                spawnLava(px, py + 3.5, pz, 8, 1, 8)
+                if (roll < 0.55) {
+                    spawnLava(px, py + 1, pz, 4, 1, 4)
+                    spawnLava(px, py + 2, pz, 4, 1, 4)
+                    spawnLava(px, py + 3, pz, 4, 1, 4)
+                }
+            } else if (roll < 0.7) {
+                spawnBounce(px, py, pz);
+                py += 15
+            } else if (roll < 0.8) {
+                spawnPlatform(px, py, pz, 3, 1, 11);
+                spawnBounce(px, py, pz - 7, 3, 1, 3);
+                spawnLava(px - 2.5, py, pz - 16, 0.5, 1, 6);
+                spawnLava(px + 2.5, py, pz - 16, 0.5, 1, 6);
+                spawnLava(px, py, pz - 19, 5, 1, 0.5);
+                spawnLava(px, py, pz - 13, 5, 1, 0.5);
+                spawnPlatform(px, py - 6, pz - 17, 3, 1, 6);
+                pz -= 18
+                py -= 6
+
+            } else if (roll < 0.9) {
+                spawnPlatform(px, py, pz, 5, 1, 5, true);
             } else {
                 spawnPlatform(px, py, pz, Math.random() * 4 + 3, 1, Math.random() * 4 + 3);
 
             }
             px += Math.random() * 8 - 4
             py += Math.random() * 4 - 1
-            pz -= Math.random() * 3.5 + 7.5
+            pz -= Math.random() * 4 + 7
         }
         for (let i = 0; i < 50; i++) {
             makeNewPlatform()
@@ -276,6 +331,21 @@
                     player.position.y = topOfPlatform;
                     pyVelocity = 0;
                     isGrounded = true;
+                    if (p.crack) {
+                        p.position.y -= 0.03
+                    }
+                }
+            });
+            bouncies.forEach(p => {
+                const withinX = player.position.x >= p.position.x - p.width / 2 - 0.5 && player.position.x <= p.position.x + p.width / 2 + 0.5;
+                const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
+
+                const topOfPlatform = p.position.y + p.height / 2 + 1;
+                const hittingTop = player.position.y <= topOfPlatform && player.position.y >= topOfPlatform + pyVelocity - 0.1;
+
+                if (withinX && withinZ && hittingTop && pyVelocity <= 0) {
+                    player.position.y = topOfPlatform;
+                    pyVelocity = jumpForce * 2;
                 }
             });
             lavas.forEach(p => {
@@ -283,7 +353,7 @@
                 const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
 
                 const topOfPlatform = p.position.y + p.height / 2 + 1;
-                const hittingTop = player.position.y <= topOfPlatform && player.position.y >= topOfPlatform - p.height/2 - 1;
+                const hittingTop = player.position.y <= topOfPlatform && player.position.y >= topOfPlatform - p.height / 2 - 1;
 
                 if (withinX && withinZ && hittingTop) {
                     player.position.set(0, 1, 0);
