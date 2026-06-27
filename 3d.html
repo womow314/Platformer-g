@@ -117,7 +117,15 @@
 
 
         const playerGeo = new THREE.BoxGeometry(1, 2, 1);
-        const playerMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF });
+        const loader = new THREE.TextureLoader();
+        const playerMat = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (51).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (51).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (49).png") }),
+        ];
         const player = new THREE.Mesh(playerGeo, playerMat);
         const sensitivity = 0.003
         player.position.set(0, 1, 0);
