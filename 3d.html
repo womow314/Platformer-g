@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple 3D Platformer</title>
+    <title>3D Games.io</title>
     <link rel="stylesheet" href="styles1.css" />
     <style>
         body {
@@ -53,7 +53,9 @@
         }
         const loader = new THREE.TextureLoader();
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB);
+        //scene.background = new THREE.Color(0x87CEEB);
+        scene.background = new THREE.Color(0x74b0c8);
+        //scene.background = loader.load("images/pixil-frame-0 (3).png")
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -67,11 +69,11 @@
         dirLight.position.set(10, 20, 15);
         scene.add(dirLight);
 
-        const floorGeo = new THREE.BoxGeometry(50, 2, 50);
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0x228B22 });
-        const floor = new THREE.Mesh(floorGeo, floorMat);
-        floor.position.y = -1;
-        scene.add(floor);
+        const waterMat = new THREE.MeshStandardMaterial({
+            map: loader.load("images/pixil-frame-0 (6).png"),
+            transparent: true,
+            opacity: 0.5
+        });
 
         const platMat = [
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
@@ -90,12 +92,12 @@
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
         ];
         const bouncy = [
-            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (55).png") }),
-            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (55).png") }),
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
-            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (55).png") }),
-            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (55).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
         ];
         const lavalMat = [
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
@@ -106,7 +108,7 @@
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
         ];
         const platforms = [];
-        const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, crack = false) => {
+        const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, crack = false, check = false) => {
             let p
             if (!crack) {
                 p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
@@ -144,6 +146,17 @@
             bouncies.push(p);
 
         };
+        waters = []
+        const spawnWater = (x, y, z, width = 1, height = 1, depth = 1) => {
+            const p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), waterMat);
+            p.position.set(x, y, z);
+            scene.add(p);
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
+            waters.push(p);
+
+        };
 
         let px = 0
         let py = 2
@@ -164,8 +177,6 @@
             btn.addEventListener('mousedown', () => keys[key] = true);
             btn.addEventListener('mouseup', () => keys[key] = false);
         }
-        let swarm = false
-
         bindButton("left", "ArrowLeft");
         bindButton("right", "ArrowRight");
         bindButton("up", "ArrowUp");
@@ -185,6 +196,18 @@
                         spawnLava(px + 2 - i, py + 2, pz)
                         spawnLava(px + 2 - i, py - 2, pz)
                     }
+                    if (roll < 0.025) {
+                        spawnLava(px + 2 - i, py + 3, pz)
+                        spawnLava(px + 2 - i, py - 3, pz)
+                    }
+                }
+                if (Math.random() < 0.5) {
+                    const height = 9
+                    for (let i = 2; i < height; i++) {
+                        spawnLava(px + 2, py + i, pz)
+                        spawnLava(px - 2, py + i, pz)
+                    }
+                    spawnLava(px, py + height, pz, 5)
                 }
                 pz -= 2.5
             } else if (roll < 0.2) {
@@ -231,20 +254,23 @@
                 py -= 6
 
             } else {
-                spawnPlatform(px, py, pz, Math.random() * 4 + 3, 1, Math.random() * 4 + 3, isCracked);
+                spawnPlatform(px, py, pz, Math.random() * 4 + 3, 1, Math.random() * 4 + 3, isCracked, true);
 
             }
             px += Math.random() * 8 - 4
             py += Math.random() * 4 - 1
             pz -= Math.random() * 4 + 7
-            if (isCracked) py -=  1
+            if (isCracked) py -= 1
         }
         for (let i = 0; i < 50; i++) {
             makeNewPlatform()
         }
+        spawnPlatform(0, -1, 0, 8, 1, 8)
+        spawnWater(0, 4, 0)
 
 
         const playerGeo = new THREE.BoxGeometry(1, 2, 1);
+
 
         const playerMat = [
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
@@ -264,6 +290,7 @@
 
         let pyVelocity = 0;
         const gravity = -0.015;
+        const gravityBool = 1
         const jumpForce = 0.4;
         const speed = 0.15;
         let isGrounded = true;
@@ -298,6 +325,15 @@
 
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
+        function playerHitsPlatform(p) {
+            const withinX = player.position.x >= p.position.x - p.width / 2 - 0.5 && player.position.x <= p.position.x + p.width / 2 + 0.5;
+            const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
+
+            const topOfPlatform = p.position.y + p.height / 2 + 1;
+            const bottomOfPlatform = p.position.y - p.height / 2 - 1;
+            const hittingTop = player.position.y <= topOfPlatform && player.position.y >= bottomOfPlatform;
+            return withinX && withinZ && hittingTop
+        }
 
         function animate() {
             requestAnimationFrame(animate);
@@ -322,21 +358,18 @@
             player.position.y += pyVelocity;
             isGrounded = false;
 
-            if (player.position.y <= 1 && player.position.x >= -25 && player.position.x <= 25 && player.position.z >= -25 && player.position.z <= 25) {
-                player.position.y = 1;
-                pyVelocity = 0;
-                isGrounded = true;
-            }
+
 
             platforms.forEach(p => {
-                const withinX = player.position.x >= p.position.x - p.width / 2 - 0.5 && player.position.x <= p.position.x + p.width / 2 + 0.5;
-                const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
-
                 const topOfPlatform = p.position.y + p.height / 2 + 1;
-                const hittingTop = player.position.y <= topOfPlatform && player.position.y >= topOfPlatform + pyVelocity - 0.1;
-
-                if (withinX && withinZ && hittingTop && pyVelocity <= 0) {
-                    player.position.y = topOfPlatform;
+                const bottomOfPlatform = p.position.y - p.height / 2 - 1;
+                if (playerHitsPlatform(p)) {
+                    if (gravity < 0) {
+                        player.position.y = topOfPlatform;
+                    }
+                    else {
+                        player.position.y = bottomOfPlatform;
+                    }
                     pyVelocity = 0;
                     isGrounded = true;
                     if (p.crack) {
@@ -346,35 +379,30 @@
                 }
             });
             bouncies.forEach(p => {
-                const withinX = player.position.x >= p.position.x - p.width / 2 - 0.5 && player.position.x <= p.position.x + p.width / 2 + 0.5;
-                const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
-
                 const topOfPlatform = p.position.y + p.height / 2 + 1;
-                const hittingTop = player.position.y <= topOfPlatform && player.position.y >= topOfPlatform + pyVelocity - 0.1;
-
-                if (withinX && withinZ && hittingTop && pyVelocity <= 0) {
-                    player.position.y = topOfPlatform;
-                    pyVelocity = jumpForce * 2;
+                const bottomOfPlatform = p.position.y - p.height / 2 - 1;
+                if (playerHitsPlatform(p)) {
+                    if (gravity < 0) {
+                        player.position.y = topOfPlatform;
+                    }
+                    else {
+                        player.position.y = bottomOfPlatform;
+                    }
+                    pyVelocity = jumpForce * 2 * gravityBool;
                 }
             });
             lavas.forEach(p => {
-                const withinX = player.position.x >= p.position.x - p.width / 2 - 0.5 && player.position.x <= p.position.x + p.width / 2 + 0.5;
-                const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
-
-                const topOfPlatform = p.position.y + p.height / 2 + 1;
-                const hittingTop = player.position.y <= topOfPlatform && player.position.y >= topOfPlatform - p.height / 2 - 1;
-
-                if (withinX && withinZ && hittingTop) {
+                if (playerHitsPlatform(p)) {
                     player.position.set(0, 1, 0);
                 }
             });
 
             if (keys["Space"] && isGrounded) {
-                pyVelocity = jumpForce;
+                pyVelocity = jumpForce * gravityBool;
                 isGrounded = false;
             }
 
-            if (player.position.y < -20) {
+            if (player.position.y < -50 || player.position.y > 800) {
                 player.position.set(0, 1, 0);
                 pyVelocity = 0;
             }
@@ -389,7 +417,7 @@
             } else {
                 const camX = player.position.x;
                 const camZ = player.position.z;
-                const camY = player.position.y + 1;
+                const camY = player.position.y + 0.8;
                 camera.position.set(camX, camY, camZ);
 
                 const lookX = player.position.x - Math.sin(cameraAngle);
