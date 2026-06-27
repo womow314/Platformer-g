@@ -45,6 +45,7 @@
         function home() {
             window.location.href = "index.html";
         }
+        const loader = new THREE.TextureLoader();
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
 
@@ -66,14 +67,43 @@
         floor.position.y = -1;
         scene.add(floor);
 
-        const platGeo = new THREE.BoxGeometry(5, 1, 5);
-        const platMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+        const platMat = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+        ];
+        const lavalMat = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+        ];
         const platforms = [];
-        const spawnPlatform = (x, y, z) => {
-            const p = new THREE.Mesh(platGeo, platMat);
+        const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5) => {
+            const p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
             p.position.set(x, y, z);
             scene.add(p);
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
             platforms.push(p);
+
+        };
+        lavas = []
+        const spawnLava = (x, y, z, width = 1, height = 1, depth = 1) => {
+            const p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), lavalMat);
+            p.position.set(x, y, z);
+            scene.add(p);
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
+            lavas.push(p);
+
         };
 
         let px = 0
@@ -82,34 +112,30 @@
         function makeNewPlatform() {
             let roll = Math.random()
             if (roll < 0.1) {
-                spawnPlatform(px, py, pz);
-                spawnPlatform(px, py, pz - 5);
-                px += Math.random() * 8 - 4
-                py += Math.random() * 4 - 1
-                pz -= Math.random() * 3 + 13
+                spawnPlatform(px, py, pz, 5, 1, 10);
+                spawnLava(px, py+1, pz)
+                pz -= 5
             } else if (roll < 0.2) {
                 spawnPlatform(px, py, pz);
                 spawnPlatform(px, py, pz - 5);
                 spawnPlatform(px + 5, py, pz - 5);
                 spawnPlatform(px + 5, py, pz - 10);
-                px += Math.random() * 8 - 4
-                py += Math.random() * 4 - 1
-                pz -= Math.random() * 3 + 18
+                pz -= 10
             } else if (roll < 0.3) {
                 spawnPlatform(px, py, pz);
                 spawnPlatform(px + 10, py, pz);
                 spawnPlatform(px + 20, py, pz);
                 spawnPlatform(px + 30, py, pz);
                 spawnPlatform(px + 30, py, pz - 5);
-                px += Math.random() * 8 + 30
-                py += Math.random() * 4 - 1
-                pz -= Math.random() * 3 + 13
+                px += 35
+                pz -= 5
             } else {
-                spawnPlatform(px, py, pz);
-                px += Math.random() * 8 - 4
-                py += Math.random() * 4 - 1
-                pz -= Math.random() * 3 + 8
+                spawnPlatform(px, py, pz, Math.random() * 4 + 3, 1, Math.random() * 4 + 3);
+
             }
+            px += Math.random() * 8 - 4
+            py += Math.random() * 4 - 1
+            pz -= Math.random() * 3.5 + 7.5
         }
         for (let i = 0; i < 50; i++) {
             makeNewPlatform()
@@ -117,12 +143,22 @@
 
 
         const playerGeo = new THREE.BoxGeometry(1, 2, 1);
-        const playerMat = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
+
+        const playerMat = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (51).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (51).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (49).png") }),
+        ];
         const player = new THREE.Mesh(playerGeo, playerMat);
+        const sensitivity = 0.003
         player.position.set(0, 1, 0);
         scene.add(player);
 
         const keys = {}
+
 
         let pyVelocity = 0;
         const gravity = -0.015;
@@ -131,8 +167,32 @@
         let isGrounded = true;
 
         let cameraAngle = 0;
-        const cameraRadius = 15;
+        let cameraLookY = 0
+        const cameraRadius = 10;
         const rotationSpeed = 0.03;
+
+        let isFirstPerson = false
+
+        renderer.domElement.addEventListener("click", () => {
+            renderer.domElement.requestPointerLock();
+            isFirstPerson = true
+        });
+        document.addEventListener("pointerlockchange", () => {
+            if (document.pointerLockElement === renderer.domElement) {
+                isFirstPerson = true;
+            } else {
+                isFirstPerson = false;
+                cameraLookY = 0;
+            }
+        });
+        window.addEventListener("mousemove", (e) => {
+            if (document.pointerLockElement !== renderer.domElement) return;
+
+            cameraAngle -= e.movementX * sensitivity;
+            cameraLookY -= e.movementY * sensitivity;
+
+            cameraLookY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraLookY));
+        });
 
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
@@ -141,21 +201,20 @@
             requestAnimationFrame(animate);
 
 
-            if (keys.ArrowLeft) cameraAngle += rotationSpeed;
-            if (keys.ArrowRight) cameraAngle -= rotationSpeed;
+            if (keys.ArrowLeft || keys.KeyA) cameraAngle += rotationSpeed;
+            if (keys.ArrowRight || keys.KeyD) cameraAngle -= rotationSpeed;
 
             const forwardX = Math.sin(cameraAngle);
             const forwardZ = Math.cos(cameraAngle);
 
-            if (keys.ArrowUp) {
+            if (keys.ArrowUp || keys.KeyW) {
                 player.position.x -= forwardX * speed;
                 player.position.z -= forwardZ * speed;
             }
-            if (keys.ArrowDown) {
+            if (keys.ArrowDown || keys.KeyS) {
                 player.position.x += forwardX * speed;
                 player.position.z += forwardZ * speed;
             }
-
 
             pyVelocity += gravity;
             player.position.y += pyVelocity;
@@ -168,16 +227,27 @@
             }
 
             platforms.forEach(p => {
-                const withinX = player.position.x >= p.position.x - 3 && player.position.x <= p.position.x + 3;
-                const withinZ = player.position.z >= p.position.z - 3 && player.position.z <= p.position.z + 3;
+                const withinX = player.position.x >= p.position.x - p.width / 2 - 0.5 && player.position.x <= p.position.x + p.width / 2 + 0.5;
+                const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
 
-                const topOfPlatform = p.position.y + 1.5;
+                const topOfPlatform = p.position.y + p.height / 2 + 1;
                 const hittingTop = player.position.y <= topOfPlatform && player.position.y >= topOfPlatform + pyVelocity - 0.1;
 
                 if (withinX && withinZ && hittingTop && pyVelocity <= 0) {
                     player.position.y = topOfPlatform;
                     pyVelocity = 0;
                     isGrounded = true;
+                }
+            });
+            lavas.forEach(p => {
+                const withinX = player.position.x >= p.position.x - p.width / 2 - 0.5 && player.position.x <= p.position.x + p.width / 2 + 0.5;
+                const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
+
+                const topOfPlatform = p.position.y + p.height / 2 + 1;
+                const hittingTop = player.position.y <= topOfPlatform && player.position.y >= topOfPlatform + pyVelocity - 0.1;
+
+                if (withinX && withinZ && hittingTop && pyVelocity <= 0) {
+                     player.position.set(0, 1, 0);
                 }
             });
 
@@ -191,13 +261,27 @@
                 pyVelocity = 0;
             }
 
+            if (!isFirstPerson) {
+                const camX = player.position.x + Math.sin(cameraAngle) * cameraRadius;
+                const camZ = player.position.z + Math.cos(cameraAngle) * cameraRadius;
+                const camY = player.position.y + 6;
+                camera.position.set(camX, camY, camZ);
+                camera.lookAt(player.position)
 
-            const camX = player.position.x + Math.sin(cameraAngle) * cameraRadius;
-            const camZ = player.position.z + Math.cos(cameraAngle) * cameraRadius;
-            const camY = player.position.y + 6;
+            } else {
+                const camX = player.position.x;
+                const camZ = player.position.z;
+                const camY = player.position.y + 1;
+                camera.position.set(camX, camY, camZ);
 
-            camera.position.set(camX, camY, camZ);
-            camera.lookAt(player.position);
+                const lookX = player.position.x - Math.sin(cameraAngle);
+                const lookY = player.position.y + 1 + Math.sin(cameraLookY);
+                const lookZ = player.position.z - Math.cos(cameraAngle);
+
+                camera.lookAt(lookX, lookY, lookZ);
+            }
+
+
 
             renderer.render(scene, camera);
         }
