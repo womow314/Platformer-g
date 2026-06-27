@@ -29,6 +29,12 @@
         }
     </style>
     <button onclick="home()" id="home">Home</button>
+    <div id="mobileControls">
+        <button id="left">←</button>
+        <button id="right">→</button>
+        <button id="up">ꜛ</button>
+        <button id="jump">⤒</button>
+    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 
@@ -109,11 +115,38 @@
         let px = 0
         let py = 2
         let pz = -10
+        function bindButton(id, key) {
+            const btn = document.getElementById(id);
+
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys[key] = true;
+            }, { passive: false });
+
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[key] = false;
+            });
+
+            btn.addEventListener('mousedown', () => keys[key] = true);
+            btn.addEventListener('mouseup', () => keys[key] = false);
+        }
+        let swarm = false
+
+        bindButton("left", "ArrowLeft");
+        bindButton("right", "ArrowRight");
+        bindButton("up", "ArrowUp");
+        bindButton("jump", "Space");
         function makeNewPlatform() {
             let roll = Math.random()
             if (roll < 0.1) {
                 spawnPlatform(px, py, pz, 5, 1, 10);
-                spawnLava(px, py+1, pz)
+                for (let i = 0; i <= 4; i++) {
+                    spawnLava(px + 2 - i, py + 1, pz)
+                    if (roll < 0.5) {
+                        spawnLava(px + 2 - i, py + 2, pz)
+                    }
+                }
                 pz -= 5
             } else if (roll < 0.2) {
                 spawnPlatform(px, py, pz);
@@ -244,10 +277,10 @@
                 const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
 
                 const topOfPlatform = p.position.y + p.height / 2 + 1;
-                const hittingTop = player.position.y <= topOfPlatform ;
+                const hittingTop = player.position.y <= topOfPlatform;
 
                 if (withinX && withinZ && hittingTop) {
-                     player.position.set(0, 1, 0);
+                    player.position.set(0, 1, 0);
                 }
             });
 
