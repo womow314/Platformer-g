@@ -247,7 +247,10 @@
                 const hittingTop = player.position.y <= topOfPlatform && player.position.y >= topOfPlatform + pyVelocity - 0.1;
 
                 if (withinX && withinZ && hittingTop && pyVelocity <= 0) {
-                     player.position.set(0, 1, 0);
+                     player.position.x = 0
+                    player.position.y = 1
+                    player.position.z = 0
+
                 }
             });
 
