@@ -148,9 +148,22 @@
         };
         waters = []
         const spawnWater = (x, y, z, width = 1, height = 1, depth = 1) => {
-            const p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), waterMat);
+            const borderSize = 0.1
+            let p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), waterMat);
             p.position.set(x, y, z);
             scene.add(p);
+            let p1 = new THREE.Mesh(new THREE.BoxGeometry(borderSize, height, depth), waterMat);
+            p1.position.set(x - width / 2 - borderSize / 2, y, z);
+            scene.add(p1);
+            let p2 = new THREE.Mesh(new THREE.BoxGeometry(borderSize, height, depth), waterMat);
+            p2.position.set(x + width / 2 + borderSize / 2, y, z);
+            scene.add(p2);
+            let p3 = new THREE.Mesh(new THREE.BoxGeometry(width, height, borderSize), waterMat);
+            p3.position.set(x, y, z + depth / 2 + borderSize / 2);
+            scene.add(p3);
+            let p4 = new THREE.Mesh(new THREE.BoxGeometry(width, height, borderSize), waterMat);
+            p4.position.set(x, y, z - depth / 2 - borderSize / 2);
+            scene.add(p4);
             p.width = width;
             p.height = height;
             p.depth = depth;
@@ -161,6 +174,8 @@
         let px = 0
         let py = 2
         let pz = -10
+        let lastWaterWallZ = 1000
+        let hasSpawnedWater = false
         function bindButton(id, key) {
             const btn = document.getElementById(id);
 
@@ -183,7 +198,6 @@
         bindButton("jump", "Space");
         function makeNewPlatform() {
             let roll = Math.random()
-            //roll = 0.79
             let isCracked = Math.random() < 0.2
             if (roll < 0.1) {
                 spawnPlatform(px, py, pz, 5, 1, 10, isCracked);
@@ -242,6 +256,10 @@
             } else if (roll < 0.7) {
                 spawnBounce(px, py, pz);
                 py += 15
+                if (pz > lastWaterWallZ - 50 && hasSpawnedWater) {
+                    py -= 30
+                }
+
             } else if (roll < 0.8) {
                 spawnPlatform(px, py, pz, 3, 1, 11, isCracked);
                 spawnBounce(px, py, pz - 7, 3, 1, 3);
@@ -249,12 +267,33 @@
                 spawnLava(px + 2.5, py, pz - 16, 0.5, 1, 6);
                 spawnLava(px, py, pz - 19, 5, 1, 0.5);
                 spawnLava(px, py, pz - 13, 5, 1, 0.5);
-                spawnPlatform(px, py - 6, pz - 17, 3, 1, 6, isCracked);
-                pz -= 18
+                spawnPlatform(px, py - 6, pz - 18, 3, 1, 8, isCracked);
+                pz -= 21
                 py -= 6
 
+            } else if (roll < 0.9) {
+                py += 4
+                spawnPlatform(px, py, pz - 5.5, 6, 1, 11);
+                spawnLava(px, py-1, pz - 5.5, 6, 1,1 )
+                spawnLava(px, py + 1, pz - 5.5, 6, 1, 11)
+                spawnWater(px, py-10.5, pz- 5.5, 6, 20, 11)
+                spawnPlatform(px, py-3.5, pz - 13.5, 6, 1, 6 );
+                pz -= 15
+                py -= 3.5
+
+            } else if (roll < 0.97) {
+                spawnPlatform(px, py, pz);
+                if (pz < lastWaterWallZ - 60) {
+                    spawnWater(px, py, pz - 25, 50, 100, 50)
+                    lastWaterWallZ = pz
+                    hasSpawnedWater = true
+                }
+
             } else {
-                spawnPlatform(px, py, pz, Math.random() * 4 + 3, 1, Math.random() * 4 + 3, isCracked, true);
+                let width = Math.random() * 4 + 3
+                let depth = Math.random() * 4 + 3
+                spawnPlatform(px, py+ 10.5, pz, width, 1, depth, isCracked, true);
+                spawnWater(px, py, pz, width, 20, depth)
 
             }
             px += Math.random() * 8 - 4
@@ -266,7 +305,6 @@
             makeNewPlatform()
         }
         spawnPlatform(0, -1, 0, 8, 1, 8)
-        spawnWater(0, 4, 0)
 
 
         const playerGeo = new THREE.BoxGeometry(1, 2, 1);
@@ -289,10 +327,11 @@
 
 
         let pyVelocity = 0;
-        const gravity = -0.015;
-        const gravityBool = 1
+        let gravity = -0.015;
+        let gravityBool = 1
         const jumpForce = 0.4;
         const speed = 0.15;
+        let currentSpeed = speed
         let isGrounded = true;
 
         let cameraAngle = 0;
@@ -301,6 +340,13 @@
         const rotationSpeed = 0.03;
 
         let isFirstPerson = false
+        let isTouching = false
+
+        window.addEventListener('touchstart', (e) => { isTouching = true });
+        window.addEventListener('touchend', (e) => { isTouching = false });
+
+        window.addEventListener('mousedown', (e) => { isTouching = true });
+        window.addEventListener('mouseup', (e) => { isTouching = false });
 
         renderer.domElement.addEventListener("click", () => {
             renderer.domElement.requestPointerLock();
@@ -315,6 +361,9 @@
             }
         });
         window.addEventListener("mousemove", (e) => {
+            if (isTouching) {
+                cameraAngle += e.movementX * sensitivity
+            }
             if (document.pointerLockElement !== renderer.domElement) return;
 
             cameraAngle -= e.movementX * sensitivity;
@@ -331,12 +380,19 @@
 
             const topOfPlatform = p.position.y + p.height / 2 + 1;
             const bottomOfPlatform = p.position.y - p.height / 2 - 1;
-            const hittingTop = player.position.y <= topOfPlatform && player.position.y >= bottomOfPlatform;
+            const hittingTop = player.position.y < topOfPlatform && player.position.y > bottomOfPlatform;
             return withinX && withinZ && hittingTop
         }
+        let isInWater = false;
+        let wasInWater = false;
+        let justEnteredWater = 0;
 
         function animate() {
             requestAnimationFrame(animate);
+            currentSpeed = speed
+            if (keys['ShiftRight'] || keys['ShiftLeft']){
+                currentSpeed = speed*2
+            }
 
 
             if (keys.ArrowLeft || keys.KeyA) cameraAngle += rotationSpeed;
@@ -346,35 +402,64 @@
             const forwardZ = Math.cos(cameraAngle);
 
             if (keys.ArrowUp || keys.KeyW) {
-                player.position.x -= forwardX * speed;
-                player.position.z -= forwardZ * speed;
+                player.position.x -= forwardX * currentSpeed;
+                player.position.z -= forwardZ * currentSpeed;
             }
             if (keys.ArrowDown || keys.KeyS) {
-                player.position.x += forwardX * speed;
-                player.position.z += forwardZ * speed;
+                player.position.x += forwardX * currentSpeed;
+                player.position.z += forwardZ * currentSpeed;
             }
 
             pyVelocity += gravity;
             player.position.y += pyVelocity;
             isGrounded = false;
+            wasInWater = isInWater;
+            isInWater = false;
 
+            waters.forEach(w => {
+                if (playerHitsPlatform(w)) {
+                    isInWater = true;
+                }
+            });
 
+            if (isInWater && !wasInWater) {
+                justEnteredWater = 15;
+            }
+            if (!isInWater && wasInWater) {
+                justEnteredWater = 15;
+            }
+
+            if (justEnteredWater > 0) justEnteredWater--;
+            if (isInWater) {
+                gravity = 0.015
+                gravityBool = -1
+                scene.background = new THREE.Color(0x0000ff);
+            } else {
+                gravity = -0.015
+                gravityBool = 1
+                scene.background = new THREE.Color(0x74b0c8);
+            }
 
             platforms.forEach(p => {
                 const topOfPlatform = p.position.y + p.height / 2 + 1;
                 const bottomOfPlatform = p.position.y - p.height / 2 - 1;
                 if (playerHitsPlatform(p)) {
                     if (gravity < 0) {
-                        player.position.y = topOfPlatform;
+                        if (justEnteredWater === 0) {
+                            if (pyVelocity === 0 ) return
+                            player.position.y = topOfPlatform;
+                        }
+                    } else {
+                        if (justEnteredWater === 0) {
+                            player.position.y = bottomOfPlatform;
+                        }
                     }
-                    else {
-                        player.position.y = bottomOfPlatform;
-                    }
+
                     pyVelocity = 0;
                     isGrounded = true;
                     if (p.crack) {
-                        p.position.y -= 0.03
-                        player.position.y -= 0.03
+                        p.position.y -= 0.03 * gravityBool;
+                        player.position.y -= 0.03 * gravityBool;
                     }
                 }
             });
@@ -410,21 +495,27 @@
             if (!isFirstPerson) {
                 const camX = player.position.x + Math.sin(cameraAngle) * cameraRadius;
                 const camZ = player.position.z + Math.cos(cameraAngle) * cameraRadius;
-                const camY = player.position.y + 6;
+                let camY = player.position.y + 6;
+                if (gravityBool === -1) {
+                    camY = player.position.y - 6;
+                }
                 camera.position.set(camX, camY, camZ);
                 camera.lookAt(player.position)
 
             } else {
                 const camX = player.position.x;
-                const camZ = player.position.z;
                 const camY = player.position.y + 0.8;
+                const camZ = player.position.z;
+
                 camera.position.set(camX, camY, camZ);
 
-                const lookX = player.position.x - Math.sin(cameraAngle);
-                const lookY = player.position.y + 1 + Math.sin(cameraLookY);
-                const lookZ = player.position.z - Math.cos(cameraAngle);
+                const dirX = -Math.sin(cameraAngle) * Math.cos(cameraLookY);
+                const dirY = Math.sin(cameraLookY);
+                const dirZ = -Math.cos(cameraAngle) * Math.cos(cameraLookY);
 
-                camera.lookAt(lookX, lookY, lookZ);
+                camera.rotation.order = "YXZ";
+                camera.rotation.y = cameraAngle;
+                camera.rotation.x = cameraLookY;
             }
 
 
