@@ -81,6 +81,10 @@
     <source src="audio/shooter/upgrade.mp3" type="audio/mp3">
     <source src="audio/shooter/upgrade.ogg" type="audio/ogg">
   </audio>
+  <audio id="lightningSound" preload="auto">
+    <source src="audio/shooter/lightning.mp3" type="audio/mp3">
+    <source src ="audio/shooter/lightning.ogg" type="audio/ogg">
+  </audio>
 
   <script>
     localStorage.setItem('localPower', localStorage.getItem('localPower') || "1")
@@ -263,6 +267,12 @@
     function playBuySound() {
       buySound.currentTime = 0;
       buySound.play();
+    }
+
+    const lightningSound = document.getElementById("lightningSound")
+    function playLightningSound() {
+      lightningSound.currentTime = 0;
+      lightningSound.play();
     }
 
     const boss1 = new Image();
@@ -1630,6 +1640,7 @@
         for (let enemy of enemies) {
           if (bulletHitsEnemy(bolt, enemy)) {
             enemy.health -= bulletPower * lightningMult
+            playLightningSound();
           }
         }
         lightningBolts.push({ x: mob.x, y: mob.y, time: 30 })
