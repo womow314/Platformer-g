@@ -358,8 +358,8 @@
             addPlatform(currentX - 50, currentY, 50, thickness);
             addPlatform(currentX + width, currentY + 75, 350, thickness);
             addPlatform(currentX + width, currentY - 75, 350, thickness);
-            addPlatform(currentX, currentY - 100, width, thickness, true);
-            addPlatform(currentX, currentY + 100, width, thickness, true);
+            addPlatform(currentX, currentY - 100, width, thickness);
+            addPlatform(currentX, currentY + 100, width, thickness);
             width += 350
             currentY += 25
           } else {
@@ -658,7 +658,7 @@
           }
           if (!plat.water) { unflipPlayerIMG(); };
           if (plat.water) { gravity = -basegravity / 2; flipPlayerIMG(); continue; };
-          if (plat.check) { printLevel += 1; plat.check = false; save.x = player.x + 10; save.y = player.y; playCheckpointSound();  localStorage.setItem('platLevel', String(printLevel)); revampLevels() };
+          if (plat.check) { printLevel += 1; plat.check = false; save.x = player.x + 10; save.y = player.y; playCheckpointSound();  if (Number(localStorage.getItem('platLevel')) < printLevel) localStorage.setItem('platLevel', String(printLevel)); revampLevels() };
           if (gravity > 0) {
 
             if (player.dy > 0 && player.y + player.height - player.dy <= plat.y + 5) {
