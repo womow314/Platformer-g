@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Games.io</title>
+    <title>3D | Games.io</title>
     <link rel="stylesheet" href="styles1.css" />
     <style>
         body {
@@ -294,8 +294,8 @@
                 }
             } else if (roll === 7) {
                 spawnBounce(px, py, pz);
-                spawnLava(px, py+1, pz, 5, 1, 1)
-                spawnLava(px, py+1, pz, 1, 1, 5)
+                spawnLava(px, py + 1, pz, 5, 1, 1)
+                spawnLava(px, py + 1, pz, 1, 1, 5)
                 py += 15
                 if (pz > lastWaterWallZ - 50 && hasSpawnedWater) {
                     py -= 30
@@ -411,6 +411,17 @@
             }
         });
         window.addEventListener("mousemove", (e) => {
+            if (isTouching) {
+                cameraAngle += e.movementX * sensitivity
+            }
+            if (document.pointerLockElement !== renderer.domElement) return;
+
+            cameraAngle -= e.movementX * sensitivity;
+            cameraLookY -= e.movementY * sensitivity;
+
+            cameraLookY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraLookY));
+        });
+        window.addEventListener("touchmove", (e) => {
             if (isTouching) {
                 cameraAngle += e.movementX * sensitivity
             }

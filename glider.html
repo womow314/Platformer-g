@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Games.io</title>
+    <title>Glider | Games.io</title>
     <link rel="stylesheet" href="styles1.css" />
     <style>
         body {
@@ -164,9 +164,7 @@
 
         };
 
-        let px = 0
-        let py = 0
-        let pz = 0
+
         let lastWaterWallZ = 1000
         let hasSpawnedWater = false
         function bindButton(id, key) {
@@ -224,7 +222,7 @@
             let width = Math.random() * 4 + 3
             let depth = Math.random() * 4 + 3
             if (roll < 0.9) {
-                makeRingFire(px, py, pz, Math.max(Math.random() * 8 + 11 - level / 10, 3.8), Math.max(Math.random() * 8 + 11 - level / 10, 3.8), 0.7, 16)
+                makeRingFire(px, py, pz, Math.max(Math.random() * 8 + 11 - level / 10, 4.5), Math.max(Math.random() * 8 + 11 - level / 10, 4.5), 0.7, 16)
             } else {
                 pz -= width / 2
                 width = 10;
@@ -296,7 +294,9 @@
             if (isCracked) py -= 1
         }
         let level = 1
-
+        let px = 0
+        let py = 0
+        let pz = 0
         for (let i = 0; i < 200; i++) {
             level += 1
             makeNewPlatform(level)
@@ -389,7 +389,7 @@
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
         function playerHitsPlatform(p) {
-            const range = 0.2
+            const range = 0.25
             const withinX = player.position.x >= p.position.x - p.width / 2 - range && player.position.x <= p.position.x + p.width / 2 + range;
             const withinZ = player.position.z >= p.position.z - p.depth / 2 - range && player.position.z <= p.position.z + p.depth / 2 + range;
 
@@ -407,14 +407,14 @@
             z: 8
         }
         tunnelSections.push({
-                x: 0,
-                y: 0,
-                z: 0,
-                width: 10,
-                height: 16,
-                depth: 20,
-                type: "shaft"
-            });
+            x: 0,
+            y: 0,
+            z: 0,
+            width: 10,
+            height: 16,
+            depth: 20,
+            type: "shaft"
+        });
 
         function animate() {
             requestAnimationFrame(animate);
