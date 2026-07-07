@@ -48,13 +48,14 @@
     </div>
 
     <script>
+        const tunnelSections = [];
         function home() {
             window.location.href = "index.html";
         }
         const loader = new THREE.TextureLoader();
         const scene = new THREE.Scene();
         //scene.background = new THREE.Color(0x87CEEB);
-        scene.background = new THREE.Color(0x74b0c8);
+        scene.background = new THREE.Color(0xff2222);
         //scene.background = loader.load("images/pixil-frame-0 (3).png")
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -113,19 +114,7 @@
         ];
         const platforms = [];
         const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, crack = false,) => {
-            let p
-            if (!crack) {
-                p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
-            } else {
-                p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMatCrack);
-            }
-            p.position.set(x, y, z);
-            scene.add(p);
-            p.width = width;
-            p.height = height;
-            p.depth = depth;
-            p.crack = crack
-            platforms.push(p);
+
 
         };
         lavas = []
@@ -176,8 +165,8 @@
         };
 
         let px = 0
-        let py = 2
-        let pz = -10
+        let py = 0
+        let pz = 0
         let lastWaterWallZ = 1000
         let hasSpawnedWater = false
         function bindButton(id, key) {
@@ -201,13 +190,117 @@
         bindButton("up", "ArrowUp");
         bindButton("jump", "Space");
         checkpoints = []
+        function makeRingFire(x, y, z, width, height, thickness = 1, depth = 1) {
+            spawnLava(x, y, z, width, thickness, depth);
+            spawnLava(x, y + height, z, width, thickness, depth);
+            spawnLava(
+                x - width / 2 + thickness / 2,
+                y + height / 2,
+                z,
+                thickness,
+                height, depth
+            );
+            spawnLava(
+                x + width / 2 - thickness / 2,
+                y + height / 2,
+                z,
+                thickness,
+                height, depth
+            );
+            tunnelSections.push({
+                x,
+                y,
+                z,
+                width,
+                height,
+                depth,
+                type: "shaft"
+            });
+        }
         function makeNewPlatform(level, special = 0) {
-            let roll = Math.ceil(Math.random() * level)
+            let roll = Math.random()
+
             let isCracked = Math.random() < 0.2
             let width = Math.random() * 4 + 3
             let depth = Math.random() * 4 + 3
-            if (special != 0) {
-                roll = special
+            if (roll < 0.9) {
+                makeRingFire(px, py, pz, Math.max(Math.random() * 8 + 11 - level / 10, 3.8), Math.max(Math.random() * 8 + 11 - level / 10, 3.8), 0.7, 16)
+            } else {
+                pz -= width / 2
+                width = 10;
+                height = 16;
+                depth = 20;
+                thickness = 1;
+
+                x = px;
+                y = py;
+                z = pz;
+
+                // Floor
+                spawnLava(
+                    x,
+                    y,
+                    z,
+                    width,
+                    thickness,
+                    depth
+                );
+
+                // Roof
+                spawnLava(
+                    x,
+                    y + height,
+                    z,
+                    width,
+                    thickness,
+                    depth
+                );
+
+                // Left wall
+                spawnLava(
+                    x - width / 2 + thickness / 2,
+                    y + height / 2,
+                    z,
+                    thickness,
+                    height,
+                    depth
+                );
+
+                // Right wall
+                spawnLava(
+                    x + width / 2 - thickness / 2,
+                    y + height / 2,
+                    z,
+                    thickness,
+                    height,
+                    depth
+                );
+
+                // Front wall
+                spawnLava(
+                    x,
+                    y + height / 4,
+                    z - depth / 2 + thickness / 2,
+                    width,
+                    height / 2,
+                    thickness
+                );
+
+                // Move generator forward
+                py += height / 2;
+                pz -= width;
+            }
+            px += Math.random() * getMaxChange() - getMinChange()
+            py += Math.random() * getMaxChange() - getMinChange()
+            pz -= 8
+            if (isCracked) py -= 1
+        }
+        let level = 1
+
+        for (let i = 0; i < 200; i++) {
+            level += 1
+            makeNewPlatform(level)
+            if (i != 0, i % 20 === 0) {
                 const l = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1000, 0.5), white);
                 l.position.set(px, py, pz);
                 l.width = 0.5;
@@ -215,149 +308,20 @@
                 l.depth = 0.5;
                 checkpoints.push(l)
                 scene.add(l);
-            }
-
-            if (roll === 1) {
-                if (Math.random() < 0.8) {
-                    spawnPlatform(px, py, pz, width, 1, depth, isCracked);
-                }
-                else {
-                    spawnBounce(px, py, pz, width, 1, depth);
-                    py += 15
-                }
-            }
-
-            else if (roll === 2) {
-                spawnPlatform(px, py, pz, 5, 1, 10, isCracked);
-                let roll = Math.random()
-                for (let i = 0; i <= 4; i++) {
-                    spawnLava(px + 2 - i, py + 1, pz)
-                    spawnLava(px + 2 - i, py - 1, pz)
-                    spawnLava(px + 2 - i, py, pz)
-
-                    if (roll < 0.5) {
-                        spawnLava(px + 2 - i, py + 2, pz)
-                        spawnLava(px + 2 - i, py - 2, pz)
-                    }
-                    if (roll < 0.4) {
-                        spawnLava(px + 2 - i, py + 3, pz)
-                        spawnLava(px + 2 - i, py - 3, pz)
-                    }
-                    if (roll < 0.3) {
-                        spawnLava(px + 2 - i, py + 4, pz)
-                        spawnLava(px + 2 - i, py - 4, pz)
-                    }
-                    if (roll < 0.1) {
-                        spawnLava(px + 2 - i, py + 5, pz)
-                        spawnLava(px + 2 - i, py - 5, pz)
-                    }
-                }
-                if (Math.random() < 0.2) {
-                    const height = 9
-                    for (let i = 2; i < height; i++) {
-                        spawnLava(px + 2, py + i, pz)
-                        spawnLava(px - 2, py + i, pz)
-                    }
-                    spawnLava(px, py + height, pz, 5)
-                }
-                pz -= 2.5
-            }
-
-            else if (roll === 3) {
-                spawnPlatform(px, py, pz);
-                spawnPlatform(px, py, pz - 5);
-                spawnPlatform(px + 5, py, pz - 5);
-                spawnPlatform(px + 5, py, pz - 10);
-                pz -= 10
-            } else if (roll === 4) {
-                spawnPlatform(px, py, pz, 5, 1, 5, isCracked);
-                spawnPlatform(px + 10, py, pz, 5, 1, 5, isCracked);
-                spawnPlatform(px + 20, py, pz, 5, 1, 5, isCracked);
-
-                spawnPlatform(px + 30, py, pz - 2.5, 5, 1, 10, isCracked);
-                px += 35
-                pz -= 5
-            } else if (roll === 5) {
-                spawnPlatform(px, py, pz, 5, 1, 5, isCracked);
-                spawnLava(px, py + 1, pz)
-                spawnLava(px, py, pz)
-                spawnLava(px, py - 1, pz)
-            } else if (roll === 6) {
-                spawnPlatform(px, py, pz, 11, 1, 11, isCracked);
-                spawnLava(px, py + 3.5, pz, 8, 1, 8)
-                if (roll < 0.55) {
-                    spawnLava(px, py + 1, pz, 4, 1, 4)
-                    spawnLava(px, py, pz, 4, 1, 4)
-                    spawnLava(px, py - 1, pz, 4, 1, 4)
-                    spawnLava(px, py + 2, pz, 4, 1, 4)
-                    spawnLava(px, py + 3, pz, 4, 1, 4)
-                }
-            } else if (roll === 7) {
-                spawnBounce(px, py, pz);
-                spawnLava(px, py+1, pz, 5, 1, 1)
-                spawnLava(px, py+1, pz, 1, 1, 5)
-                py += 15
-                if (pz > lastWaterWallZ - 50 && hasSpawnedWater) {
-                    py -= 30
-                }
-
-            } else if (roll === 8) {
-                spawnPlatform(px, py, pz, 3, 1, 11, isCracked);
-                spawnBounce(px, py, pz - 7, 3, 1, 3);
-                spawnLava(px - 2.5, py, pz - 16, 0.5, 1, 6);
-                spawnLava(px + 2.5, py, pz - 16, 0.5, 1, 6);
-                spawnLava(px, py, pz - 19, 5, 1, 0.5);
-                spawnLava(px, py, pz - 13, 5, 1, 0.5);
-                spawnPlatform(px, py - 6, pz - 18, 3, 1, 8, isCracked);
-                pz -= 21
-                py -= 6
-
-            } else if (roll === 9) {
-                py += 4
-                spawnPlatform(px, py, pz - 5.5, 6, 1, 11);
-                spawnLava(px, py - 1, pz - 5.5, 6, 1, 1)
-                spawnLava(px, py + 1, pz - 5.5, 6, 1, 11)
-                spawnWater(px, py - 10.5, pz - 5.5, 6, 20, 11)
-                spawnPlatform(px, py - 3.5, pz - 13.5, 6, 1, 6);
-                pz -= 15
-                py -= 3.5
-
-            } else if (roll === 10) {
-                spawnPlatform(px, py, pz);
-                if (pz < lastWaterWallZ - 60) {
-                    spawnWater(px, py, pz - 25, 50, 100, 50)
-                    lastWaterWallZ = pz
-                    hasSpawnedWater = true
-                }
-
-            } else {
-                let width = Math.random() * 4 + 3
-                let depth = Math.random() * 4 + 3
-                spawnPlatform(px, py + 10.5, pz, width, 1, depth, isCracked, true);
-                spawnWater(px, py, pz, width, 20, depth)
 
             }
-            px += Math.random() * 8 - 4
-            py += Math.random() * 4 - 1
-            pz -= Math.random() * 4 + 7
-            if (isCracked) py -= 1
-        }
-        let level = 1
 
-        for (let i = 0; i < 110; i++) {
-            if (i % 10 === 0 && i != 0) {
-                level += 1
-                makeNewPlatform(level, level)
-            }
-            else {
-                makeNewPlatform(level)
-            }
 
         }
-        spawnPlatform(0, -1, 0, 8, 1, 8)
+        function getMaxChange() {
+            return Math.max(3 - level / 20, 1.5)
+        }
+        function getMinChange() {
+            return Math.max(1.5 - level / 20, 0.75)
+        }
 
 
-        const playerGeo = new THREE.BoxGeometry(1, 2, 1);
+        const playerGeo = new THREE.BoxGeometry(1, 1, 1);
 
 
         const playerMat = [
@@ -371,7 +335,7 @@
         const player = new THREE.Mesh(playerGeo, playerMat);
         const sensitivity = 0.002
         player.position.set(0, 1, 0);
-        scene.add(player);
+        //scene.add(player);
 
         const keys = {}
 
@@ -380,7 +344,7 @@
         let gravity = -0.015;
         let gravityBool = 1
         const jumpForce = 0.4;
-        const speed = 0.15;
+        const speed = 0.25;
         let currentSpeed = speed
         let isGrounded = true;
 
@@ -425,11 +389,12 @@
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
         function playerHitsPlatform(p) {
-            const withinX = player.position.x >= p.position.x - p.width / 2 - 0.5 && player.position.x <= p.position.x + p.width / 2 + 0.5;
-            const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
+            const range = 0.2
+            const withinX = player.position.x >= p.position.x - p.width / 2 - range && player.position.x <= p.position.x + p.width / 2 + range;
+            const withinZ = player.position.z >= p.position.z - p.depth / 2 - range && player.position.z <= p.position.z + p.depth / 2 + range;
 
-            const topOfPlatform = p.position.y + p.height / 2 + 1;
-            const bottomOfPlatform = p.position.y - p.height / 2 - 1;
+            const topOfPlatform = p.position.y + p.height / 2 + range;
+            const bottomOfPlatform = p.position.y - p.height / 2 - range;
             const hittingTop = player.position.y < topOfPlatform && player.position.y > bottomOfPlatform;
             return withinX && withinZ && hittingTop
         }
@@ -438,9 +403,18 @@
         let justEnteredWater = 0;
         let save = {
             x: 0,
-            y: 1,
-            z: 0
+            y: 2,
+            z: 8
         }
+        tunnelSections.push({
+                x: 0,
+                y: 0,
+                z: 0,
+                width: 10,
+                height: 16,
+                depth: 20,
+                type: "shaft"
+            });
 
         function animate() {
             requestAnimationFrame(animate);
@@ -448,7 +422,34 @@
             if (keys['ShiftRight'] || keys['ShiftLeft']) {
                 currentSpeed = speed * 2
             }
+            let nearest = null;
+            let bestDist = Infinity;
 
+            for (const t of tunnelSections) {
+
+                const dz = Math.abs(player.position.z - t.z);
+
+                if (dz < bestDist) {
+                    bestDist = dz;
+                    nearest = t;
+                }
+            }
+            let nearestDist = Infinity;
+
+            for (const lava of lavas) {
+                const dx = player.position.x - lava.position.x;
+                const dy = player.position.y - lava.position.y;
+                const dz = player.position.z - lava.position.z;
+
+                const dist = dx * dx + dy * dy + dz * dz;
+
+                if (dist < nearestDist)
+                    nearestDist = dist;
+            }
+            const naughtyRange = 10
+            if (nearestDist > naughtyRange * naughtyRange) {
+                player.position.set(save.x, save.y, save.z);
+            }
 
             if (keys.ArrowLeft || keys.KeyA) cameraAngle += rotationSpeed;
             if (keys.ArrowRight || keys.KeyD) cameraAngle -= rotationSpeed;
@@ -456,20 +457,11 @@
             const forwardX = Math.sin(cameraAngle);
             const forwardZ = Math.cos(cameraAngle);
 
-            if (keys.ArrowUp || keys.KeyW) {
-                player.position.x -= forwardX * currentSpeed;
-                player.position.z -= forwardZ * currentSpeed;
-            }
-            if (keys.ArrowDown || keys.KeyS) {
-                player.position.x += forwardX * currentSpeed;
-                player.position.z += forwardZ * currentSpeed;
-            }
-            if (keys['KeyQ']) {
-                pyVelocity = -gravity
-            }
+            player.position.x -= forwardX * currentSpeed;
+            player.position.z -= forwardZ * currentSpeed;
+            player.position.y += Math.sin(cameraLookY) * currentSpeed
 
-            pyVelocity += gravity;
-            player.position.y += pyVelocity;
+
             isGrounded = false;
             wasInWater = isInWater;
             isInWater = false;
@@ -487,60 +479,17 @@
                 justEnteredWater = 15;
             }
 
-            if (justEnteredWater > 0) justEnteredWater--;
-            if (isInWater) {
-                gravity = 0.015
-                gravityBool = -1
-                scene.background = new THREE.Color(0x0000ff);
-            } else {
-                gravity = -0.015
-                gravityBool = 1
-                scene.background = new THREE.Color(0x74b0c8);
-            }
 
-            platforms.forEach(p => {
-                const topOfPlatform = p.position.y + p.height / 2 + 1;
-                const bottomOfPlatform = p.position.y - p.height / 2 - 1;
-                if (playerHitsPlatform(p)) {
-                    if (gravity < 0) {
-                        if (justEnteredWater === 0) {
-                            if (pyVelocity === 0) return
-                            player.position.y = topOfPlatform;
-                        }
-                    } else {
-                        if (justEnteredWater === 0) {
-                            player.position.y = bottomOfPlatform;
-                        }
-                    }
 
-                    pyVelocity = 0;
-                    isGrounded = true;
-                    if (p.crack) {
-                        p.position.y -= 0.03 * gravityBool;
-                        player.position.y -= 0.03 * gravityBool;
-                    }
-                }
-            });
-            bouncies.forEach(p => {
-                const topOfPlatform = p.position.y + p.height / 2 + 1;
-                const bottomOfPlatform = p.position.y - p.height / 2 - 1;
-                if (playerHitsPlatform(p)) {
-                    if (gravity < 0) {
-                        player.position.y = topOfPlatform;
-                    }
-                    else {
-                        player.position.y = bottomOfPlatform;
-                    }
-                    pyVelocity = jumpForce * 2 * gravityBool;
-                }
-            });
-            lavas.forEach(p => {
-                if (playerHitsPlatform(p)) {
+
+            for (let i = 0; i < lavas.length; i++) {
+                let l = lavas[i]
+                if (playerHitsPlatform(l)) {
                     player.position.x = save.x
                     player.position.y = save.y
                     player.position.z = save.z
                 }
-            });
+            }
             checkpoints.forEach(p => {
                 if (playerHitsPlatform(p)) {
                     save.x = player.position.x
@@ -551,17 +500,8 @@
                 }
             });
 
-            if (keys["Space"] && isGrounded) {
-                pyVelocity = jumpForce * gravityBool;
-                isGrounded = false;
-            }
 
-            if (player.position.y < -50 || player.position.y > 800) {
-                player.position.x = save.x
-                player.position.y = save.y
-                player.position.z = save.z
-                pyVelocity = 0;
-            }
+
 
             if (!isFirstPerson) {
                 const camX = player.position.x + Math.sin(cameraAngle) * cameraRadius;
