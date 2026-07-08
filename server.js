@@ -12,6 +12,11 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, "public")));
 
 const players = {};
+let tagCooldown = 0
+
+setInterval(() => {
+    tagCooldown -= 1
+}, 300);
 
 io.on("connection", (socket) => {
 
@@ -48,7 +53,8 @@ io.on("connection", (socket) => {
                 a.y + 30 > b.y
             ) {
 
-                if (a.it) {
+                if (a.it && tagCooldown < 0) {
+                    tagCooldown = 3
                     a.it = false;
                     b.it = true;
                 }
