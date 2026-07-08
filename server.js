@@ -23,6 +23,9 @@ setInterval(() => {
 
         if (player.it && Object.keys(players).length > 1) {
             player.timeIT += 1;
+            if (player.timeIT > 120 ) {
+                app.use(express.static(path.join(__dirname, "public")));
+            }
         }
     }
 

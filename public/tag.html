@@ -111,10 +111,11 @@
             keys[e.key.toLowerCase()] = false;
 
         });
+        let speed = 4;
 
         function update() {
 
-            let speed = 4;
+            
 
             if (keys["w"]) myY -= speed;
             if (keys["s"]) myY += speed;
