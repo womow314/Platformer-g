@@ -17,11 +17,22 @@ let tagCooldown = 0
 setInterval(() => {
     tagCooldown -= 1
 }, 300);
+setInterval(() => {
+    for (let id in players) {
+        let player = players[id];
+
+        if (player.it && Object.keys(players).length > 1) {
+            player.timeIT += 1;
+        }
+    }
+
+}, 1000);
 
 io.on("connection", (socket) => {
     socket.on("setName", (name) => {
         if (players[socket.id]) {
             players[socket.id].name = name.substring(0, 15);
+            players[socket.id].timeIT = 0
         }
     });
 
@@ -31,7 +42,9 @@ io.on("connection", (socket) => {
         x: Math.random() * 700 + 50,
         y: Math.random() * 400 + 50,
         color: "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0"),
-        it: Object.keys(players).length === 0
+        it: Object.keys(players).length === 0,
+        timeIT: 0,
+        name: "Player"
     };
 
     io.emit("players", players);

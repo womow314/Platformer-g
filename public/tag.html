@@ -12,6 +12,7 @@
 <body>
     <button onclick="home()" id="home">Home</button>
     <h1 id="admin"></h1>
+    <h2 id="score"></h2>
 
     <canvas id="game" width="800" height="500"></canvas>
 
@@ -57,6 +58,15 @@
         function home() {
             window.location.href = "index.html";
         }
+        setInterval(() => {
+            let scorePanel = document.getElementById('score');
+            scorePanel.innerText = '';
+
+            for (let id in players) {
+                let player = players[id];
+                scorePanel.innerText += `${player.name}: ${player.timeIT}\n`;
+            }
+        }, 50);
 
         const socket = io();
 
