@@ -19,6 +19,11 @@ setInterval(() => {
 }, 300);
 
 io.on("connection", (socket) => {
+    socket.on("setName", (name) => {
+        if (players[socket.id]) {
+            players[socket.id].name = name.substring(0, 15);
+        }
+    });
 
     console.log(`Player connected: ${socket.id}`);
 
