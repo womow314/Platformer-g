@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Multiplayer Tag</title>
+
+    <link rel="stylesheet" href="styles1.css" />
+
+</head>
+
+<body>
+    <button onclick="home()" id="home">Home</button>
+
+    <canvas id="game" width="800" height="500"></canvas>
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+        function home() {
+            window.location.href = "index.html";
+        }
+
+        const socket = io();
+
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+
+        let players = {};
+
+        let myX = 400;
+        let myY = 250;
+
+        const keys = {};
+
+        socket.on("connect", () => {
+
+            console.log("Connected!");
+
+        });
+
+        socket.on("players", (data) => {
+
+            players = data;
+
+        });
+
+        document.addEventListener("keydown", (e) => {
+
+            keys[e.key.toLowerCase()] = true;
+
+        });
+
+        document.addEventListener("keyup", (e) => {
+
+            keys[e.key.toLowerCase()] = false;
+
+        });
+
+        function update() {
+
+            const speed = 4;
+
+            if (keys["w"]) myY -= speed;
+            if (keys["s"]) myY += speed;
+            if (keys["a"]) myX -= speed;
+            if (keys["d"]) myX += speed;
+
+            myX = Math.max(0, Math.min(canvas.width - 30, myX));
+            myY = Math.max(0, Math.min(canvas.height - 30, myY));
+
+            socket.emit("move", {
+                x: myX,
+                y: myY
+            });
+
+        }
+
+        function draw() {
+
+            ctx.fillStyle = "#87CEEB";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (const id in players) {
+
+                const p = players[id];
+
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, 30, 30);
+
+                if (p.it) {
+
+                    ctx.strokeStyle = "red";
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(p.x - 2, p.y - 2, 34, 34);
+
+                }
+
+                ctx.fillStyle = "black";
+                ctx.font = "12px Arial";
+                ctx.fillText(id.substring(0, 4), p.x, p.y - 5);
+
+            }
+
+        }
+
+        function gameLoop() {
+
+            update();
+            draw();
+
+            requestAnimationFrame(gameLoop);
+
+        }
+
+        gameLoop();
+
+    </script>
+
+</body>
+
+</html>

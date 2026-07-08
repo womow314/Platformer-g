@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Games.io | Home</title>
+  <link rel="stylesheet" href="styles1.css" />
+</head>
+
+<body>
+  <img id="title" src="https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(8).png" width=700px />
+  <div id="homeButtons">
+    <button onclick="launchPlatProc()" id="plat">Launch Platformer</button>
+    <button onclick="launchShooter()" id="shooter">Launch Shooter</button>
+    <button onclick="launch3d()" id="maze">Launch 3d</button>
+    <button onclick="launchClicker()" id="clicker">Launch Clicker</button>
+    <button onclick="launchGlider()" id="clicker">Launch Glider</button>
+    <button onclick="launchTag()" id = "clicker">Launch Tag</button>
+    <button onclick="launchWiki()" id="wiki">Wiki</button>
+  </div>
+  <div id="stuff">
+    <button onclick="wipe()">Destroy user data</button>
+  </div>
+  <script>
+    function wipe() {
+      localStorage.clear()
+    }
+    function launchPlatProc() {
+      window.location.href = "platformer.html";
+    }
+
+    function launchShooter() {
+      window.location.href = "shooter.html";
+    }
+    function launchClicker() {
+      window.location.href = "clicker.html";
+    }
+    function launch3d() {
+      window.location.href = "3d.html";
+    }
+    function launchGlider() {
+      window.location.href = "glider.html";
+    }
+    function launchWiki() {
+      window.location.href = "wiki/wikiHome.html"
+    }
+    function launchTag() {
+      window.location.href = "tag.html";
+    }
+
+
+    window.addEventListener("keydown", function (e) {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].indexOf(e.code) > -1) {
+        e.preventDefault();
+      }
+    }, false);
+  </script>
+</body>
+
+</html>
