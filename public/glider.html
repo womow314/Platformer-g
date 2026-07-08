@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glider | Games.io</title>
+    <link rel="stylesheet" href="styles1.css" />
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #instructions {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: sans-serif;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+    <button onclick="home()" id="home">Home</button>
+    <div id="mobileControls">
+        <button id="left">←</button>
+        <button id="right">→</button>
+        <button id="up">ꜛ</button>
+        <button id="jump">⤒</button>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+
+    <div id="instructions">
+        <strong>Controls:</strong><br>
+        Move: Up arrow/Down<br>
+        Turn: Left/right arrow
+        Jump: Spacebar
+    </div>
+
+    <script>
+        const tunnelSections = [];
+        function home() {
+            window.location.href = "index.html";
+        }
+        const loader = new THREE.TextureLoader();
+        const scene = new THREE.Scene();
+        //scene.background = new THREE.Color(0x87CEEB);
+        scene.background = new THREE.Color(0xff2222);
+        //scene.background = loader.load("images/pixil-frame-0 (3).png")
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 15);
+        scene.add(dirLight);
+
+        const white = new THREE.MeshBasicMaterial({
+            color: 0xffffff
+        });
+
+        const waterMat = new THREE.MeshStandardMaterial({
+            map: loader.load("images/pixil-frame-0 (6).png"),
+            transparent: true,
+            opacity: 0.5
+        });
+
+        const platMat = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+        ];
+        const platMatCrack = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (56).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (56).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+        ];
+        const bouncy = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+        ];
+        const lavalMat = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+        ];
+        const platforms = [];
+        const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, crack = false,) => {
+
+
+        };
+        lavas = []
+        const spawnLava = (x, y, z, width = 1, height = 1, depth = 1) => {
+            const p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), lavalMat);
+            p.position.set(x, y, z);
+            scene.add(p);
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
+            lavas.push(p);
+
+        };
+        bouncies = []
+        const spawnBounce = (x, y, z, width = 5, height = 1, depth = 5) => {
+            const p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), bouncy);
+            p.position.set(x, y, z);
+            scene.add(p);
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
+            bouncies.push(p);
+
+        };
+        waters = []
+        const spawnWater = (x, y, z, width = 1, height = 1, depth = 1) => {
+            const borderSize = 0.1
+            let p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), waterMat);
+            p.position.set(x, y, z);
+            scene.add(p);
+            let p1 = new THREE.Mesh(new THREE.BoxGeometry(borderSize, height, depth), waterMat);
+            p1.position.set(x - width / 2 - borderSize / 2, y, z);
+            scene.add(p1);
+            let p2 = new THREE.Mesh(new THREE.BoxGeometry(borderSize, height, depth), waterMat);
+            p2.position.set(x + width / 2 + borderSize / 2, y, z);
+            scene.add(p2);
+            let p3 = new THREE.Mesh(new THREE.BoxGeometry(width, height, borderSize), waterMat);
+            p3.position.set(x, y, z + depth / 2 + borderSize / 2);
+            scene.add(p3);
+            let p4 = new THREE.Mesh(new THREE.BoxGeometry(width, height, borderSize), waterMat);
+            p4.position.set(x, y, z - depth / 2 - borderSize / 2);
+            scene.add(p4);
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
+            waters.push(p);
+
+        };
+
+
+        let lastWaterWallZ = 1000
+        let hasSpawnedWater = false
+        function bindButton(id, key) {
+            const btn = document.getElementById(id);
+
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys[key] = true;
+            }, { passive: false });
+
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[key] = false;
+            });
+
+            btn.addEventListener('mousedown', () => keys[key] = true);
+            btn.addEventListener('mouseup', () => keys[key] = false);
+        }
+        bindButton("left", "ArrowLeft");
+        bindButton("right", "ArrowRight");
+        bindButton("up", "ArrowUp");
+        bindButton("jump", "Space");
+        checkpoints = []
+        function makeRingFire(x, y, z, width, height, thickness = 1, depth = 1) {
+            spawnLava(x, y, z, width, thickness, depth);
+            spawnLava(x, y + height, z, width, thickness, depth);
+            spawnLava(
+                x - width / 2 + thickness / 2,
+                y + height / 2,
+                z,
+                thickness,
+                height, depth
+            );
+            spawnLava(
+                x + width / 2 - thickness / 2,
+                y + height / 2,
+                z,
+                thickness,
+                height, depth
+            );
+            tunnelSections.push({
+                x,
+                y,
+                z,
+                width,
+                height,
+                depth,
+                type: "shaft"
+            });
+        }
+        function makeNewPlatform(level, special = 0) {
+            let roll = Math.random()
+
+            let isCracked = Math.random() < 0.2
+            let width = Math.random() * 4 + 3
+            let depth = Math.random() * 4 + 3
+            if (roll < 0.9) {
+                makeRingFire(px, py, pz, Math.max(Math.random() * 8 + 11 - level / 10, 4.5), Math.max(Math.random() * 8 + 11 - level / 10, 4.5), 0.7, 16)
+            } else {
+                pz -= width / 2
+                width = 10;
+                height = 16;
+                depth = 20;
+                thickness = 1;
+
+                x = px;
+                y = py;
+                z = pz;
+
+                // Floor
+                spawnLava(
+                    x,
+                    y,
+                    z,
+                    width,
+                    thickness,
+                    depth
+                );
+
+                // Roof
+                spawnLava(
+                    x,
+                    y + height,
+                    z,
+                    width,
+                    thickness,
+                    depth
+                );
+
+                // Left wall
+                spawnLava(
+                    x - width / 2 + thickness / 2,
+                    y + height / 2,
+                    z,
+                    thickness,
+                    height,
+                    depth
+                );
+
+                // Right wall
+                spawnLava(
+                    x + width / 2 - thickness / 2,
+                    y + height / 2,
+                    z,
+                    thickness,
+                    height,
+                    depth
+                );
+
+                // Front wall
+                spawnLava(
+                    x,
+                    y + height / 4,
+                    z - depth / 2 + thickness / 2,
+                    width,
+                    height / 2,
+                    thickness
+                );
+
+                // Move generator forward
+                py += height / 2;
+                pz -= width;
+            }
+            px += Math.random() * getMaxChange() - getMinChange()
+            py += Math.random() * getMaxChange() - getMinChange()
+            pz -= 8
+            if (isCracked) py -= 1
+        }
+        let level = 1
+        let px = 0
+        let py = 0
+        let pz = 0
+        for (let i = 0; i < 200; i++) {
+            level += 1
+            makeNewPlatform(level)
+            if (i != 0, i % 20 === 0) {
+                const l = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1000, 0.5), white);
+                l.position.set(px, py, pz);
+                l.width = 0.5;
+                l.height = 1000;
+                l.depth = 0.5;
+                checkpoints.push(l)
+                scene.add(l);
+
+            }
+
+
+        }
+        function getMaxChange() {
+            return Math.max(3 - level / 20, 1.5)
+        }
+        function getMinChange() {
+            return Math.max(1.5 - level / 20, 0.75)
+        }
+
+
+        const playerGeo = new THREE.BoxGeometry(1, 1, 1);
+
+
+        const playerMat = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (51).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (51).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (49).png") }),
+        ];
+        const player = new THREE.Mesh(playerGeo, playerMat);
+        const sensitivity = 0.002
+        player.position.set(0, 1, 0);
+        //scene.add(player);
+
+        const keys = {}
+
+
+        let pyVelocity = 0;
+        let gravity = -0.015;
+        let gravityBool = 1
+        const jumpForce = 0.4;
+        const speed = 0.25;
+        let currentSpeed = speed
+        let isGrounded = true;
+
+        let cameraAngle = 0;
+        let cameraLookY = 0
+        const cameraRadius = 10;
+        const rotationSpeed = 0.03;
+
+        let isFirstPerson = false
+        let isTouching = false
+
+        window.addEventListener('touchstart', (e) => { isTouching = true });
+        window.addEventListener('touchend', (e) => { isTouching = false });
+
+        window.addEventListener('mousedown', (e) => { isTouching = true });
+        window.addEventListener('mouseup', (e) => { isTouching = false });
+
+        renderer.domElement.addEventListener("click", () => {
+            renderer.domElement.requestPointerLock();
+            isFirstPerson = true
+        });
+        document.addEventListener("pointerlockchange", () => {
+            if (document.pointerLockElement === renderer.domElement) {
+                isFirstPerson = true;
+            } else {
+                isFirstPerson = false;
+                cameraLookY = 0;
+            }
+        });
+        window.addEventListener("mousemove", (e) => {
+            if (isTouching) {
+                cameraAngle += e.movementX * sensitivity
+            }
+            if (document.pointerLockElement !== renderer.domElement) return;
+
+            cameraAngle -= e.movementX * sensitivity;
+            cameraLookY -= e.movementY * sensitivity;
+
+            cameraLookY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraLookY));
+        });
+
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+        function playerHitsPlatform(p) {
+            const range = 0.25
+            const withinX = player.position.x >= p.position.x - p.width / 2 - range && player.position.x <= p.position.x + p.width / 2 + range;
+            const withinZ = player.position.z >= p.position.z - p.depth / 2 - range && player.position.z <= p.position.z + p.depth / 2 + range;
+
+            const topOfPlatform = p.position.y + p.height / 2 + range;
+            const bottomOfPlatform = p.position.y - p.height / 2 - range;
+            const hittingTop = player.position.y < topOfPlatform && player.position.y > bottomOfPlatform;
+            return withinX && withinZ && hittingTop
+        }
+        let isInWater = false;
+        let wasInWater = false;
+        let justEnteredWater = 0;
+        let save = {
+            x: 0,
+            y: 2,
+            z: 8
+        }
+        tunnelSections.push({
+            x: 0,
+            y: 0,
+            z: 0,
+            width: 10,
+            height: 16,
+            depth: 20,
+            type: "shaft"
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            currentSpeed = speed
+            if (keys['ShiftRight'] || keys['ShiftLeft']) {
+                currentSpeed = speed * 2
+            }
+            let nearest = null;
+            let bestDist = Infinity;
+
+            for (const t of tunnelSections) {
+
+                const dz = Math.abs(player.position.z - t.z);
+
+                if (dz < bestDist) {
+                    bestDist = dz;
+                    nearest = t;
+                }
+            }
+            let nearestDist = Infinity;
+
+            for (const lava of lavas) {
+                const dx = player.position.x - lava.position.x;
+                const dy = player.position.y - lava.position.y;
+                const dz = player.position.z - lava.position.z;
+
+                const dist = dx * dx + dy * dy + dz * dz;
+
+                if (dist < nearestDist)
+                    nearestDist = dist;
+            }
+            const naughtyRange = 10
+            if (nearestDist > naughtyRange * naughtyRange) {
+                player.position.set(save.x, save.y, save.z);
+            }
+
+            if (keys.ArrowLeft || keys.KeyA) cameraAngle += rotationSpeed;
+            if (keys.ArrowRight || keys.KeyD) cameraAngle -= rotationSpeed;
+
+            const forwardX = Math.sin(cameraAngle);
+            const forwardZ = Math.cos(cameraAngle);
+
+            player.position.x -= forwardX * currentSpeed;
+            player.position.z -= forwardZ * currentSpeed;
+            player.position.y += Math.sin(cameraLookY) * currentSpeed
+
+
+            isGrounded = false;
+            wasInWater = isInWater;
+            isInWater = false;
+
+            waters.forEach(w => {
+                if (playerHitsPlatform(w)) {
+                    isInWater = true;
+                }
+            });
+
+            if (isInWater && !wasInWater) {
+                justEnteredWater = 15;
+            }
+            if (!isInWater && wasInWater) {
+                justEnteredWater = 15;
+            }
+
+
+
+
+            for (let i = 0; i < lavas.length; i++) {
+                let l = lavas[i]
+                if (playerHitsPlatform(l)) {
+                    player.position.x = save.x
+                    player.position.y = save.y
+                    player.position.z = save.z
+                }
+            }
+            checkpoints.forEach(p => {
+                if (playerHitsPlatform(p)) {
+                    save.x = player.position.x
+                    save.y = player.position.y
+                    save.z = player.position.z
+                    checkpoints.splice(checkpoints.indexOf(p), 1)
+                    scene.remove(p)
+                }
+            });
+
+
+
+
+            if (!isFirstPerson) {
+                const camX = player.position.x + Math.sin(cameraAngle) * cameraRadius;
+                const camZ = player.position.z + Math.cos(cameraAngle) * cameraRadius;
+                let camY = player.position.y + 6;
+                if (gravityBool === -1) {
+                    camY = player.position.y - 6;
+                }
+                camera.position.set(camX, camY, camZ);
+                camera.lookAt(player.position)
+
+            } else {
+                const camX = player.position.x;
+                const camY = player.position.y + 0.8;
+                const camZ = player.position.z;
+
+                camera.position.set(camX, camY, camZ);
+
+                const dirX = -Math.sin(cameraAngle) * Math.cos(cameraLookY);
+                const dirY = Math.sin(cameraLookY);
+                const dirZ = -Math.cos(cameraAngle) * Math.cos(cameraLookY);
+
+                camera.rotation.order = "YXZ";
+                camera.rotation.y = cameraAngle;
+                camera.rotation.x = cameraLookY;
+            }
+
+
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+
+</html>
