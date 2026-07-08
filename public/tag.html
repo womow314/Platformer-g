@@ -130,6 +130,16 @@
             });
 
         }
+        const imageCache = {};
+
+        function loadImage(src) {
+            if (!imageCache[src]) {
+                imageCache[src] = new Image();
+                imageCache[src].src = src;
+            }
+
+            return imageCache[src];
+        }
 
         function draw() {
 
@@ -140,8 +150,11 @@
 
                 const p = players[id];
 
-                ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y, 30, 30);
+                const img = loadImage(p.color);
+
+                if (img.complete) {
+                    ctx.drawImage(img, p.x, p.y, 30, 30);
+                }
 
                 if (p.it) {
 
