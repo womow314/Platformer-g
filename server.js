@@ -58,7 +58,7 @@ io.on("connection", (socket) => {
                 a.y + 30 > b.y
             ) {
 
-                if ( tagCooldown < 0) {
+                if ((a.it || b.it) && tagCooldown < 0) {
                     tagCooldown = 3
                     a.it = false;
                     b.it = true;
