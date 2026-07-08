@@ -25,6 +25,7 @@
     </div>
 
     <script>
+        const keys = {};
         function bindButton(id, key) {
             const btn = document.getElementById(id);
 
@@ -61,7 +62,7 @@
         let myX = 400;
         let myY = 250;
 
-        const keys = {};
+        
 
         socket.on("connect", () => {
 
