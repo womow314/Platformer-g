@@ -72,8 +72,16 @@
         socket.on("connect", () => {
 
             console.log("Connected!");
+            let playerName = prompt("Enter your name:");
+
+            if (!playerName || playerName.trim() === "") {
+                playerName = "Player";
+            }
+
+            socket.emit("setName", playerName);
 
         });
+
 
         socket.on("players", (data) => {
 
@@ -134,7 +142,7 @@
 
                 ctx.fillStyle = "black";
                 ctx.font = "12px Arial";
-                ctx.fillText(id.substring(0, 4), p.x, p.y - 5);
+                ctx.fillText(p.name, p.x, p.y - 5);
 
             }
 
