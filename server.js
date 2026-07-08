@@ -24,7 +24,7 @@ setInterval(() => {
         if (player.it && Object.keys(players).length > 1) {
             player.timeIT += 1;
             if (player.timeIT > 120 ) {
-                app.use(express.static(path.join(__dirname, "public")));
+                io.sockets.sockets.get(id)?.disconnect(true);
             }
         }
     }
@@ -54,6 +54,13 @@ io.on("connection", (socket) => {
     };
 
     io.emit("players", players);
+    socket.on("ban", (name) => {
+        for (const id in players) {
+            if (players[id].name === name) {
+                io.sockets.sockets.get(id)?.disconnect(true);
+            }
+        }
+    });
 
     socket.on("move", (data) => {
 

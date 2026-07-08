@@ -77,7 +77,10 @@
 
         let myX = 400;
         let myY = 250;
-
+        
+        function ban(name){
+            socket.emit("ban", name)
+        }
 
 
         socket.on("connect", () => {
