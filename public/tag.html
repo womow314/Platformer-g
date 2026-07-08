@@ -16,7 +16,37 @@
 
     <script src="/socket.io/socket.io.js"></script>
 
+    <div id="mobileControls">
+        <button id="left">←</button>
+        <button id="right">→</button>
+        <button id="up">ꜛ</button>
+        <button id="down">↓</button>
+
+    </div>
+
     <script>
+        function bindButton(id, key) {
+            const btn = document.getElementById(id);
+
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys[key] = true;
+            }, { passive: false });
+
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[key] = false;
+            });
+
+            btn.addEventListener('mousedown', () => keys[key] = true);
+            btn.addEventListener('mouseup', () => keys[key] = false);
+        }
+        let swarm = false
+
+        bindButton("left", "ArrowLeft");
+        bindButton("right", "ArrowRight");
+        bindButton("up", "ArrowUp");
+        bindButton("down", "ArrowDown");
         function home() {
             window.location.href = "index.html";
         }
@@ -59,7 +89,7 @@
 
         function update() {
 
-            const speed = 4;
+            let speed = 4;
 
             if (keys["w"]) myY -= speed;
             if (keys["s"]) myY += speed;
@@ -81,7 +111,7 @@
             ctx.fillStyle = "#87CEEB";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            for (const id in players) {
+            for (let id in players) {
 
                 const p = players[id];
 
