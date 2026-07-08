@@ -24,7 +24,14 @@ setInterval(() => {
         if (player.it && Object.keys(players).length > 1) {
             player.timeIT += 1;
             if (player.timeIT > 120 ) {
-                io.sockets.sockets.get(id)?.disconnect(true);
+                const target = io.sockets.sockets.get(id);
+
+                if (target) {
+                    target.emit("kicked");
+                    setTimeout(() => {
+                        target.disconnect(true);
+                    }, 100);
+                }
             }
         }
     }
@@ -57,7 +64,14 @@ io.on("connection", (socket) => {
     socket.on("ban", (name) => {
         for (const id in players) {
             if (players[id].name === name) {
-                io.sockets.sockets.get(id)?.disconnect(true);
+                const target = io.sockets.sockets.get(id);
+
+                if (target) {
+                    target.emit("kicked");
+                    setTimeout(() => {
+                        target.disconnect(true);
+                    }, 100);
+                }
             }
         }
     });
