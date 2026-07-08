@@ -37,11 +37,14 @@ io.on("connection", (socket) => {
     });
 
     console.log(`Player connected: ${socket.id}`);
+    const min = 57;
+    const max = 68;
+    const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
 
     players[socket.id] = {
         x: Math.random() * 700 + 50,
         y: Math.random() * 400 + 50,
-        color: "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0"),
+        color: `/images/pixil-frame-0 (${randomNumber}).png`,
         it: Object.keys(players).length === 0,
         timeIT: 0,
         name: "Player"
