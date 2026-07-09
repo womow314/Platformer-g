@@ -207,6 +207,11 @@ details {
   cursor: pointer;
 }
 
+#multi {
+  background-color: rgb(66, 128, 0);
+  cursor: pointer;
+}
+
 #clicker:hover {
   transform: scale(1.03);
 }
