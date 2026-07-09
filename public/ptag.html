@@ -62,8 +62,8 @@
             let scorePanel = document.getElementById('score');
             scorePanel.innerText = '';
 
-            for (let id in players) {
-                let player = players[id];
+            for (let id in gravityPlayers) {
+                let player = gravityPlayers[id];
                 scorePanel.innerText += `${player.name}: ${player.timeIT}\n`;
             }
         }, 50);
@@ -92,7 +92,7 @@
 
 
 
-        let players = {};
+        let gravityPlayers = {};
         let platforms = []
         function addPlatform(px, py, w, h, isBouncy = false) {
             platforms.push({
@@ -132,7 +132,7 @@
 
         socket.on("players", (data) => {
 
-            players = data;
+            gravityPlayers = data;
 
         });
 
@@ -233,9 +233,9 @@
                 }
             });
 
-            for (let id in players) {
+            for (let id in gravityPlayers) {
 
-                const p = players[id];
+                const p = gravityPlayers[id];
 
                 const img = loadImage(p.color);
                 if (p.facing === "down") continue;
