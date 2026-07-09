@@ -475,9 +475,7 @@
                 player.position.x += forwardX * currentSpeed;
                 player.position.z += forwardZ * currentSpeed;
             }
-            if (keys['KeyQ']) {
-                pyVelocity = -gravity
-            }
+            
 
             pyVelocity += gravity;
             player.position.y += pyVelocity;
@@ -507,6 +505,9 @@
                 gravity = -0.015
                 gravityBool = 1
                 scene.background = new THREE.Color(0x74b0c8);
+            }
+            if (keys['KeyQ']) {
+                gravity = 0
             }
 
             platforms.forEach(p => {
