@@ -39,7 +39,7 @@ setInterval(() => {
 }, 1000);
 
 io.on("connection", (socket) => {
-    socket.on("joinTag", () =>{
+    socket.on("joinTag", (dir) =>{
         socket.on("setName", (name) => {
             if (players[socket.id]) {
                 players[socket.id].name = name.substring(0, 15);
@@ -58,7 +58,8 @@ io.on("connection", (socket) => {
             color: `/images/pixil-frame-0 (${randomNumber}).png`,
             it: Object.keys(players).length === 0,
             timeIT: 0,
-            name: "Player"
+            name: "Player",
+            facing: dir
         };
 
         io.emit("players", players);
@@ -99,7 +100,106 @@ io.on("connection", (socket) => {
                     a.y + 30 > b.y
                 ) {
 
-                    if ((a.it || b.it) && tagCooldown < 0) {
+                    if ((a.it || b.it) && (a.facing === b.facing) && tagCooldown < 0) {
+                        tagCooldown = 3
+                        a.it = false;
+                        b.it = true;
+                    }
+
+                }
+
+            }
+
+            io.emit("players", players);
+
+        });
+
+        socket.on("disconnect", () => {
+
+            const wasIt = players[socket.id]?.it;
+
+            delete players[socket.id];
+
+            // If IT left, make another player IT
+            if (wasIt) {
+
+                const ids = Object.keys(players);
+
+                if (ids.length > 0) {
+                    players[ids[0]].it = true;
+                }
+
+            }
+
+            io.emit("players", players);
+
+            console.log(`Player disconnected: ${socket.id}`);
+
+        });
+    })
+
+    socket.on("joinTagSide", (dir) => {
+        socket.on("setName", (name) => {
+            if (players[socket.id]) {
+                players[socket.id].name = name.substring(0, 15);
+                players[socket.id].timeIT = 0
+            }
+        });
+
+        console.log(`Player connected: ${socket.id}`);
+        const min = 57;
+        const max = 68;
+        const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+        players[socket.id] = {
+            x: Math.random() * 700 + 50,
+            y: Math.random() * 400 + 50,
+            color: `/images/pixil-frame-0 (${randomNumber}).png`,
+            it: Object.keys(players).length === 0,
+            timeIT: 0,
+            name: "Player",
+            facing: dir
+        };
+
+        io.emit("players", players);
+        socket.on("ban", (name) => {
+            for (const id in players) {
+                if (players[id].name === name) {
+                    const target = io.sockets.sockets.get(id);
+
+                    if (target) {
+                        target.emit("kicked");
+                        setTimeout(() => {
+                            target.disconnect(true);
+                        }, 100);
+                    }
+                }
+            }
+        });
+
+        socket.on("move", (data) => {
+
+            if (!players[socket.id]) return;
+
+            players[socket.id].x = data.x;
+            players[socket.id].y = data.y;
+
+            // Check for tagging
+            for (const id in players) {
+
+                if (id === socket.id) continue;
+
+                const a = players[socket.id];
+                const b = players[id];
+
+                if (
+                    a.x < b.x + 30 &&
+                    a.x + 30 > b.x &&
+                    a.y < b.y + 30 &&
+                    a.y + 30 > b.y
+                ) {
+
+                    if ((a.it || b.it) && (a.facing === b.facing) && tagCooldown < 0) {
                         tagCooldown = 3
                         a.it = false;
                         b.it = true;
