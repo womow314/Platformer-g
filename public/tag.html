@@ -69,7 +69,7 @@
         }, 50);
 
         const socket = io();
-        socket.emit("joinTag");
+        socket.emit("joinTag", "down");
 
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
@@ -158,8 +158,10 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             for (let id in players) {
+                
 
                 const p = players[id];
+                if (p.facing === "side") continue;
 
                 const img = loadImage(p.color);
 
