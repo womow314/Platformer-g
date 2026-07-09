@@ -62,8 +62,8 @@
             let scorePanel = document.getElementById('score');
             scorePanel.innerText = '';
 
-            for (let id in players) {
-                let player = players[id];
+            for (let id in flatPlayers) {
+                let player = flatPlayers[id];
                 scorePanel.innerText += `${player.name}: ${player.timeIT}\n`;
             }
         }, 50);
@@ -76,7 +76,7 @@
 
         
 
-        let players = {};
+        let flatPlayers = {};
 
         let myX = 400;
         let myY = 250;
@@ -106,7 +106,7 @@
 
         socket.on("players", (data) => {
 
-            players = data;
+            flatPlayers = data;
 
         });
 
@@ -157,10 +157,10 @@
             ctx.fillStyle = "#87CEEB";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            for (let id in players) {
+            for (let id in flatPlayers) {
                 
 
-                const p = players[id];
+                const p = flatPlayers[id];
                 if (p.facing === "side") continue;
 
                 const img = loadImage(p.color);
