@@ -125,7 +125,7 @@
 
         });
         socket.on("kicked", () => {
-            alert("You have been kicked from the game.");
+            alert("You have been kicked from the game. Please rejoin.");
             window.location.href = "index.html";
         });
 
@@ -200,6 +200,9 @@
 
 
             myX = Math.max(0, Math.min(canvas.width - 30, myX));
+            if(myY > canvas.height +30) {
+                player.dy = 0
+            }
 
 
             socket.emit("move", {

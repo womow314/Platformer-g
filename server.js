@@ -32,16 +32,6 @@ setInterval(() => {
 
         if (player.it && Object.keys(gravityPlayers).length > 1) {
             player.timeIT += 1;
-            if (player.timeIT > 120) {
-                const target = io.sockets.sockets.get(id);
-
-                if (target) {
-                    target.emit("kicked");
-                    setTimeout(() => {
-                        target.disconnect(true);
-                    }, 100);
-                }
-            }
         }
     }
 
