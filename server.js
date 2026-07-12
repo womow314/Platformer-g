@@ -13,6 +13,8 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const flatPlayers = {};
 const gravityPlayers = {};
+const players3d = {};
+
 
 let tagCooldown = 0
 
@@ -101,10 +103,14 @@ io.on("connection", (socket) => {
                     a.y + 30 > b.y
                 ) {
 
-                    if ((a.it || b.it) && (a.facing === b.facing) && tagCooldown < 0) {
-                        tagCooldown = 3
+                    if (a.it && tagCooldown < 0) {
+                        tagCooldown = 3;
                         a.it = false;
                         b.it = true;
+                    } else if (b.it && tagCooldown < 0) {
+                        tagCooldown = 3;
+                        b.it = false;
+                        a.it = true;
                     }
 
                 }
@@ -200,10 +206,14 @@ io.on("connection", (socket) => {
                     a.y + 30 > b.y
                 ) {
 
-                    if ((a.it || b.it) && (a.facing === b.facing) && tagCooldown < 0) {
-                        tagCooldown = 3
+                    if (a.it && tagCooldown < 0) {
+                        tagCooldown = 3;
                         a.it = false;
                         b.it = true;
+                    } else if (b.it && tagCooldown < 0) {
+                        tagCooldown = 3;
+                        b.it = false;
+                        a.it = true;
                     }
 
                 }
@@ -232,6 +242,107 @@ io.on("connection", (socket) => {
             }
 
             io.emit("players", gravityPlayers);
+
+            console.log(`Player disconnected: ${socket.id}`);
+
+        });
+    })
+
+    socket.on("joinTag3", (dir) => {
+        socket.on("setName", (name) => {
+            if (players3d[socket.id]) {
+                players3d[socket.id].name = name.substring(0, 15);
+                players3d[socket.id].timeIT = 0
+            }
+        });
+
+        console.log(`Player connected: ${socket.id}`);
+        const min = 57;
+        const max = 68;
+        const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+
+        players3d[socket.id] = {
+            x: Math.random() * 700 + 50,
+            y: Math.random() * 400 + 50,
+            it: Object.keys(players3d).length === 0,
+            timeIT: 0,
+            name: "Player"
+        };
+
+        io.emit("players", players3d);
+        socket.on("ban", (name) => {
+            for (const id in players3d) {
+                if (players3d[id].name === name) {
+                    const target = io.sockets.sockets.get(id);
+
+                    if (target) {
+                        target.emit("kicked");
+                        setTimeout(() => {
+                            target.disconnect(true);
+                        }, 100);
+                    }
+                }
+            }
+        });
+
+        socket.on("move", (data) => {
+
+            if (!players3d[socket.id]) return;
+
+            players3d[socket.id].x = data.x;
+            players3d[socket.id].y = data.y;
+            players3d[socket.id].z = data.z;
+
+            // Check for tagging
+            for (const id in players3d) {
+
+                if (id === socket.id) continue;
+
+                const a = players3d[socket.id];
+                const b = players3d[id];
+
+                const dx = a.x - b.x;
+                const dy = a.y - b.y;
+                const dz = a.z - b.z;
+
+                const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+                if (distance < 2) {
+                    if (a.it && tagCooldown < 0) {
+                        tagCooldown = 3;
+                        a.it = false;
+                        b.it = true;
+                    } else if (b.it && tagCooldown < 0) {
+                        tagCooldown = 3;
+                        b.it = false;
+                        a.it = true;
+                    }
+                }
+
+            }
+
+            io.emit("players", players3d);
+
+        });
+
+        socket.on("disconnect", () => {
+
+            const wasIt = players3d[socket.id]?.it;
+
+            delete players3d[socket.id];
+
+            // If IT left, make another player IT
+            if (wasIt) {
+
+                const ids = Object.keys(players3d);
+
+                if (ids.length > 0) {
+                    players3d[ids[0]].it = true;
+                }
+
+            }
+
+            io.emit("players", players3d);
 
             console.log(`Player disconnected: ${socket.id}`);
 
