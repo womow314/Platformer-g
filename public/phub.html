@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Games.io | Tag Hub</title>
+    <link rel="stylesheet" href="styles1.css" />
+</head>
+
+<body>
+    <img id="title" src="https://uploads.onecompiler.io/44hquga6n/44m32pxhz/pixil-frame-0%20(8).png" width=700px />
+    <div id="homeButtons">
+        <button onclick="launchTag()" id="multi">Launch Tag</button>
+        <button onclick="launchPTag()" id="multi">Launch Platform Tag</button>
+        <button onclick="launch3Tag()" id="multi">Launch 3d Tag</button>
+
+    </div>
+    <button onclick="home()" id="home">Home</button>
+    <script>
+
+        function launchTag() {
+            window.location.href = "tag.html";
+        }
+        function launchPTag() {
+            window.location.href = "ptag.html";
+        }
+        function launch3Tag() {
+            window.location.href = "3tag.html";
+        }
+        function home() {
+            window.location.href = "index.html";
+        }
+
+
+        window.addEventListener("keydown", function (e) {
+            if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].indexOf(e.code) > -1) {
+                e.preventDefault();
+            }
+        }, false);
+    </script>
+</body>
+
+</html>
