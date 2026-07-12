@@ -269,6 +269,19 @@ io.on("connection", (socket) => {
             name: "Player"
         };
 
+        socket.on("fellOff", () => {
+
+            // Nobody is it
+            for (const id in players3d) {
+                players3d[id].it = false;
+            }
+
+            // Player who fell becomes it
+            players3d[socket.id].it = true;
+
+            io.emit("players", players3d);
+        });
+
         io.emit("players", players3d);
         socket.on("ban", (name) => {
             for (const id in players3d) {
