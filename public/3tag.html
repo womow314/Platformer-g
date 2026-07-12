@@ -506,17 +506,7 @@
                 isGrounded = false;
             }
 
-            if (otherPlayers[id].userData.lastName !== p.name) {
-                otherPlayers[id].remove(otherPlayers[id].userData.nameTag);
-
-                const newTag = createNameTag(p.name);
-                newTag.position.set(0, 1.8, 0);
-
-                otherPlayers[id].add(newTag);
-
-                otherPlayers[id].userData.nameTag = newTag;
-                otherPlayers[id].userData.lastName = p.name;
-            }
+            
 
             if (player.position.y < -50 || player.position.y > 800) {
                 player.position.x = save.x
@@ -593,6 +583,18 @@
                     p.z
                 );
                 otherPlayers[id].material = p.it ? itMat : playerMat;
+
+                if (otherPlayers[id].userData.lastName !== p.name) {
+                    otherPlayers[id].remove(otherPlayers[id].userData.nameTag);
+
+                    const newTag = createNameTag(p.name);
+                    newTag.position.set(0, 1.8, 0);
+
+                    otherPlayers[id].add(newTag);
+
+                    otherPlayers[id].userData.nameTag = newTag;
+                    otherPlayers[id].userData.lastName = p.name;
+                }
 
 
             }
