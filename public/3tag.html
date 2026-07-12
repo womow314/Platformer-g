@@ -279,7 +279,7 @@
 
         spawnBounce(15, 15, -15, 3, 1, 3);
 
-        spawnPlatform( 0, 10, 0, 15, 1, 15)
+        spawnPlatform(0, 10, 0, 15, 1, 15)
 
         spawnPlatform(-10, -5, -10)
 
@@ -445,7 +445,7 @@
                 scene.background = new THREE.Color(0x74b0c8);
             }
             if (keys['KeyQ']) {
-                gravity = 0
+                //gravity = 0
             }
 
             platforms.forEach(p => {
@@ -504,6 +504,18 @@
             if (keys["Space"] && isGrounded) {
                 pyVelocity = jumpForce * gravityBool;
                 isGrounded = false;
+            }
+
+            if (otherPlayers[id].userData.lastName !== p.name) {
+                otherPlayers[id].remove(otherPlayers[id].userData.nameTag);
+
+                const newTag = createNameTag(p.name);
+                newTag.position.set(0, 1.8, 0);
+
+                otherPlayers[id].add(newTag);
+
+                otherPlayers[id].userData.nameTag = newTag;
+                otherPlayers[id].userData.lastName = p.name;
             }
 
             if (player.position.y < -50 || player.position.y > 800) {
@@ -566,7 +578,8 @@
 
 
                     const tag = createNameTag(p.name);
-                    tag.position.set(0, 1.8, 0);
+                    mesh.userData.nameTag = tag; // save reference
+                    mesh.userData.lastName = p.name;
                     mesh.add(tag);
 
                     scene.add(mesh);
