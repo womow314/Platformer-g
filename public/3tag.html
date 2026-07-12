@@ -509,9 +509,12 @@
             
 
             if (player.position.y < -50 || player.position.y > 800) {
-                player.position.x = save.x
-                player.position.y = save.y
-                player.position.z = save.z
+
+                socket.emit("fellOff");
+
+                player.position.x = save.x;
+                player.position.y = save.y;
+                player.position.z = save.z;
                 pyVelocity = 0;
             }
 
@@ -588,7 +591,6 @@
                     otherPlayers[id].remove(otherPlayers[id].userData.nameTag);
 
                     const newTag = createNameTag(p.name);
-                    newTag.position.set(0, 1.8, 0);
 
                     otherPlayers[id].add(newTag);
 
