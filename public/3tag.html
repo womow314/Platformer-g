@@ -36,6 +36,7 @@
         <button id="jump">⤒</button>
     </div>
     <h2 id="itStatus"></h2>
+    
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -409,9 +410,15 @@
             const status = document.getElementById("itStatus");
 
             if (players3d[socket.id]?.it) {
-                status.textContent = "YOU ARE IT";
+                status.textContent = "YOU ARE IT!";
             } else {
-                status.textContent = "";
+                let name;
+                for (const id in players3d) {
+                    if(players3d[id].it ) {
+                        name = players3d[id].name
+                    }
+                }
+                status.textContent = `${name} is it!`;
             }
 
 
