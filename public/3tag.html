@@ -36,7 +36,7 @@
         <button id="jump">⤒</button>
     </div>
     <h2 id="itStatus"></h2>
-    
+
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -109,32 +109,40 @@
         });
 
         function createNameTag(name) {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
+                const canvas = document.createElement("canvas");
+                canvas.width = 256;
+                canvas.height = 64;
 
-            canvas.width = 256;
-            canvas.height = 64;
+                const ctx = canvas.getContext("2d");
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            ctx.font = "28px Arial";
-            ctx.textAlign = "center";
-            ctx.fillStyle = "white";
-            ctx.strokeStyle = "black";
-            ctx.lineWidth = 4;
+                ctx.font = "bold 28px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
 
-            ctx.strokeText(name, canvas.width / 2, 42);
-            ctx.fillText(name, canvas.width / 2, 42);
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = 5;
+                ctx.fillStyle = "white";
 
-            const texture = new THREE.CanvasTexture(canvas);
-            const material = new THREE.SpriteMaterial({
-                map: texture,
-                transparent: true
-            });
+                ctx.strokeText(name, 128, 32);
+                ctx.fillText(name, 128, 32);
 
-            const sprite = new THREE.Sprite(material);
-            sprite.scale.set(3, 0.75, 1);
+                const texture = new THREE.CanvasTexture(canvas);
+                texture.minFilter = THREE.LinearFilter;
+                texture.magFilter = THREE.LinearFilter;
 
-            return sprite;
-        }
+                const material = new THREE.SpriteMaterial({
+                    map: texture,
+                    transparent: true,
+                    depthTest: false
+                });
+
+                const sprite = new THREE.Sprite(material);
+                sprite.scale.set(3, 0.75, 1);
+                sprite.position.set(0, 2.2, 0);
+
+                return sprite;
+            }
         const itMat = new THREE.MeshStandardMaterial({
             color: 0xff0000
         });
@@ -268,23 +276,39 @@
             players3d = data;
 
         });
-        // Spawn Platform
-        spawnPlatform(0, -1, 0, 15, 1, 15);
+        // Ring of Platforms
+        const size = 5
+        spawnPlatform(-8, -11, 0, size, 1, size);
+        spawnPlatform(-12, -11, -12, size, 1, size);
+        spawnPlatform(-24, -11, -16, size, 1, size);
+        spawnPlatform(-36, -11, -12, size, 1, size);
+        spawnPlatform(-40, -11, 0, size, 1, size);
+        spawnPlatform(-36, -11, 12, size, 1, size);
+        spawnPlatform(-24, -11, 16, size, 1, size);
+        spawnPlatform(-12, -11, 12, size, 1, size);
 
-        // Small parkour
-        spawnPlatform(8, 1, -8, 4, 1, 4);
-        spawnPlatform(14, 3, -14, 4, 1, 4);
-        spawnPlatform(20, 5, -20, 4, 1, 4);
+        // Center Platform
+        spawnPlatform(-24, 4, 0, 8, 1, 8);
+        spawnBounce(-24, -11, 0, 12, 1, 12);
 
-        spawnWater(20, 10.5, -20, 4, 10, 4);
+        // Final Jump Sequence
+        const size2 = 3
+        spawnPlatform(-10, 3, 0, size2, 1, size2);
+        spawnPlatform(-2, 6, 0, size2, 1, size2);
+        spawnPlatform(6, 9, 0, size2, 1, size2);
+        spawnPlatform(14, 12, 0, size2, 1, size2);
+        spawnPlatform(22, 15, 0, size2, 1, size2);
 
-        spawnBounce(15, 15, -15, 3, 1, 3);
+        // Final Island
+        spawnPlatform(40, 11, 0, 30, 1, 30);
+        spawnPlatform(40, 24, 0, 16, 1, 16);
+        spawnBounce(40, 25, 0, 4, 1, 4)
 
-        spawnPlatform(0, 10, 0, 15, 1, 15)
-
-        spawnPlatform(-10, -5, -10)
-
-        spawnPlatform(0, -10, 0, 15, 1, 15);
+        // Decoration
+        spawnWater(30, 17, 10, 4, 12, 4);
+        spawnWater(50, 17, 10, 4, 12, 4);
+        spawnWater(30, 17, -10, 4, 12, 4);
+        spawnWater(50, 17, -10, 4, 12, 4);
 
 
 
@@ -301,8 +325,7 @@
         ];
         const player = new THREE.Mesh(playerGeo, playerMat);
         const sensitivity = 0.002
-        player.position.set(0, 1, 0);
-        scene.add(player);
+
 
         const keys = {}
 
@@ -379,10 +402,13 @@
         let wasInWater = false;
         let justEnteredWater = 0;
         let save = {
-            x: 0,
-            y: 1,
+            x: -23,
+            y: 6,
             z: 0
         }
+
+        player.position.set(save.x, save.y, save.z);
+        scene.add(player);
 
         function animate() {
             requestAnimationFrame(animate);
@@ -414,7 +440,7 @@
             } else {
                 let name;
                 for (const id in players3d) {
-                    if(players3d[id].it ) {
+                    if (players3d[id].it) {
                         name = players3d[id].name
                     }
                 }
@@ -513,7 +539,7 @@
                 isGrounded = false;
             }
 
-            
+
 
             if (player.position.y < -50 || player.position.y > 800) {
 
