@@ -470,6 +470,7 @@
             if (justEnteredWater > 0) justEnteredWater--;
             if (isInWater) {
                 gravity = 0.015
+                player.position.y += 0.01
                 gravityBool = -1
                 scene.background = new THREE.Color(0x0000ff);
             } else {
