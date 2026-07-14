@@ -36,6 +36,10 @@
         <button id="jump">⤒</button>
     </div>
     <h2 id="itStatus"></h2>
+    <div id="playerList">
+        <h3>Players Online (<span id="playerCount">0</span>)</h3>
+        <ul id="playersOnline"></ul>
+    </div>Í
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -439,6 +443,7 @@
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
         function playerHitsPlatform(p) {
+            if (!p.visible || !p.parent.visible) return false;
             const withinX = player.position.x >= p.position.x - p.width / 2 - 0.5 && player.position.x <= p.position.x + p.width / 2 + 0.5;
             const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
 
@@ -460,14 +465,28 @@
         scene.add(player);
 
         function animate() {
+
             requestAnimationFrame(animate);
+            
             currentSpeed = speed
-            const playerCount = Object.keys(players3d).length;
+            const playerNames = document.getElementById("playersOnline");
+            let playerCount = document.getElementById("playerCount");
+
+            playerNames.innerHTML = "";
+
+            for (const id in players3d) {
+                const li = document.createElement("li");
+                li.textContent = players3d[id].name;
+                playerNames.appendChild(li);
+            }
+
+            playerCount.textContent = Object.keys(players3d).length;
+            let playerCountNum = Object.keys(players3d).length;
 
             group1.visible = true;
             group2.visible = true;
-            group3.visible = playerCount >= 3;
-            group4.visible = playerCount >= 4;
+            group3.visible = playerCountNum >= 3;
+            group4.visible = playerCountNum >= 4;
             if (keys['ShiftRight'] || keys['ShiftLeft']) {
                 currentSpeed = speed * 2
             }
