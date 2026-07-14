@@ -460,6 +460,11 @@
             y: 6,
             z: 0
         }
+        let isOwner = false;
+
+        socket.on("ownerStatus", (value) => {
+            isOwner = value;
+        });
 
         player.position.set(save.x, save.y, save.z);
         scene.add(player);
@@ -467,7 +472,7 @@
         function animate() {
 
             requestAnimationFrame(animate);
-            
+
             currentSpeed = speed
             const playerNames = document.getElementById("playersOnline");
             let playerCount = document.getElementById("playerCount");
@@ -552,8 +557,8 @@
                 gravityBool = 1
                 scene.background = new THREE.Color(0x74b0c8);
             }
-            if (keys['KeyQ']) {
-                //gravity = 0
+            if (keys['KeyQ'] && isOwner) {
+                gravity = 0
             }
 
             platforms.forEach(p => {
