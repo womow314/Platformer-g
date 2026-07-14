@@ -42,7 +42,7 @@ setInterval(() => {
 
 
 io.on("connection", (socket) => {
-    socket.on("joinTag", (dir) =>{
+    socket.on("joinTag", (dir) => {
         socket.on("setName", (name) => {
             if (flatPlayers[socket.id]) {
                 flatPlayers[socket.id].name = name.substring(0, 15);
@@ -255,6 +255,14 @@ io.on("connection", (socket) => {
                 players3d[socket.id].timeIT = 0
             }
         });
+
+        const ip = socket.handshake.address;
+
+        socket.isOwner = (
+            ip === "::ffff:192.168.4.49" ||
+            ip === "192.168.4.49"
+        );
+        socket.emit("ownerStatus", socket.isOwner);
 
         console.log(`Player connected: ${socket.id}`);
         const min = 57;
