@@ -109,40 +109,40 @@
         });
 
         function createNameTag(name) {
-                const canvas = document.createElement("canvas");
-                canvas.width = 256;
-                canvas.height = 64;
+            const canvas = document.createElement("canvas");
+            canvas.width = 256;
+            canvas.height = 64;
 
-                const ctx = canvas.getContext("2d");
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                ctx.font = "bold 28px Arial";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
+            ctx.font = "bold 28px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
 
-                ctx.strokeStyle = "black";
-                ctx.lineWidth = 5;
-                ctx.fillStyle = "white";
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 5;
+            ctx.fillStyle = "white";
 
-                ctx.strokeText(name, 128, 32);
-                ctx.fillText(name, 128, 32);
+            ctx.strokeText(name, 128, 32);
+            ctx.fillText(name, 128, 32);
 
-                const texture = new THREE.CanvasTexture(canvas);
-                texture.minFilter = THREE.LinearFilter;
-                texture.magFilter = THREE.LinearFilter;
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
 
-                const material = new THREE.SpriteMaterial({
-                    map: texture,
-                    transparent: true,
-                    depthTest: false
-                });
+            const material = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true,
+                depthTest: false
+            });
 
-                const sprite = new THREE.Sprite(material);
-                sprite.scale.set(3, 0.75, 1);
-                sprite.position.set(0, 2.2, 0);
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(3, 0.75, 1);
+            sprite.position.set(0, 2.2, 0);
 
-                return sprite;
-            }
+            return sprite;
+        }
         const itMat = new THREE.MeshStandardMaterial({
             color: 0xff0000
         });
@@ -179,67 +179,97 @@
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
         ];
         const platforms = [];
-        const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, crack = false,) => {
-            let p
+
+        const group1 = new THREE.Group();
+        const group2 = new THREE.Group();
+        const group3 = new THREE.Group();
+        const group4 = new THREE.Group();
+
+        scene.add(group1);
+        scene.add(group2);
+        scene.add(group3);
+        scene.add(group4);
+        const spawnPlatform = (group, x, y, z, width = 5, height = 1, depth = 5, crack = false) => {
+            let p;
+
             if (!crack) {
                 p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
             } else {
                 p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMatCrack);
             }
+
             p.position.set(x, y, z);
-            scene.add(p);
+
+            group.add(p);       // instead of scene.add(p)
+
             p.width = width;
             p.height = height;
             p.depth = depth;
-            p.crack = crack
-            platforms.push(p);
+            p.crack = crack;
 
+            platforms.push(p);
         };
         lavas = []
-        const spawnLava = (x, y, z, width = 1, height = 1, depth = 1) => {
-            const p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), lavalMat);
+        const spawnLava = (group, x, y, z, width = 1, height = 1, depth = 1) => {
+            const p = new THREE.Mesh(
+                new THREE.BoxGeometry(width, height, depth),
+                lavalMat
+            );
+
             p.position.set(x, y, z);
-            scene.add(p);
+            group.add(p);
+
             p.width = width;
             p.height = height;
             p.depth = depth;
-            lavas.push(p);
 
+            lavas.push(p);
         };
         bouncies = []
-        const spawnBounce = (x, y, z, width = 5, height = 1, depth = 5) => {
-            const p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), bouncy);
+        const spawnBounce = (group, x, y, z, width = 5, height = 1, depth = 5) => {
+            const p = new THREE.Mesh(
+                new THREE.BoxGeometry(width, height, depth),
+                bouncy
+            );
+
             p.position.set(x, y, z);
-            scene.add(p);
+            group.add(p);
+
             p.width = width;
             p.height = height;
             p.depth = depth;
-            bouncies.push(p);
 
+            bouncies.push(p);
         };
         waters = []
-        const spawnWater = (x, y, z, width = 1, height = 1, depth = 1) => {
-            const borderSize = 0.1
+        const spawnWater = (group, x, y, z, width = 1, height = 1, depth = 1) => {
+            const borderSize = 0.1;
+
             let p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), waterMat);
             p.position.set(x, y, z);
-            scene.add(p);
+            group.add(p);
+
             let p1 = new THREE.Mesh(new THREE.BoxGeometry(borderSize, height, depth), waterMat);
             p1.position.set(x - width / 2 - borderSize / 2, y, z);
-            scene.add(p1);
+            group.add(p1);
+
             let p2 = new THREE.Mesh(new THREE.BoxGeometry(borderSize, height, depth), waterMat);
             p2.position.set(x + width / 2 + borderSize / 2, y, z);
-            scene.add(p2);
+            group.add(p2);
+
             let p3 = new THREE.Mesh(new THREE.BoxGeometry(width, height, borderSize), waterMat);
             p3.position.set(x, y, z + depth / 2 + borderSize / 2);
-            scene.add(p3);
+            group.add(p3);
+
             let p4 = new THREE.Mesh(new THREE.BoxGeometry(width, height, borderSize), waterMat);
             p4.position.set(x, y, z - depth / 2 - borderSize / 2);
-            scene.add(p4);
+            group.add(p4);
+
             p.width = width;
             p.height = height;
             p.depth = depth;
-            waters.push(p);
 
+            waters.push(p);
         };
 
         let px = 0
@@ -276,39 +306,58 @@
             players3d = data;
 
         });
-        // Ring of Platforms
+        // Group 1
         const size = 5
-        spawnPlatform(-8, -11, 0, size, 1, size);
-        spawnPlatform(-12, -11, -12, size, 1, size);
-        spawnPlatform(-24, -11, -16, size, 1, size);
-        spawnPlatform(-36, -11, -12, size, 1, size);
-        spawnPlatform(-40, -11, 0, size, 1, size);
-        spawnPlatform(-36, -11, 12, size, 1, size);
-        spawnPlatform(-24, -11, 16, size, 1, size);
-        spawnPlatform(-12, -11, 12, size, 1, size);
+        spawnPlatform(group1, -8, -11, 0, size, 1, size);
+        spawnPlatform(group1, -12, -11, -12, size, 1, size);
+        spawnPlatform(group1, -24, -11, -16, size, 1, size);
+        spawnPlatform(group1, -36, -11, -12, size, 1, size);
+        spawnPlatform(group1, -40, -11, 0, size, 1, size);
+        spawnPlatform(group1, -36, -11, 12, size, 1, size);
+        spawnPlatform(group1, -24, -11, 16, size, 1, size);
+        spawnPlatform(group1, -12, -11, 12, size, 1, size);
 
-        // Center Platform
-        spawnPlatform(-24, 4, 0, 8, 1, 8);
-        spawnBounce(-24, -11, 0, 12, 1, 12);
+        spawnPlatform(group1, -24, 4, 0, 8, 1, 8);
+        spawnBounce(group1, -24, -11, 0, 12, 1, 12);
 
-        // Final Jump Sequence
-        const size2 = 3
-        spawnPlatform(-10, 3, 0, size2, 1, size2);
-        spawnPlatform(-2, 6, 0, size2, 1, size2);
-        spawnPlatform(6, 9, 0, size2, 1, size2);
-        spawnPlatform(14, 12, 0, size2, 1, size2);
-        spawnPlatform(22, 15, 0, size2, 1, size2);
+        // Group 2
+        const size2 = 4
+        spawnPlatform(group2, -10, 3, 0, size2, 1, size2);
+        spawnPlatform(group2, -2, 6, 0, size2, 1, size2);
+        spawnPlatform(group2, 6, 9, 0, size2, 1, size2);
+        spawnPlatform(group2, 14, 12, 0, size2, 1, size2);
+        spawnPlatform(group2, 22, 15, 0, size2, 1, size2);
 
-        // Final Island
-        spawnPlatform(40, 11, 0, 30, 1, 30);
-        spawnPlatform(40, 24, 0, 16, 1, 16);
-        spawnBounce(40, 25, 0, 4, 1, 4)
+        spawnPlatform(group2, 40, 11, 0, 30, 1, 30);
+        spawnPlatform(group2, 40, 24, 0, 16, 1, 16);
+        spawnBounce(group2, 40, 25, 0, 4, 1, 4)
 
-        // Decoration
-        spawnWater(30, 17, 10, 4, 12, 4);
-        spawnWater(50, 17, 10, 4, 12, 4);
-        spawnWater(30, 17, -10, 4, 12, 4);
-        spawnWater(50, 17, -10, 4, 12, 4);
+        spawnWater(group2, 30, 17, 10, 4, 12, 4);
+        spawnWater(group2, 50, 17, 10, 4, 12, 4);
+        spawnWater(group2, 30, 17, -10, 4, 12, 4);
+        spawnWater(group2, 50, 17, -10, 4, 12, 4);
+
+        // Group 3
+
+        spawnPlatform(group3, 40, 15, -30, 4, 1, 20)
+        spawnPlatform(group3, 40, 11, -60, 30, 1, 30);
+        spawnPlatform(group3, 40, 17, -60, 6, 1, 6);
+        spawnLava(group3, 40, 12, -60, 1, 1, 30);
+        spawnLava(group3, 40, 12, -60, 30, 1, 1);
+        spawnLava(group3, 40, 16, -30, 4, 1, 1);
+
+        //Group 4
+        spawnPlatform(group4, -24, 35.5, -60, 30, 1, 30)
+        spawnWater(group4, -24, 15, -60, 30, 40, 30)
+        for (let i = 0; i < 3; i++) {
+            spawnPlatform(group4, -24, i * 3 - 9, -23 - i * 8)
+        }
+
+        spawnBounce(group4, 0, 10, -60)
+        spawnBounce(group4, 15, 10, -60)
+        spawnBounce(group4, 30, 10, -60)
+
+
 
 
 
@@ -413,6 +462,12 @@
         function animate() {
             requestAnimationFrame(animate);
             currentSpeed = speed
+            const playerCount = Object.keys(players3d).length;
+
+            group1.visible = true;
+            group2.visible = true;
+            group3.visible = playerCount >= 3;
+            group4.visible = playerCount >= 4;
             if (keys['ShiftRight'] || keys['ShiftLeft']) {
                 currentSpeed = speed * 2
             }
@@ -523,6 +578,7 @@
                     player.position.x = save.x
                     player.position.y = save.y
                     player.position.z = save.z
+                    socket.emit("fellOff");
                 }
             });
             checkpoints.forEach(p => {
