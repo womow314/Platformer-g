@@ -257,12 +257,18 @@ io.on("connection", (socket) => {
         });
 
         const ip = socket.handshake.address;
+        console.log("Player IP:", ip);
 
-        socket.isOwner = (
-            ip === "::ffff:192.168.4.49" ||
-            ip === "192.168.4.49"
-        );
+
+        socket.isOwner =
+            ip === "::1" ||
+            ip === "::ffff:127.0.0.1" ||
+            ip === "127.0.0.1";
+
+        console.log("Is owner:", socket.isOwner);
+
         socket.emit("ownerStatus", socket.isOwner);
+
 
         console.log(`Player connected: ${socket.id}`);
         const min = 57;
