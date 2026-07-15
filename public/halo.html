@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Halo Terrain FPS</title>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: Arial;
+            background: rgba(0, 0, 0, .5);
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="info">
+        WASD Move<br>
+        Shift Sprint<br>
+        Mouse Look<br>
+        Space Jump
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
+
+
+    <script>
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x74b0c8);
+
+
+        const camera = new THREE.PerspectiveCamera(
+            90,
+            innerWidth / innerHeight,
+            0.1,
+            3000
+        );
+
+
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+
+        renderer.setSize(
+            innerWidth,
+            innerHeight
+        );
+
+        renderer.shadowMap.enabled = true;
+
+        document.body.appendChild(renderer.domElement);
+
+
+
+        // LIGHT
+
+        const sun = new THREE.DirectionalLight(
+            0xffffff,
+            2
+        );
+
+        sun.position.set(
+            100,
+            200,
+            100
+        );
+
+        sun.castShadow = true;
+
+        scene.add(sun);
+
+        scene.add(
+            new THREE.AmbientLight(
+                0xffffff,
+                0.3
+            )
+        );
+
+
+
+        // TERRAIN HEIGHT FUNCTION
+
+        function getHeight(x, z) {
+
+            return (
+                Math.sin(x * .02) * 8 +
+                Math.cos(z * .025) * 8 +
+                Math.sin((x + z) * .01) * 15 +
+                Math.sin(x * .004) *
+                Math.cos(z * .006) * 35 +
+                Math.sin(x * .1 + z * .08) * 2
+            );
+
+        }
+
+
+
+
+        // TERRAIN
+
+        const size = 900;
+        const segments = 30;
+
+
+        const geo = new THREE.PlaneGeometry(
+            size,
+            size,
+            segments,
+            segments
+        );
+
+
+        const verts = geo.attributes.position;
+
+
+        for (let i = 0; i < verts.count; i++) {
+
+            let x = verts.getX(i);
+            let z = verts.getY(i);
+
+
+            verts.setZ(
+                i,
+                getHeight(x, z)
+            );
+
+        }
+
+
+        geo.computeVertexNormals();
+
+
+        const terrain = new THREE.Mesh(
+            geo,
+            new THREE.MeshStandardMaterial({
+                color: 0x2c8c2c
+            })
+        );
+
+
+        // keep terrain aligned with collision
+
+        terrain.rotation.x = -Math.PI / 2;
+
+        terrain.updateMatrixWorld(true);
+
+        scene.add(terrain);
+
+
+
+        // PLAYER
+
+        const player = {
+
+            x: 0,
+
+            z: 0,
+
+            y: 50,
+
+            height: 3,
+
+            speed: .5,
+
+            velocityY: 0,
+
+            grounded: false
+
+        };
+
+
+        const gravity = -.025;
+        const jump = .8;
+
+
+
+        // MOUSE LOOK
+
+
+        let yaw = 0;
+        let pitch = 0;
+
+
+        renderer.domElement.onclick = () => {
+
+            renderer.domElement.requestPointerLock();
+
+        };
+
+
+
+        document.addEventListener(
+            "mousemove",
+            e => {
+
+                if (document.pointerLockElement !== renderer.domElement)
+                    return;
+
+
+                yaw -= e.movementX * .002;
+
+                pitch -= e.movementY * .002;
+
+
+                pitch = Math.max(
+                    -1.5,
+                    Math.min(1.5, pitch)
+                );
+
+            });
+
+
+
+        // INPUT
+
+
+        let keys = {};
+
+
+        addEventListener(
+            "keydown",
+            e => {
+                keys[e.code] = true;
+            });
+
+
+        addEventListener(
+            "keyup",
+            e => {
+                keys[e.code] = false;
+            });
+
+
+
+
+
+        // TERRAIN COLLISION
+
+
+        const raycaster = new THREE.Raycaster();
+
+
+        function terrainHeight(x, z) {
+
+
+            raycaster.set(
+                new THREE.Vector3(x, 200, z),
+                new THREE.Vector3(0, -1, 0)
+            );
+
+
+            let hit =
+                raycaster.intersectObject(
+                    terrain
+                );
+
+
+            if (hit.length) {
+
+                return hit[0].point.y;
+
+            }
+
+
+            return -100;
+
+        }
+
+
+
+        function canMove(x, z) {
+
+            let current =
+                terrainHeight(
+                    player.x,
+                    player.z
+                );
+
+
+            let next =
+                terrainHeight(
+                    x,
+                    z
+                );
+
+
+            // prevent walking into cliffs
+
+            if (next - current > 1.5)
+                return false;
+
+
+            return true;
+
+        }
+
+
+
+        function updateGround() {
+
+            let ground =
+                terrainHeight(
+                    player.x,
+                    player.z
+                );
+
+
+
+            if (player.y - player.height <= ground) {
+
+                player.y =
+                    ground + player.height;
+
+                player.velocityY = 0;
+
+                player.grounded = true;
+
+            }
+            else {
+
+                player.grounded = false;
+
+            }
+
+        }
+
+
+
+
+
+        // GAME LOOP
+
+
+        function animate() {
+
+            requestAnimationFrame(
+                animate
+            );
+
+
+
+            let speed = player.speed;
+
+
+            if (keys.ShiftLeft || keys.ShiftRight)
+                speed *= 2;
+
+
+
+            let mx = 0;
+            let mz = 0;
+
+
+
+            let fx = Math.sin(yaw);
+            let fz = Math.cos(yaw);
+
+
+
+            if (keys.KeyW) {
+
+                mx -= fx;
+                mz -= fz;
+
+            }
+
+
+            if (keys.KeyS) {
+
+                mx += fx;
+                mz += fz;
+
+            }
+
+
+            if (keys.KeyA) {
+
+                mx -= Math.cos(yaw);
+                mz += Math.sin(yaw);
+
+            }
+
+
+            if (keys.KeyD) {
+
+                mx += Math.cos(yaw);
+                mz -= Math.sin(yaw);
+
+            }
+
+
+
+            let len = Math.sqrt(
+                mx * mx + mz * mz
+            );
+
+
+            if (len) {
+
+                mx /= len;
+                mz /= len;
+
+            }
+
+
+
+            let nx =
+                player.x + mx * speed;
+
+
+            let nz =
+                player.z + mz * speed;
+
+
+
+            if (canMove(nx, player.z))
+                player.x = nx;
+
+
+            if (canMove(player.x, nz))
+                player.z = nz;
+
+
+
+            // gravity
+
+            player.velocityY += gravity;
+
+            player.y += player.velocityY;
+
+
+
+            updateGround();
+
+
+
+            // jump
+
+            if (keys.Space && player.grounded) {
+
+                player.velocityY = jump;
+                player.grounded = false;
+
+            }
+
+
+
+
+            camera.position.set(
+                player.x,
+                player.y,
+                player.z
+            );
+
+
+            camera.rotation.order = "YXZ";
+
+            camera.rotation.y = yaw;
+
+            camera.rotation.x = pitch;
+
+
+
+            renderer.render(
+                scene,
+                camera
+            );
+
+        }
+
+
+        animate();
+
+
+
+
+
+        addEventListener(
+            "resize",
+            () => {
+
+                camera.aspect =
+                    innerWidth / innerHeight;
+
+                camera.updateProjectionMatrix();
+
+                renderer.setSize(
+                    innerWidth,
+                    innerHeight
+                );
+
+            });
+
+    </script>
+
+</body>
+
+</html>
