@@ -263,8 +263,8 @@ io.on("connection", (socket) => {
 
         socket.isOwner =
             ip === "::1" ||
-            ip === "::ffff:127.0.0.1" ||
-            ip === "127.0.0.1";
+            ip === "::ffff:192.168.4.49" ||
+            ip === "192.168.4.49";
 
         console.log("Is owner:", socket.isOwner);
 
@@ -287,7 +287,7 @@ io.on("connection", (socket) => {
         socket.on("makeMap", (bool) => {
             fullMap = bool;
             io.emit("mapMod", bool);
-        }); 
+        });
 
         socket.on("fellOff", () => {
 
