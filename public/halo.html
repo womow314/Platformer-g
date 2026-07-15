@@ -133,6 +133,14 @@
                 new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
                 new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
             ];
+            const ironMAT = [
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+            ];
 
             const bullet = [
                 new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
@@ -146,13 +154,13 @@
             let platforms = []
             let bullets = []
 
-            const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, crack = false) => {
+            const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, iron = false) => {
                 let p;
 
-                if (!crack) {
+                if (!iron) {
                     p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
                 } else {
-                    p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMatCrack);
+                    p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), ironMAT);
                 }
 
                 p.position.set(x, y, z);
@@ -162,12 +170,15 @@
                 p.width = width;
                 p.height = height;
                 p.depth = depth;
-                p.crack = crack
 
                 platforms.push(p);
             };
 
             spawnPlatform(-10, 6, 10, 80, 1, 30)
+            spawnPlatform(-10, 2, -5, 80, 32, 1, true)
+            spawnPlatform(-10, -2, 25, 80, 38, 1, true)
+            spawnPlatform(-60, -6, 10, 8, 38, 8, true)
+            spawnPlatform(-90, -6, 10, 8, 44, 8, true)
 
             function playerHitsPlatform(p) {
 
