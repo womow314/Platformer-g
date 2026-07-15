@@ -14,6 +14,7 @@ app.use(express.static(path.join(__dirname, "public")));
 const flatPlayers = {};
 const gravityPlayers = {};
 const players3d = {};
+let fullMap = false
 
 
 let tagCooldown = 0
@@ -282,6 +283,10 @@ io.on("connection", (socket) => {
             timeIT: 0,
             name: "Player"
         };
+
+        socket.on("makeMap", (bool) => {
+            socket.emit("mapMod", bool)
+        })
 
         socket.on("fellOff", () => {
 
