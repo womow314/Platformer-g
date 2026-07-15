@@ -428,16 +428,25 @@
 
             cameraLookY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraLookY));
         });
+        let lastTouchX = null;
+
+        window.addEventListener("touchstart", (e) => {
+            lastTouchX = e.touches[0].clientX;
+        });
+
         window.addEventListener("touchmove", (e) => {
-            if (isTouching) {
-                cameraAngle += e.movementX * sensitivity
-            }
-            if (document.pointerLockElement !== renderer.domElement) return;
+            if (!isTouching) return;
 
-            cameraAngle -= e.movementX * sensitivity;
-            cameraLookY -= e.movementY * sensitivity;
+            const touch = e.touches[0];
+            const dx = touch.clientX - lastTouchX;
 
-            cameraLookY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraLookY));
+            cameraAngle -= dx * sensitivity;
+
+            lastTouchX = touch.clientX;
+        });
+
+        window.addEventListener("touchend", () => {
+            lastTouchX = null;
         });
 
         window.addEventListener('keydown', e => keys[e.code] = true);
@@ -558,12 +567,12 @@
 
             if (justEnteredWater > 0) justEnteredWater--;
             if (isInWater) {
-                gravity = basegravity
+                gravity = -basegravity
                 player.position.y += 0.01
                 gravityBool = -1
                 scene.background = new THREE.Color(0x0000ff);
             } else {
-                gravity = -basegravity
+                gravity = basegravity
                 gravityBool = 1
                 scene.background = new THREE.Color(0x74b0c8);
             }
