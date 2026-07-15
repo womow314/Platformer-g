@@ -24,10 +24,18 @@
             background: rgba(0, 0, 0, .5);
             padding: 10px;
         }
+
+        #plus {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+        }
     </style>
+    <link rel="stylesheet" href="styles1.css" />
 </head>
 
 <body>
+    <button onclick="home()" id="home">Home</button>
 
     <div id="info">
         WASD Move<br>
@@ -36,479 +44,604 @@
         Space Jump
     </div>
 
-
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
-
-
-    <script>
-
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x74b0c8);
+    <span id="plus">+</p>
 
 
-        const camera = new THREE.PerspectiveCamera(
-            90,
-            innerWidth / innerHeight,
-            0.1,
-            3000
-        );
+        <script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
 
 
-        const renderer = new THREE.WebGLRenderer({
-            antialias: true
-        });
-
-        renderer.setSize(
-            innerWidth,
-            innerHeight
-        );
-
-        renderer.shadowMap.enabled = true;
-
-        document.body.appendChild(renderer.domElement);
+        <script>
+            function home() {
+                window.location.href = "index.html";
+            }
 
 
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x74b0c8);
 
-        // LIGHT
+            const loader = new THREE.TextureLoader();
 
-        const sun = new THREE.DirectionalLight(
-            0xffffff,
-            2
-        );
 
-        sun.position.set(
-            100,
-            200,
-            100
-        );
+            const camera = new THREE.PerspectiveCamera(
+                90,
+                innerWidth / innerHeight,
+                0.1,
+                3000
+            );
 
-        sun.castShadow = true;
 
-        scene.add(sun);
+            const renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
 
-        scene.add(
-            new THREE.AmbientLight(
+            renderer.setSize(
+                innerWidth,
+                innerHeight
+            );
+
+            renderer.shadowMap.enabled = true;
+
+            document.body.appendChild(renderer.domElement);
+
+
+
+            // LIGHT
+
+            const sun = new THREE.DirectionalLight(
                 0xffffff,
-                0.3
-            )
-        );
-
-
-
-        // TERRAIN HEIGHT FUNCTION
-
-        function getHeight(x, z) {
-
-            return (
-                Math.sin(x * .02) * 8 +
-                Math.cos(z * .025) * 8 +
-                Math.sin((x + z) * .01) * 15 +
-                Math.sin(x * .004) *
-                Math.cos(z * .006) * 35 +
-                Math.sin(x * .1 + z * .08) * 2
+                2
             );
 
-        }
-
-
-
-
-        // TERRAIN
-
-        const size = 900;
-        const segments = 30;
-
-
-        const geo = new THREE.PlaneGeometry(
-            size,
-            size,
-            segments,
-            segments
-        );
-
-
-        const verts = geo.attributes.position;
-
-
-        for (let i = 0; i < verts.count; i++) {
-
-            let x = verts.getX(i);
-            let z = verts.getY(i);
-
-
-            verts.setZ(
-                i,
-                getHeight(x, z)
+            sun.position.set(
+                100,
+                200,
+                100
             );
 
-        }
+            sun.castShadow = true;
 
+            scene.add(sun);
 
-        geo.computeVertexNormals();
-
-
-        const terrain = new THREE.Mesh(
-            geo,
-            new THREE.MeshStandardMaterial({
-                color: 0x2c8c2c
-            })
-        );
-
-
-        // keep terrain aligned with collision
-
-        terrain.rotation.x = -Math.PI / 2;
-
-        terrain.updateMatrixWorld(true);
-
-        scene.add(terrain);
+            scene.add(
+                new THREE.AmbientLight(
+                    0xffffff,
+                    0.3
+                )
+            );
 
 
 
-        // PLAYER
+            // TERRAIN HEIGHT FUNCTION
 
-        const player = {
+            function getHeight(x, z) {
 
-            x: 0,
-
-            z: 0,
-
-            y: 50,
-
-            height: 3,
-
-            speed: .5,
-
-            velocityY: 0,
-
-            grounded: false
-
-        };
-
-
-        const gravity = -.025;
-        const jump = .8;
-
-
-
-        // MOUSE LOOK
-
-
-        let yaw = 0;
-        let pitch = 0;
-
-
-        renderer.domElement.onclick = () => {
-
-            renderer.domElement.requestPointerLock();
-
-        };
-
-
-
-        document.addEventListener(
-            "mousemove",
-            e => {
-
-                if (document.pointerLockElement !== renderer.domElement)
-                    return;
-
-
-                yaw -= e.movementX * .002;
-
-                pitch -= e.movementY * .002;
-
-
-                pitch = Math.max(
-                    -1.5,
-                    Math.min(1.5, pitch)
+                return (
+                    Math.sin(x * .02) * 8 +
+                    Math.cos(z * .025) * 8 +
+                    Math.sin((x + z) * .01) * 15 +
+                    Math.sin(x * .004) *
+                    Math.cos(z * .006) * 35
                 );
 
-            });
+            }
+
+            const platMat = [
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            ];
+
+            const bullet = [
+                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") })
+            ];
+
+            let platforms = []
+            let bullets = []
+
+            const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, crack = false) => {
+                let p;
+
+                if (!crack) {
+                    p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
+                } else {
+                    p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMatCrack);
+                }
+
+                p.position.set(x, y, z);
+
+                scene.add(p);       // instead of scene.add(p)
+
+                p.width = width;
+                p.height = height;
+                p.depth = depth;
+                p.crack = crack
+
+                platforms.push(p);
+            };
+
+            spawnPlatform(-10, 6, 10, 80, 1, 30)
+
+            function playerHitsPlatform(p) {
+
+                const withinX =
+                    player.x >= p.position.x - p.width / 2 - 0.5 &&
+                    player.x <= p.position.x + p.width / 2 + 0.5;
 
 
-
-        // INPUT
-
-
-        let keys = {};
+                const withinZ =
+                    player.z >= p.position.z - p.depth / 2 - 0.5 &&
+                    player.z <= p.position.z + p.depth / 2 + 0.5;
 
 
-        addEventListener(
-            "keydown",
-            e => {
-                keys[e.code] = true;
-            });
+                const feet = player.y - player.height;
 
 
-        addEventListener(
-            "keyup",
-            e => {
-                keys[e.code] = false;
-            });
+                const topOfPlatform =
+                    p.position.y + p.height / 2;
 
 
+                const hittingTop =
+                    feet <= topOfPlatform &&
+                    feet >= topOfPlatform - 2;
 
 
-
-        // TERRAIN COLLISION
-
-
-        const raycaster = new THREE.Raycaster();
-
-
-        function terrainHeight(x, z) {
-
-
-            raycaster.set(
-                new THREE.Vector3(x, 200, z),
-                new THREE.Vector3(0, -1, 0)
-            );
-
-
-            let hit =
-                raycaster.intersectObject(
-                    terrain
-                );
-
-
-            if (hit.length) {
-
-                return hit[0].point.y;
+                return withinX && withinZ && hittingTop;
 
             }
 
 
-            return -100;
-
-        }
 
 
+            // TERRAIN
 
-        function canMove(x, z) {
+            const size = 1900;
+            const segments = 60;
 
-            let current =
-                terrainHeight(
+
+            const geo = new THREE.PlaneGeometry(
+                size,
+                size,
+                segments,
+                segments
+            );
+
+
+            const verts = geo.attributes.position;
+
+
+            for (let i = 0; i < verts.count; i++) {
+
+                let x = verts.getX(i);
+                let z = verts.getY(i);
+
+
+                verts.setZ(
+                    i,
+                    getHeight(x, z)
+                );
+
+            }
+
+
+            geo.computeVertexNormals();
+
+            const grass = new THREE.MeshStandardMaterial({
+                map: loader.load("images/pixil-frame-0 (69).png")
+            });
+
+
+            const terrain = new THREE.Mesh(
+                geo,
+                grass
+            );
+
+
+            // keep terrain aligned with collision
+
+            terrain.rotation.x = -Math.PI / 2;
+
+            terrain.updateMatrixWorld(true);
+
+            scene.add(terrain);
+
+
+
+            // PLAYER
+
+            const player = {
+
+                x: 0,
+
+                z: 0,
+
+                y: 50,
+
+                height: 3,
+
+                speed: .5,
+
+                velocityY: 0,
+
+                grounded: false
+
+            };
+            let yaw = 0;
+            let pitch = 0;
+
+
+            const gravity = -.025;
+            const jump = .8;
+            //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+            function fire() {
+                let p = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), bullet);
+
+                p.position.set(player.x, player.y, player.z);
+
+                scene.add(p);       // instead of scene.add(p)
+
+                p.dx = -Math.sin(yaw);
+                p.dy = Math.sin(pitch);
+                p.dz = -Math.cos(yaw);
+
+                bullets.push(p);
+            }
+
+
+
+            // MOUSE LOOK
+
+
+
+
+
+            renderer.domElement.onclick = () => {
+
+                renderer.domElement.requestPointerLock();
+
+            };
+
+            window.addEventListener('pointerdown', (event) => {
+                if (event.button === 0) {
+                    fire()
+                }
+            });
+
+
+
+            document.addEventListener(
+                "mousemove",
+                e => {
+
+                    if (document.pointerLockElement !== renderer.domElement)
+                        return;
+
+
+                    yaw -= e.movementX * .002;
+
+                    pitch -= e.movementY * .002;
+
+
+                    pitch = Math.max(
+                        -1.5,
+                        Math.min(1.5, pitch)
+                    );
+
+                });
+
+
+
+            // INPUT
+
+
+            let keys = {};
+
+
+            addEventListener(
+                "keydown",
+                e => {
+                    keys[e.code] = true;
+                });
+
+
+            addEventListener(
+                "keyup",
+                e => {
+                    keys[e.code] = false;
+                });
+
+
+
+
+
+            // TERRAIN COLLISION
+
+
+            const raycaster = new THREE.Raycaster();
+
+
+            function terrainHeight(x, z) {
+
+
+                raycaster.set(
+                    new THREE.Vector3(x, 200, z),
+                    new THREE.Vector3(0, -1, 0)
+                );
+
+
+                let hit =
+                    raycaster.intersectObject(
+                        terrain
+                    );
+
+
+                if (hit.length) {
+
+                    return hit[0].point.y;
+
+                }
+
+
+                return -100;
+
+            }
+
+
+
+            function canMove(x, z) {
+
+                let current =
+                    terrainHeight(
+                        player.x,
+                        player.z
+                    );
+
+
+                let next =
+                    terrainHeight(
+                        x,
+                        z
+                    );
+
+
+                // prevent walking into cliffs
+
+                if (next - current > 1.5)
+                    return false;
+
+
+                return true;
+
+            }
+
+
+
+            function updateGround() {
+
+                let ground =
+                    terrainHeight(
+                        player.x,
+                        player.z
+                    );
+
+
+
+                if (player.y - player.height <= ground) {
+
+                    player.y =
+                        ground + player.height;
+
+                    player.velocityY = 0;
+
+                    player.grounded = true;
+
+                }
+                else {
+
+                    player.grounded = false;
+
+                }
+
+            }
+
+
+
+
+
+            // GAME LOOP
+
+
+            function animate() {
+
+                requestAnimationFrame(
+                    animate
+                );
+                let bulletSpeed = 3
+
+                for (let bullet of bullets) {
+                    bullet.position.x += bullet.dx * bulletSpeed
+                    bullet.position.y += bullet.dy * bulletSpeed
+                    bullet.position.z += bullet.dz * bulletSpeed
+                }
+
+                let speed = player.speed;
+
+
+                if (keys.ShiftLeft || keys.ShiftRight)
+                    speed *= 2;
+
+
+
+                let mx = 0;
+                let mz = 0;
+
+
+
+                let fx = Math.sin(yaw);
+                let fz = Math.cos(yaw);
+
+
+
+                if (keys.KeyW) {
+
+                    mx -= fx;
+                    mz -= fz;
+
+                }
+
+
+                if (keys.KeyS) {
+
+                    mx += fx;
+                    mz += fz;
+
+                }
+
+
+                if (keys.KeyA) {
+
+                    mx -= Math.cos(yaw);
+                    mz += Math.sin(yaw);
+
+                }
+
+
+                if (keys.KeyD) {
+
+                    mx += Math.cos(yaw);
+                    mz -= Math.sin(yaw);
+
+                }
+
+
+
+                let len = Math.sqrt(
+                    mx * mx + mz * mz
+                );
+
+
+                if (len) {
+
+                    mx /= len;
+                    mz /= len;
+
+                }
+
+
+
+                let nx =
+                    player.x + mx * speed;
+
+
+                let nz =
+                    player.z + mz * speed;
+
+
+
+                if (canMove(nx, player.z))
+                    player.x = nx;
+
+
+                if (canMove(player.x, nz))
+                    player.z = nz;
+
+                // gravity
+
+                player.velocityY += gravity;
+                player.y += player.velocityY;
+
+
+                // terrain collision
+
+                updateGround();
+
+
+                // platform collision
+
+                platforms.forEach(p => {
+
+                    if (playerHitsPlatform(p) && player.velocityY <= 0) {
+
+                        player.y =
+                            p.position.y +
+                            p.height / 2 +
+                            player.height;
+
+                        player.velocityY = 0;
+
+                        player.grounded = true;
+
+                    }
+
+                });
+
+
+
+                // jump
+
+                if (keys.Space && player.grounded) {
+
+                    player.velocityY = jump;
+                    player.grounded = false;
+
+                }
+
+
+
+
+                camera.position.set(
                     player.x,
+                    player.y,
                     player.z
                 );
 
 
-            let next =
-                terrainHeight(
-                    x,
-                    z
+                camera.rotation.order = "YXZ";
+
+                camera.rotation.y = yaw;
+
+                camera.rotation.x = pitch;
+
+
+
+                renderer.render(
+                    scene,
+                    camera
                 );
 
-
-            // prevent walking into cliffs
-
-            if (next - current > 1.5)
-                return false;
-
-
-            return true;
-
-        }
-
-
-
-        function updateGround() {
-
-            let ground =
-                terrainHeight(
-                    player.x,
-                    player.z
-                );
-
-
-
-            if (player.y - player.height <= ground) {
-
-                player.y =
-                    ground + player.height;
-
-                player.velocityY = 0;
-
-                player.grounded = true;
-
-            }
-            else {
-
-                player.grounded = false;
-
-            }
-
-        }
-
-
-
-
-
-        // GAME LOOP
-
-
-        function animate() {
-
-            requestAnimationFrame(
-                animate
-            );
-
-
-
-            let speed = player.speed;
-
-
-            if (keys.ShiftLeft || keys.ShiftRight)
-                speed *= 2;
-
-
-
-            let mx = 0;
-            let mz = 0;
-
-
-
-            let fx = Math.sin(yaw);
-            let fz = Math.cos(yaw);
-
-
-
-            if (keys.KeyW) {
-
-                mx -= fx;
-                mz -= fz;
-
             }
 
 
-            if (keys.KeyS) {
+            animate();
 
-                mx += fx;
-                mz += fz;
 
-            }
 
 
-            if (keys.KeyA) {
 
-                mx -= Math.cos(yaw);
-                mz += Math.sin(yaw);
+            addEventListener(
+                "resize",
+                () => {
 
-            }
+                    camera.aspect =
+                        innerWidth / innerHeight;
 
+                    camera.updateProjectionMatrix();
 
-            if (keys.KeyD) {
+                    renderer.setSize(
+                        innerWidth,
+                        innerHeight
+                    );
 
-                mx += Math.cos(yaw);
-                mz -= Math.sin(yaw);
+                });
 
-            }
-
-
-
-            let len = Math.sqrt(
-                mx * mx + mz * mz
-            );
-
-
-            if (len) {
-
-                mx /= len;
-                mz /= len;
-
-            }
-
-
-
-            let nx =
-                player.x + mx * speed;
-
-
-            let nz =
-                player.z + mz * speed;
-
-
-
-            if (canMove(nx, player.z))
-                player.x = nx;
-
-
-            if (canMove(player.x, nz))
-                player.z = nz;
-
-
-
-            // gravity
-
-            player.velocityY += gravity;
-
-            player.y += player.velocityY;
-
-
-
-            updateGround();
-
-
-
-            // jump
-
-            if (keys.Space && player.grounded) {
-
-                player.velocityY = jump;
-                player.grounded = false;
-
-            }
-
-
-
-
-            camera.position.set(
-                player.x,
-                player.y,
-                player.z
-            );
-
-
-            camera.rotation.order = "YXZ";
-
-            camera.rotation.y = yaw;
-
-            camera.rotation.x = pitch;
-
-
-
-            renderer.render(
-                scene,
-                camera
-            );
-
-        }
-
-
-        animate();
-
-
-
-
-
-        addEventListener(
-            "resize",
-            () => {
-
-                camera.aspect =
-                    innerWidth / innerHeight;
-
-                camera.updateProjectionMatrix();
-
-                renderer.setSize(
-                    innerWidth,
-                    innerHeight
-                );
-
-            });
-
-    </script>
+        </script>
 
 </body>
 
