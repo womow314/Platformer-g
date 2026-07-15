@@ -461,6 +461,15 @@
             z: 0
         }
         let isOwner = false;
+        let fullMap = false;
+
+        function makeMap(bool) {
+            socket.emit("makeMap", bool)
+        }
+
+        socket.on("mapMod", (bool) => {
+            fullMap = bool
+        })
 
         socket.on("ownerStatus", (value) => {
             isOwner = value;
@@ -468,6 +477,7 @@
 
         player.position.set(save.x, save.y, save.z);
         scene.add(player);
+        let basegravity = gravity
 
         function animate() {
 
@@ -490,8 +500,8 @@
 
             group1.visible = true;
             group2.visible = true;
-            group3.visible = playerCountNum >= 3;
-            group4.visible = playerCountNum >= 4;
+            group3.visible = playerCountNum >= 3 || fullMap;
+            group4.visible = playerCountNum >= 4 || fullMap;
             if (keys['ShiftRight'] || keys['ShiftLeft']) {
                 currentSpeed = speed * 2
             }
@@ -548,12 +558,12 @@
 
             if (justEnteredWater > 0) justEnteredWater--;
             if (isInWater) {
-                gravity = 0.015
+                gravity = basegravity
                 player.position.y += 0.01
                 gravityBool = -1
                 scene.background = new THREE.Color(0x0000ff);
             } else {
-                gravity = -0.015
+                gravity = -basegravity
                 gravityBool = 1
                 scene.background = new THREE.Color(0x74b0c8);
             }
