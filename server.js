@@ -285,8 +285,9 @@ io.on("connection", (socket) => {
         };
 
         socket.on("makeMap", (bool) => {
-            socket.emit("mapMod", bool)
-        })
+            fullMap = bool;
+            io.emit("mapMod", bool);
+        }); 
 
         socket.on("fellOff", () => {
 
