@@ -32,6 +32,7 @@
             transform: translate(-50%, -50%);
             text-align: center;
             padding: 0;
+            font-size: 70px;
         }
     </style>
     <link rel="stylesheet" href="styles1.css" />
@@ -44,10 +45,11 @@
         WASD Move<br>
         Shift Sprint<br>
         Mouse Look<br>
-        Space Jump
+        Space Jump<br>
+        Q switch guns
     </div>
 
-    <span id="plus">+</p>
+    <span id="plus">O</p>
 
 
         <script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
@@ -205,7 +207,7 @@
                 targets.push(p);
             }
 
-            spawnTarget (0, 50, -40)
+            spawnTarget(0, 50, -40)
 
             spawnPlatform(-10, 6, 10, 80, 1, 30)
             spawnPlatform(-10, 2, -5, 80, 32, 1, true)
@@ -249,6 +251,7 @@
 
             const size = 2000;
             const segments = 100;
+            let gun = "assult"
 
 
             const geo = new THREE.PlaneGeometry(
@@ -274,6 +277,7 @@
                 );
 
             }
+
 
 
             geo.computeVertexNormals();
@@ -324,23 +328,43 @@
 
             const gravity = -.025;
             const jump = .8;
+            guns = ["assult", "snipe"]
             function fire() {
-                let p = new THREE.Mesh(
-                    new THREE.BoxGeometry(1, 1, 1),
-                    bullet
-                );
+                if (gun === "assult") {
+                    let p = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.1, 0.1, 0.1),
+                        bullet
+                    );
 
-                p.position.copy(camera.position);
+                    p.position.copy(camera.position);
 
-                const dir = new THREE.Vector3();
-                camera.getWorldDirection(dir);
+                    const dir = new THREE.Vector3();
+                    camera.getWorldDirection(dir);
 
-                p.dx = dir.x;
-                p.dy = dir.y;
-                p.dz = dir.z;
+                    p.dx = dir.x + Math.random() / 10 - 0.05;
+                    p.dy = dir.y + Math.random() / 10 - 0.05;
+                    p.dz = dir.z + Math.random() / 10 - 0.05;
 
-                scene.add(p);
-                bullets.push(p);
+                    scene.add(p);
+                    bullets.push(p);
+                } else if (gun === "snipe") {
+                    let p = new THREE.Mesh(
+                        new THREE.BoxGeometry(1, 1, 1),
+                        bullet
+                    );
+
+                    p.position.copy(camera.position);
+
+                    const dir = new THREE.Vector3();
+                    camera.getWorldDirection(dir);
+
+                    p.dx = dir.x
+                    p.dy = dir.y
+                    p.dz = dir.z
+
+                    scene.add(p);
+                    bullets.push(p);
+                }
             }
 
 
@@ -358,19 +382,24 @@
             };
 
             let isZoomed = false
+            let isFiring = false
 
             window.addEventListener('mousedown', (event) => {
                 if (event.button === 2) {
                     isZoomed = true
                 }
                 if (event.button === 0) {
-                    fire()
+                    isFiring = true
                 }
             });
 
             window.addEventListener('mouseup', (event) => {
                 if (event.button === 2) {
                     isZoomed = false
+
+                }
+                if (event.button === 0) {
+                    isFiring = false
                 }
             });
 
@@ -408,7 +437,19 @@
                 "keydown",
                 e => {
                     keys[e.code] = true;
+                    if (keys.KeyQ) {
+                        if (gun === "assult") {
+                            gun = "snipe"
+                            document.getElementById("plus").style.fontSize = "10px"
+                            cooldown = 0
+                        } else if (gun === "snipe") {
+                            gun = "assult"
+                            document.getElementById("plus").style.fontSize = "70px"
+                            cooldown = 0
+                        }
+                    }
                 });
+
 
 
             addEventListener(
@@ -511,18 +552,21 @@
 
             }
             setInterval(() => {
-                let x = player.x + Math.random()*600-300
-                 let z = player.z + Math.random() * 600 - 300
-                
+                let x = player.x + Math.random() * 600 - 300
+                let z = player.z + Math.random() * 600 - 300
+
                 spawnTarget(x, 0, z)
-                
-            }, 4000);
+
+            }, 2000);
 
 
 
 
 
             // GAME LOOP
+
+            let maxCooldown = 2.5
+            let cooldown = 0
 
 
             function animate() {
@@ -532,20 +576,11 @@
                 );
                 let bulletSpeed = 8
 
-                camera = new THREE.PerspectiveCamera(
-                    90,
-                    innerWidth / innerHeight,
-                    0.1,
-                    3000
-                );
+
+                camera.fov = isZoomed ? 15 : 90;
+                camera.updateProjectionMatrix();
                 sensitivity = 0.002
                 if (isZoomed) {
-                    camera = new THREE.PerspectiveCamera(
-                        15,
-                        innerWidth / innerHeight,
-                        0.1,
-                        3000
-                    );
                     sensitivity = 0.0005
                 }
 
@@ -556,6 +591,12 @@
                 }
 
                 let speed = player.speed;
+
+                if (gun === "assult") {
+                    maxCooldown = 2.5
+                } else if (gun === "snipe") {
+                    maxCooldown = 100
+                }
 
 
                 if (keys.ShiftLeft || keys.ShiftRight)
@@ -586,6 +627,12 @@
                     mx += fx;
                     mz += fz;
 
+                }
+
+                cooldown -= 1
+                if (cooldown < 0 && isFiring) {
+                    fire()
+                    cooldown = maxCooldown
                 }
 
 
@@ -621,11 +668,11 @@
                 for (let target of targets) {
                     const speed = 0.5
                     let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
-                    let dx = (player.x - target.position.x)/dist * speed
-                    let dz = (player.z - target.position.z)/dist * speed
+                    let dx = (player.x - target.position.x) / dist * speed
+                    let dz = (player.z - target.position.z) / dist * speed
                     target.position.x += dx
                     target.position.z += dz
-                    target.position.y = terrainHeight(target.position.x, target.position.z) +7
+                    target.position.y = terrainHeight(target.position.x, target.position.z) + 7
 
                     for (let bullet of bullets) {
                         let forgivness = 1
