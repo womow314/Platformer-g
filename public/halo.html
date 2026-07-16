@@ -29,6 +29,9 @@
             position: absolute;
             top: 50%;
             left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            padding: 0;
         }
     </style>
     <link rel="stylesheet" href="styles1.css" />
@@ -62,7 +65,7 @@
             const loader = new THREE.TextureLoader();
 
 
-            const camera = new THREE.PerspectiveCamera(
+            let camera = new THREE.PerspectiveCamera(
                 90,
                 innerWidth / innerHeight,
                 0.1,
@@ -112,15 +115,20 @@
 
 
             // TERRAIN HEIGHT FUNCTION
+            const multiply = 5
+            const m1 = Math.random() * multiply
+            const m2 = Math.random() * multiply
+            const m3 = Math.random() * multiply
+            const m4 = Math.random() * multiply
+
 
             function getHeight(x, z) {
 
                 return (
-                    Math.sin(x * .02) * 8 +
-                    Math.cos(z * .025) * 8 +
-                    Math.sin((x + z) * .01) * 15 +
-                    Math.sin(x * .004) *
-                    Math.cos(z * .006) * 35
+                    Math.sin(x * .02) * 8 * m1 +
+                    Math.cos(z * .025) * 8 * m2 +
+                    Math.sin((x + z) * .01) * 15 * m3 +
+                    Math.sin(x * .004) * Math.cos(z * .006) * 35 * m4
                 );
 
             }
@@ -132,6 +140,14 @@
                 new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
                 new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
                 new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            ];
+            const targetMAT = [
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
+                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
             ];
             const ironMAT = [
                 new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
@@ -174,11 +190,28 @@
                 platforms.push(p);
             };
 
+            let targets = []
+
+            function spawnTarget(x, y, z) {
+                let p = new THREE.Mesh(new THREE.BoxGeometry(7, 7, 7), targetMAT);
+                p.position.set(x, y, z);
+
+                scene.add(p);       // instead of scene.add(p)
+
+                p.width = 7;
+                p.height = 7;
+                p.depth = 7;
+
+                targets.push(p);
+            }
+
+            spawnTarget (0, 50, -40)
+
             spawnPlatform(-10, 6, 10, 80, 1, 30)
             spawnPlatform(-10, 2, -5, 80, 32, 1, true)
             spawnPlatform(-10, -2, 25, 80, 38, 1, true)
-            for (let i = 0; i < 30; i ++ ){
-                spawnPlatform(-30 * i -60, -6, 10, 8, 38, 8, true)
+            for (let i = 0; i < 30; i++) {
+                spawnPlatform(-30 * i - 60, -6, 10, 8, 38, 8, true)
             }
 
             function playerHitsPlatform(p) {
@@ -214,8 +247,8 @@
 
             // TERRAIN
 
-            const size = 900;
-            const segments = 90;
+            const size = 2000;
+            const segments = 100;
 
 
             const geo = new THREE.PlaneGeometry(
@@ -272,7 +305,7 @@
 
                 x: 0,
 
-                z: 0,
+                z: -15,
 
                 y: 50,
 
@@ -291,18 +324,22 @@
 
             const gravity = -.025;
             const jump = .8;
-            //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
             function fire() {
-                let p = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), bullet);
+                let p = new THREE.Mesh(
+                    new THREE.BoxGeometry(1, 1, 1),
+                    bullet
+                );
 
-                p.position.set(player.x, player.y, player.z);
+                p.position.copy(camera.position);
 
-                scene.add(p);       // instead of scene.add(p)
+                const dir = new THREE.Vector3();
+                camera.getWorldDirection(dir);
 
-                p.dx = -Math.sin(yaw);
-                p.dy = Math.sin(pitch);
-                p.dz = -Math.cos(yaw);
+                p.dx = dir.x;
+                p.dy = dir.y;
+                p.dz = dir.z;
 
+                scene.add(p);
                 bullets.push(p);
             }
 
@@ -320,14 +357,25 @@
 
             };
 
-            window.addEventListener('pointerdown', (event) => {
+            let isZoomed = false
+
+            window.addEventListener('mousedown', (event) => {
+                if (event.button === 2) {
+                    isZoomed = true
+                }
                 if (event.button === 0) {
                     fire()
                 }
             });
 
+            window.addEventListener('mouseup', (event) => {
+                if (event.button === 2) {
+                    isZoomed = false
+                }
+            });
 
 
+            let sensitivity = 0.002
             document.addEventListener(
                 "mousemove",
                 e => {
@@ -336,9 +384,9 @@
                         return;
 
 
-                    yaw -= e.movementX * .002;
+                    yaw -= e.movementX * sensitivity;
 
-                    pitch -= e.movementY * .002;
+                    pitch -= e.movementY * sensitivity;
 
 
                     pitch = Math.max(
@@ -462,6 +510,13 @@
                 }
 
             }
+            setInterval(() => {
+                let x = player.x + Math.random()*600-300
+                 let z = player.z + Math.random() * 600 - 300
+                
+                spawnTarget(x, 0, z)
+                
+            }, 4000);
 
 
 
@@ -475,7 +530,24 @@
                 requestAnimationFrame(
                     animate
                 );
-                let bulletSpeed = 3
+                let bulletSpeed = 5
+
+                camera = new THREE.PerspectiveCamera(
+                    90,
+                    innerWidth / innerHeight,
+                    0.1,
+                    3000
+                );
+                sensitivity = 0.002
+                if (isZoomed) {
+                    camera = new THREE.PerspectiveCamera(
+                        15,
+                        innerWidth / innerHeight,
+                        0.1,
+                        3000
+                    );
+                    sensitivity = 0.0005
+                }
 
                 for (let bullet of bullets) {
                     bullet.position.x += bullet.dx * bulletSpeed
@@ -544,6 +616,26 @@
                     mx /= len;
                     mz /= len;
 
+                }
+
+                for (let target of targets) {
+                    const speed = 0.5
+                    let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
+                    let dx = (player.x - target.position.x)/dist * speed
+                    let dz = (player.z - target.position.z)/dist * speed
+                    target.position.x += dx
+                    target.position.z += dz
+                    target.position.y = terrainHeight(target.position.x, target.position.z) +7
+
+                    for (let bullet of bullets) {
+                        if (
+                            bullet.position.x > target.position.x - 3.5 && bullet.position.x < target.position.x + 3.5 &&
+                            bullet.position.y > target.position.y - 3.5 && bullet.position.y < target.position.y + 3.5 &&
+                            bullet.position.z > target.position.z - 3.5 && bullet.position.z < target.position.z + 3.5
+                        ) {
+                            scene.remove(target)
+                        }
+                    }
                 }
 
 
