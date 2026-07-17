@@ -71,7 +71,7 @@
                 90,
                 innerWidth / innerHeight,
                 0.1,
-                3000
+                1000
             );
 
 
@@ -332,7 +332,7 @@
             function fire() {
                 if (gun === "assult") {
                     let p = new THREE.Mesh(
-                        new THREE.BoxGeometry(0.1, 0.1, 0.1),
+                        new THREE.BoxGeometry(0.6, 0.6, 0.6),
                         bullet
                     );
 
@@ -344,6 +344,7 @@
                     p.dx = dir.x + Math.random() / 10 - 0.05;
                     p.dy = dir.y + Math.random() / 10 - 0.05;
                     p.dz = dir.z + Math.random() / 10 - 0.05;
+                    p.type = "assult"
 
                     scene.add(p);
                     bullets.push(p);
@@ -361,6 +362,7 @@
                     p.dx = dir.x
                     p.dy = dir.y
                     p.dz = dir.z
+                    p.type = "snipe"
 
                     scene.add(p);
                     bullets.push(p);
@@ -552,8 +554,8 @@
 
             }
             setInterval(() => {
-                let x = player.x + Math.random() * 600 - 300
-                let z = player.z + Math.random() * 600 - 300
+                let x = -1000
+                let z = player.z + Math.random() * 2000 - 1000
 
                 spawnTarget(x, 0, z)
 
@@ -574,7 +576,7 @@
                 requestAnimationFrame(
                     animate
                 );
-                let bulletSpeed = 8
+                let bulletSpeed = 50
 
 
                 camera.fov = isZoomed ? 15 : 90;
@@ -583,11 +585,36 @@
                 if (isZoomed) {
                     sensitivity = 0.0005
                 }
-
                 for (let bullet of bullets) {
-                    bullet.position.x += bullet.dx * bulletSpeed
-                    bullet.position.y += bullet.dy * bulletSpeed
-                    bullet.position.z += bullet.dz * bulletSpeed
+
+                    const oldPos = bullet.position.clone();
+
+                    bullet.position.x += bullet.dx * bulletSpeed;
+                    bullet.position.y += bullet.dy * bulletSpeed;
+                    bullet.position.z += bullet.dz * bulletSpeed;
+
+                    const direction = new THREE.Vector3()
+                        .subVectors(bullet.position, oldPos);
+
+                    const raycaster = new THREE.Raycaster(
+                        oldPos,
+                        direction.clone().normalize(),
+                        0,
+                        direction.length()
+                    );
+
+                    const hits = raycaster.intersectObjects(targets);
+
+                    if (hits.length > 0) {
+
+                        const target = hits[0].object;
+
+                        scene.remove(target);
+                        scene.remove(bullet);
+
+                        targets.splice(targets.indexOf(target), 1);
+                        bullets.splice(bullets.indexOf(bullet), 1);
+                    }
                 }
 
                 let speed = player.speed;
@@ -595,7 +622,7 @@
                 if (gun === "assult") {
                     maxCooldown = 2.5
                 } else if (gun === "snipe") {
-                    maxCooldown = 100
+                    maxCooldown = 50
                 }
 
 
@@ -672,10 +699,11 @@
                     let dz = (player.z - target.position.z) / dist * speed
                     target.position.x += dx
                     target.position.z += dz
-                    target.position.y = terrainHeight(target.position.x, target.position.z) + 7
+                    target.position.y = terrainHeight(target.position.x, target.position.z) + 4
 
                     for (let bullet of bullets) {
-                        let forgivness = 1
+
+                        let forgivness = 3
                         if (
                             bullet.position.x > target.position.x - 3.5 - forgivness && bullet.position.x < target.position.x + 3.5 + forgivness &&
                             bullet.position.y > target.position.y - 3.5 - forgivness && bullet.position.y < target.position.y + 3.5 + forgivness &&
@@ -684,8 +712,15 @@
                             scene.remove(target)
                             targets.splice(targets.indexOf(target), 1)
                         }
+
+                        let dist = Math.sqrt((player.x - bullet.position.x) * (player.x - bullet.position.x) + (player.z - bullet.position.z) * (player.z - bullet.position.z))
+                        if (dist > 1500) {
+                            bullets.splice(bullets.indexOf(bullet), 1)
+                        }
                     }
                 }
+
+
 
 
 
