@@ -52,13 +52,28 @@
     <span id="plus">O</p>
 
 
-        <script src="https://cdn.jsdelivr.net/npm/three@0.160/build/three.min.js"></script>
-
-
+        <script type="importmap">
+        {
+          "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+          }
+        }
+        </script>
         <script>
             function home() {
                 window.location.href = "index.html";
             }
+        </script>
+
+        <script type="module">
+            import * as THREE from "three";
+            import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+            // Put ALL of your JavaScript here.
+            const gltfLoader = new GLTFLoader();
+
+
 
 
             const scene = new THREE.Scene();
@@ -195,16 +210,22 @@
             let targets = []
 
             function spawnTarget(x, y, z) {
-                let p = new THREE.Mesh(new THREE.BoxGeometry(7, 7, 7), targetMAT);
-                p.position.set(x, y, z);
 
-                scene.add(p);       // instead of scene.add(p)
+                gltfLoader.load("Models/enemy.glb", function (gltf) {
 
-                p.width = 7;
-                p.height = 7;
-                p.depth = 7;
+                    const enemy = gltf.scene;
 
-                targets.push(p);
+                    enemy.position.set(x, y, z);
+                    enemy.rotation.y = Math.PI / 2
+
+                    enemy.scale.set(0.2, 0.2, 0.2); // adjust size if needed
+
+                    scene.add(enemy);
+
+                    targets.push(enemy);
+
+                });
+
             }
 
             spawnTarget(0, 50, -40)
@@ -328,7 +349,7 @@
 
             const gravity = -.025;
             const jump = .8;
-            guns = ["assult", "snipe"]
+            let guns = ["assult", "snipe"]
             function fire() {
                 if (gun === "assult") {
                     let p = new THREE.Mesh(
@@ -607,13 +628,28 @@
 
                     if (hits.length > 0) {
 
-                        const target = hits[0].object;
+                        let target = hits[0].object;
 
-                        scene.remove(target);
+                        // Go up until we find the object stored in targets[]
+                        while (target && !targets.includes(target)) {
+                            target = target.parent;
+                        }
+
+                        if (target) {
+                            scene.remove(target);
+
+                            const index = targets.indexOf(target);
+                            if (index !== -1) {
+                                targets.splice(index, 1);
+                            }
+                        }
+
                         scene.remove(bullet);
 
-                        targets.splice(targets.indexOf(target), 1);
-                        bullets.splice(bullets.indexOf(bullet), 1);
+                        const bulletIndex = bullets.indexOf(bullet);
+                        if (bulletIndex !== -1) {
+                            bullets.splice(bulletIndex, 1);
+                        }
                     }
                 }
 
@@ -699,7 +735,7 @@
                     let dz = (player.z - target.position.z) / dist * speed
                     target.position.x += dx
                     target.position.z += dz
-                    target.position.y = terrainHeight(target.position.x, target.position.z) + 4
+                    target.position.y = terrainHeight(target.position.x, target.position.z) - 2
 
                     for (let bullet of bullets) {
 
