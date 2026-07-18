@@ -46,7 +46,8 @@
         Shift Sprint<br>
         Mouse Look<br>
         Space Jump<br>
-        Q switch guns
+        Q switch guns <br>
+        Current gun: <span id="current">Assult</span>
     </div>
 
     <span id="plus">O</p>
@@ -86,7 +87,7 @@
                 90,
                 innerWidth / innerHeight,
                 0.1,
-                1000
+                2000
             );
 
 
@@ -132,7 +133,7 @@
 
 
             // TERRAIN HEIGHT FUNCTION
-            const multiply = 6
+            const multiply = 4
 
             const m1 = Math.random() * multiply
             const m2 = Math.random() * multiply
@@ -148,6 +149,32 @@
                     Math.sin((x + z) * .01) * 15 * m3 +
                     Math.sin(x * .004) * Math.cos(z * .006) * 35 * m4
                 );
+
+            }
+
+            function terrainHeight(x, z) {
+
+
+                raycaster.set(
+                    new THREE.Vector3(x, 200, z),
+                    new THREE.Vector3(0, -1, 0)
+                );
+
+
+                let hit =
+                    raycaster.intersectObject(
+                        terrain
+                    );
+
+
+                if (hit.length) {
+
+                    return hit[0].point.y;
+
+                }
+
+
+                return -100;
 
             }
 
@@ -229,16 +256,16 @@
                 });
 
             }
-            function spawnTree(x, z) {
+            function spawnTree(x, z, scale) {
 
-                gltfLoader.load("Models/tree (1).glb", function (gltf) {
+                gltfLoader.load("Models/treeG.glb", function (gltf) {
 
                     const tree = gltf.scene;
 
-                    tree.position.set(x, terrainHeight(x,z)-1, z);
+                    tree.position.set(x, terrainHeight(x, z) - 1, z);
                     tree.rotation.y = 1
 
-                    tree.scale.set(1, 1, 1); // adjust size if needed
+                    tree.scale.set(scale, scale, scale); // adjust size if needed
 
                     scene.add(tree);
 
@@ -246,14 +273,25 @@
                 });
 
             }
-            spawnTree(-200, 50)
+            for (let i = 0; i < 15; i++) {
+                spawnTree(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000, Math.random())
+            }
 
 
             spawnPlatform(-10, 6, 10, 80, 1, 30)
             spawnPlatform(-10, 2, -5, 80, 32, 1, true)
             spawnPlatform(-10, -2, 25, 80, 38, 1, true)
             for (let i = 0; i < 30; i++) {
-                spawnPlatform(-30 * i - 60, -6, 10, 8, 38, 8, true)
+                const x = -30 * i - 60;
+                spawnPlatform(
+                    x,
+                    getHeight(x, 10) + 10,
+                    10,
+                    8,
+                    60,
+                    8,
+                    true
+                );
             }
 
             function playerHitsPlatform(p) {
@@ -408,6 +446,27 @@
 
                     scene.add(p);
                     bullets.push(p);
+                } else if (gun === "shotty") {
+                    for (let i = 0; i < 60; i++) {
+                        let p = new THREE.Mesh(
+                            new THREE.BoxGeometry(0.6, 0.6, 0.6),
+                            bullet
+                        );
+
+                        p.position.copy(camera.position);
+
+                        const dir = new THREE.Vector3();
+                        camera.getWorldDirection(dir);
+
+                        p.dx = dir.x + Math.random() / 10 - 0.05;
+                        p.dy = dir.y + Math.random() / 10 - 0.05;
+                        p.dz = dir.z + Math.random() / 10 - 0.05;
+                        p.damage = 0.1
+                        p.type = "shotty"
+
+                        scene.add(p);
+                        bullets.push(p);
+                    }
                 }
             }
 
@@ -486,10 +545,13 @@
                             gun = "snipe"
                             document.getElementById("plus").style.fontSize = "10px"
                         } else if (gun === "snipe") {
+                            gun = "shotty"
+                            document.getElementById("plus").style.fontSize = "100px"
+                        } else if (gun === "shotty") {
                             gun = "assult"
                             document.getElementById("plus").style.fontSize = "70px"
-
                         }
+                        document.getElementById('current').innerText = `${gun}`
                     }
                 });
 
@@ -511,31 +573,7 @@
             const raycaster = new THREE.Raycaster();
 
 
-            function terrainHeight(x, z) {
 
-
-                raycaster.set(
-                    new THREE.Vector3(x, 200, z),
-                    new THREE.Vector3(0, -1, 0)
-                );
-
-
-                let hit =
-                    raycaster.intersectObject(
-                        terrain
-                    );
-
-
-                if (hit.length) {
-
-                    return hit[0].point.y;
-
-                }
-
-
-                return -100;
-
-            }
 
 
 
@@ -600,7 +638,7 @@
 
                 spawnTarget(x, 0, z)
 
-            }, 2000);
+            }, 4000);
 
 
 
@@ -677,6 +715,11 @@
                     let dist = Math.sqrt((player.x - bullet.position.x) * (player.x - bullet.position.x) + (player.z - bullet.position.z) * (player.z - bullet.position.z))
                     if (dist > 1500) {
                         bullets.splice(bullets.indexOf(bullet), 1)
+                        scene.remove(bullet)
+                    }
+                    if (dist > 400 && bullet.type === "shotty" || bullet.type === "assult") {
+                        bullets.splice(bullets.indexOf(bullet), 1)
+                        scene.remove(bullet)
                     }
                 }
 
@@ -685,6 +728,8 @@
                 if (gun === "assult") {
                     maxCooldown = 2.5
                 } else if (gun === "snipe") {
+                    maxCooldown = 50
+                } else if (gun === "shotty") {
                     maxCooldown = 50
                 }
 
@@ -763,6 +808,9 @@
                     target.position.x += dx
                     target.position.z += dz
                     target.position.y = terrainHeight(target.position.x, target.position.z) - 2
+                    if (dist < 10) {
+                        home()
+                    }
                 }
 
 
