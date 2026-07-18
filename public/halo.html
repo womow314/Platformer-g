@@ -132,7 +132,8 @@
 
 
             // TERRAIN HEIGHT FUNCTION
-            const multiply = 2
+            const multiply = 6
+            
             const m1 = Math.random() * multiply
             const m2 = Math.random() * multiply
             const m3 = Math.random() * multiply
@@ -217,6 +218,7 @@
 
                     enemy.position.set(x, y, z);
                     enemy.rotation.y = Math.PI / 2
+                    enemy.health = 1
 
                     enemy.scale.set(0.2, 0.2, 0.2); // adjust size if needed
 
@@ -228,7 +230,6 @@
 
             }
 
-            spawnTarget(0, 50, -40)
 
             spawnPlatform(-10, 6, 10, 80, 1, 30)
             spawnPlatform(-10, 2, -5, 80, 32, 1, true)
@@ -365,6 +366,7 @@
                     p.dx = dir.x + Math.random() / 10 - 0.05;
                     p.dy = dir.y + Math.random() / 10 - 0.05;
                     p.dz = dir.z + Math.random() / 10 - 0.05;
+                    p.damage = 0.2
                     p.type = "assult"
 
                     scene.add(p);
@@ -383,6 +385,7 @@
                     p.dx = dir.x
                     p.dy = dir.y
                     p.dz = dir.z
+                    p.damage = 1
                     p.type = "snipe"
 
                     scene.add(p);
@@ -464,11 +467,10 @@
                         if (gun === "assult") {
                             gun = "snipe"
                             document.getElementById("plus").style.fontSize = "10px"
-                            cooldown = 0
                         } else if (gun === "snipe") {
                             gun = "assult"
                             document.getElementById("plus").style.fontSize = "70px"
-                            cooldown = 0
+                    
                         }
                     }
                 });
@@ -636,11 +638,14 @@
                         }
 
                         if (target) {
-                            scene.remove(target);
+                            target.health -= bullet.damage
+                            if (target.health <= 0) {
+                                scene.remove(target);
 
-                            const index = targets.indexOf(target);
-                            if (index !== -1) {
-                                targets.splice(index, 1);
+                                const index = targets.indexOf(target);
+                                if (index !== -1) {
+                                    targets.splice(index, 1);
+                                }
                             }
                         }
 
@@ -650,6 +655,10 @@
                         if (bulletIndex !== -1) {
                             bullets.splice(bulletIndex, 1);
                         }
+                    }
+                    let dist = Math.sqrt((player.x - bullet.position.x) * (player.x - bullet.position.x) + (player.z - bullet.position.z) * (player.z - bullet.position.z))
+                    if (dist > 1500) {
+                        bullets.splice(bullets.indexOf(bullet), 1)
                     }
                 }
 
@@ -736,24 +745,6 @@
                     target.position.x += dx
                     target.position.z += dz
                     target.position.y = terrainHeight(target.position.x, target.position.z) - 2
-
-                    for (let bullet of bullets) {
-
-                        let forgivness = 3
-                        if (
-                            bullet.position.x > target.position.x - 3.5 - forgivness && bullet.position.x < target.position.x + 3.5 + forgivness &&
-                            bullet.position.y > target.position.y - 3.5 - forgivness && bullet.position.y < target.position.y + 3.5 + forgivness &&
-                            bullet.position.z > target.position.z - 3.5 - forgivness && bullet.position.z < target.position.z + 3.5 + forgivness
-                        ) {
-                            scene.remove(target)
-                            targets.splice(targets.indexOf(target), 1)
-                        }
-
-                        let dist = Math.sqrt((player.x - bullet.position.x) * (player.x - bullet.position.x) + (player.z - bullet.position.z) * (player.z - bullet.position.z))
-                        if (dist > 1500) {
-                            bullets.splice(bullets.indexOf(bullet), 1)
-                        }
-                    }
                 }
 
 
