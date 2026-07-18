@@ -133,7 +133,7 @@
 
             // TERRAIN HEIGHT FUNCTION
             const multiply = 6
-            
+
             const m1 = Math.random() * multiply
             const m2 = Math.random() * multiply
             const m3 = Math.random() * multiply
@@ -229,6 +229,24 @@
                 });
 
             }
+            function spawnTree(x, z) {
+
+                gltfLoader.load("Models/tree.glb", function (gltf) {
+
+                    const tree = gltf.scene;
+
+                    tree.position.set(x, terrainHeight(x,z)-1, z);
+                    tree.rotation.y = 1
+
+                    tree.scale.set(0.5, 0.5, 0.5); // adjust size if needed
+
+                    scene.add(tree);
+
+
+                });
+
+            }
+            spawnTree(-200, 50)
 
 
             spawnPlatform(-10, 6, 10, 80, 1, 30)
@@ -470,7 +488,7 @@
                         } else if (gun === "snipe") {
                             gun = "assult"
                             document.getElementById("plus").style.fontSize = "70px"
-                    
+
                         }
                     }
                 });
