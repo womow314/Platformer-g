@@ -184,6 +184,15 @@
                 opacity: 0.5
             });
 
+            const waterTexture = waterMat.map; // or whatever texture you use
+
+            waterTexture.wrapS = THREE.RepeatWrapping;
+            waterTexture.wrapT = THREE.RepeatWrapping;
+
+            waterTexture.repeat.set(60, 60); // 100 tiles across X and Z
+
+            waterTexture.needsUpdate = true;
+
             const platMat = [
                 new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
                 new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
@@ -241,7 +250,7 @@
                 platforms.push(p);
             };
             let p = new THREE.Mesh(new THREE.BoxGeometry(10000, 100, 10000), waterMat);
-            p.position.set(0, -50, 0)
+            p.position.set(0, -100, 0)
             scene.add(p)
 
             let targets = []
@@ -282,7 +291,27 @@
                 });
 
             }
+            function spawnGrass(x, z, scale) {
+
+                gltfLoader.load("Models/grass.glb", function (gltf) {
+
+                    const tree = gltf.scene;
+
+                    tree.position.set(x, terrainHeight(x, z) - 1, z);
+                    tree.rotation.y = 1
+
+                    tree.scale.set(scale, scale, scale); // adjust size if needed
+
+                    scene.add(tree);
+
+
+                });
+
+            }
             for (let i = 0; i < 15; i++) {
+                spawnTree(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000, Math.random())
+            }
+            for (let i = 0; i < 150; i++) {
                 spawnTree(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000, Math.random())
             }
 
@@ -372,6 +401,14 @@
             const grass = new THREE.MeshStandardMaterial({
                 map: loader.load("images/pixil-frame-0 (69).png")
             });
+            const grassTexture = grass.map; // or whatever texture you use
+
+            grassTexture.wrapS = THREE.RepeatWrapping;
+            grassTexture.wrapT = THREE.RepeatWrapping;
+
+            grassTexture.repeat.set(500, 500); // 100 tiles across X and Z
+
+            grassTexture.needsUpdate = true;
 
 
             const terrain = new THREE.Mesh(
