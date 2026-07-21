@@ -178,6 +178,12 @@
 
             }
 
+            const waterMat = new THREE.MeshStandardMaterial({
+                map: loader.load("images/pixil-frame-0 (72).png"),
+                transparent: true,
+                opacity: 0.5
+            });
+
             const platMat = [
                 new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
                 new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
@@ -234,6 +240,9 @@
 
                 platforms.push(p);
             };
+            let p = new THREE.Mesh(new THREE.BoxGeometry(10000, 100, 10000), waterMat);
+            p.position.set(0, -50, 0)
+            scene.add(p)
 
             let targets = []
 
