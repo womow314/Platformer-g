@@ -252,6 +252,9 @@
             let p = new THREE.Mesh(new THREE.BoxGeometry(10000, 100, 10000), waterMat);
             p.position.set(0, -100, 0)
             scene.add(p)
+            let p1 = new THREE.Mesh(new THREE.BoxGeometry(10000, 1, 10000), waterMat);
+            p1.position.set(0, -50, 0)
+            scene.add(p1)
 
             let targets = []
 
@@ -264,6 +267,7 @@
                     enemy.position.set(x, y, z);
                     enemy.rotation.y = Math.PI / 2
                     enemy.health = 1
+                    enemy.time = Math.random() * 600
 
                     enemy.scale.set(0.2, 0.2, 0.2); // adjust size if needed
 
@@ -281,6 +285,9 @@
                     const tree = gltf.scene;
 
                     tree.position.set(x, terrainHeight(x, z) - 1, z);
+                    if (terrainHeight(x, z) - 1 < -50) {
+                        return
+                    }
                     tree.rotation.y = 1
 
                     tree.scale.set(scale, scale, scale); // adjust size if needed
@@ -291,31 +298,42 @@
                 });
 
             }
-            function spawnGrass(x, z, scale) {
 
-                gltfLoader.load("Models/grass (1).glb", function (gltf) {
-
-                    const grass = gltf.scene;
-
-                    grass.position.set(
-                        x,
-                        terrainHeight(x, z),
-                        z
-                    );
-
-                    grass.rotation.y = Math.random() * Math.PI * 2;
-                    grass.scale.set(scale, scale, scale);
-
-                    scene.add(grass);
-
-                });
-            }
             for (let i = 0; i < 15; i++) {
                 spawnTree(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000, Math.random())
             }
-            for (let i = 0; i < 500; i++) {
-                spawnGrass(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000, Math.random() / 2)
+
+            for (let i = 0; i < 15; i++) {
+                spawnTarget(Math.random() * 2000 - 1000, 0, Math.random() * 2000 - 1000)
             }
+            let inWater = false;
+            const waterOverlay = new THREE.Mesh(
+                new THREE.PlaneGeometry(5, 5),
+                new THREE.MeshBasicMaterial({
+                    color: 0x0022ff,
+                    transparent: true,
+                    opacity: 0
+                })
+            );
+
+            waterOverlay.position.z = -1;
+            camera.add(waterOverlay);
+            scene.add(camera);
+            function checkWater() {
+
+                // water surface is at y = -50
+                // because your water box is 100 tall centered at -100
+                const waterLevel = -50;
+
+                if (player.y < waterLevel) {
+                    inWater = true;
+                } else {
+                    inWater = false;
+                }
+
+                waterOverlay.material.opacity = inWater ? 0.15 : 0;
+            }
+
 
 
             spawnPlatform(-10, 6, 10, 80, 1, 30)
@@ -426,6 +444,61 @@
             terrain.updateMatrixWorld(true);
 
             scene.add(terrain);
+
+            // GRASS INSTANCES
+            gltfLoader.load("Models/grass (1).glb", function (gltf) {
+                return;
+
+                let mesh;
+
+                // find the actual mesh inside the glb
+                gltf.scene.traverse((child) => {
+                    if (child.isMesh) {
+                        mesh = child;
+                    }
+                });
+
+                if (!mesh) {
+                    console.log("No grass mesh found");
+                    return;
+                }
+
+                const count = 1500;
+
+                const grassInstances = new THREE.InstancedMesh(
+                    mesh.geometry,
+                    mesh.material,
+                    count
+                );
+
+                const dummy = new THREE.Object3D();
+
+                for (let i = 0; i < count; i++) {
+
+                    let x = Math.random() * 2000 - 1000;
+                    let z = Math.random() * 2000 - 1000;
+
+                    dummy.position.set(
+                        x,
+                        terrainHeight(x, z) - 4,
+                        z
+                    );
+                    dummy.rotation.x = -Math.PI / 2
+
+
+                    let s = Math.random() * 0.25 + 0.1;
+                    dummy.scale.set(s, s, s);
+
+                    dummy.updateMatrix();
+
+                    grassInstances.setMatrixAt(i, dummy.matrix);
+                }
+
+                grassInstances.instanceMatrix.needsUpdate = true;
+
+                scene.add(grassInstances);
+
+            });
 
 
 
@@ -684,10 +757,9 @@
                 let x = -1000
                 let z = player.z + Math.random() * 2000 - 1000
 
-                spawnTarget(x, 0, z)
+                //spawnTarget(x, 0, z) --------------------------------------------------------------------------------------------------------------------------
 
             }, 4000);
-
 
 
 
@@ -703,7 +775,7 @@
                 requestAnimationFrame(
                     animate
                 );
-                let bulletSpeed = 50
+                let bulletSpeed = 80
 
 
                 camera.fov = isZoomed ? 15 : 90;
@@ -848,14 +920,35 @@
 
                 }
 
+                //for (let target of targets) {
+                //const speed = 0.5
+                //let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
+                //let dx = (player.x - target.position.x) / dist * speed
+                //let dz = (player.z - target.position.z) / dist * speed
+                //target.position.x += dx
+                //target.position.z += dz
+                //target.position.y = terrainHeight(target.position.x, target.position.z) - 2
+                //if (dist < 10) {
+                //home()
+                //}
+                //}
+
                 for (let target of targets) {
-                    const speed = 0.5
-                    let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
-                    let dx = (player.x - target.position.x) / dist * speed
-                    let dz = (player.z - target.position.z) / dist * speed
-                    target.position.x += dx
-                    target.position.z += dz
+                    if (target.time < 150) {
+                        target.position.x += 0.3
+                    } else if (target.time > 200 && target.time < 350) {
+                        target.position.z -= 0.3
+                    } else if (target.time > 400 && target.time < 550) {
+                        target.position.x -= 0.3
+                    } else if (target.time > 600 && target.time < 750) {
+                        target.position.z += 0.3
+                    } else if (target.time > 800) {
+                        target.time = 0
+                    }
+                    target.time += 1
+
                     target.position.y = terrainHeight(target.position.x, target.position.z) - 2
+                    let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
                     if (dist < 10) {
                         home()
                     }
@@ -890,6 +983,11 @@
                 // terrain collision
 
                 updateGround();
+
+                if (player.y < -50) {
+                    player.grounded = true
+                }
+                checkWater();
 
 
                 // platform collision
