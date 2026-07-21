@@ -34,12 +34,20 @@
             padding: 0;
             font-size: 70px;
         }
+
+        #gunIMG {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
     </style>
     <link rel="stylesheet" href="styles1.css" />
 </head>
 
 <body>
     <button onclick="home()" id="home">Home</button>
+    <img id="gunIMG" src="images/pixil-frame-0 (73).png">
 
     <div id="info">
         WASD Move<br>
@@ -73,6 +81,11 @@
 
             // Put ALL of your JavaScript here.
             const gltfLoader = new GLTFLoader();
+            const gunIdle = new Image();
+            gunIdle.src = "images/pixil-frame-0 (73).png";
+
+            const gunFire = new Image();
+            gunFire.src = "images/pixil-frame-0 (74).png";
 
 
 
@@ -589,6 +602,13 @@
                         bullets.push(p);
                     }
                 }
+                const gunIMG = document.getElementById("gunIMG");
+
+                gunIMG.src = gunFire.src;
+
+                setTimeout(() => {
+                    gunIMG.src = gunIdle.src;
+                }, 25);
             }
 
 
@@ -604,6 +624,7 @@
                 renderer.domElement.requestPointerLock();
 
             };
+
 
             let isZoomed = false
             let isFiring = false
