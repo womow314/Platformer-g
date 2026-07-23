@@ -178,6 +178,7 @@
                     raycaster.intersectObject(
                         terrain
                     );
+                
 
 
                 if (hit.length) {
@@ -245,6 +246,9 @@
 
             const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, iron = false) => {
                 let p;
+                x -= 0.5 * width
+                y += 1 / 2 * height
+                z -= 1 / 2 * depth
 
                 if (!iron) {
                     p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
@@ -271,7 +275,7 @@
 
             let targets = []
 
-            function spawnTarget(x, y, z) {
+            function spawnTarget(x, y, z, time = Math.random() * 600, onPlat = false) {
 
                 gltfLoader.load("Models/enemy.glb", function (gltf) {
 
@@ -280,9 +284,10 @@
                     enemy.position.set(x, y, z);
                     enemy.rotation.y = Math.PI / 2
                     enemy.health = 1
-                    enemy.time = Math.random() * 600
+                    enemy.time = time
+                    enemy.based = onPlat
 
-                    enemy.scale.set(0.2, 0.2, 0.2); // adjust size if needed
+                    enemy.scale.set(0.1, 0.1, 0.1); // adjust size if needed
 
                     scene.add(enemy);
 
@@ -349,21 +354,6 @@
 
 
 
-            spawnPlatform(-10, 6, 10, 80, 1, 30)
-            spawnPlatform(-10, 2, -5, 80, 32, 1, true)
-            spawnPlatform(-10, -2, 25, 80, 38, 1, true)
-            for (let i = 0; i < 30; i++) {
-                const x = -30 * i - 60;
-                spawnPlatform(
-                    x,
-                    getHeight(x, 10) + 10,
-                    10,
-                    8,
-                    60,
-                    8,
-                    true
-                );
-            }
 
             function playerHitsPlatform(p) {
 
@@ -389,8 +379,25 @@
                     feet >= topOfPlatform - 2;
 
 
+
                 return withinX && withinZ && hittingTop;
 
+            }
+
+            function isInWall(p, x, z) {
+                const bar = 0.2
+                const withinX = x >= p.position.x - p.width / 2 - bar && x <= p.position.x + p.width / 2 + bar;
+
+                const withinZ = z >= p.position.z - p.depth / 2 - bar && z <= p.position.z + p.depth / 2 + bar;
+
+                const feet = player.y - player.height;
+                const head = player.y;
+
+                const withinY =
+                    head > p.position.y - p.height / 2 &&
+                    feet < p.position.y + p.height / 2;
+
+                return withinX && withinZ && withinY;
             }
 
 
@@ -521,7 +528,7 @@
 
                 x: 0,
 
-                z: -15,
+                z: 0,
 
                 y: 50,
 
@@ -778,9 +785,27 @@
                 let x = -1000
                 let z = player.z + Math.random() * 2000 - 1000
 
-                //spawnTarget(x, 0, z) --------------------------------------------------------------------------------------------------------------------------
-
+                spawnTarget(Math.random() * 2000 - 1000, 0, Math.random() * 2000 - 1000)
             }, 4000);
+
+            let groundAt = Math.max(terrainHeight(100, -200), -50) + 5
+            //Ground level
+            spawnPlatform(100, groundAt - 19, -200, 60, 20, 60, true)
+            //walls
+            spawnPlatform(100, groundAt + 1, -200, 1, 60, 60, true)
+            spawnPlatform(100, groundAt + 1, -260, 60, 60, 1, true)
+            spawnPlatform(40, groundAt + 1, -200, 1, 60, 60, true)
+            //roof
+            spawnPlatform(100, groundAt + 60, -200, 60, 1, 60, true)
+            //stair
+            spawnPlatform(75, groundAt + 10, -185, 10, 1, 10, true)
+            spawnPlatform(60, groundAt + 20, -185, 10, 1, 10, true)
+            spawnPlatform(75, groundAt + 30, -185, 10, 1, 10, true)
+            spawnPlatform(60, groundAt + 40, -185, 10, 1, 10, true)
+            spawnPlatform(75, groundAt + 50, -185, 10, 1, 10, true)
+
+            //enemies
+            spawnTarget(40, groundAt+ 61, -210, 0, true)
 
 
 
@@ -898,6 +923,7 @@
                 }
 
 
+
                 if (keys.KeyS) {
 
                     mx += fx;
@@ -956,21 +982,22 @@
 
                 for (let target of targets) {
                     if (target.time < 150) {
-                        target.position.x += 0.3
+                        target.position.x += 0.15
                     } else if (target.time > 200 && target.time < 350) {
-                        target.position.z -= 0.3
+                        target.position.z -= 0.15
                     } else if (target.time > 400 && target.time < 550) {
-                        target.position.x -= 0.3
+                        target.position.x -= 0.15
                     } else if (target.time > 600 && target.time < 750) {
-                        target.position.z += 0.3
+                        target.position.z += 0.15
                     } else if (target.time > 800) {
                         target.time = 0
                     }
-                    target.time += 1
+                    target.time += 0.5
 
-                    target.position.y = terrainHeight(target.position.x, target.position.z) - 2
+
+                    if (!target.based) target.position.y = terrainHeight(target.position.x, target.position.z) - 2;
                     let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
-                    if (dist < 10) {
+                    if (dist < 4) {
                         home()
                     }
                 }
@@ -986,13 +1013,31 @@
                 let nz =
                     player.z + mz * speed;
 
+                const wierd = 1
+                let cnx =
+                    player.x + mx * (speed * wierd);
 
 
-                if (canMove(nx, player.z))
+                let cnz =
+                    player.z + mz * (speed * wierd);
+
+
+
+                let blockedX = false;
+                let blockedZ = false;
+
+                for (let plat of platforms) {
+                    if (isInWall(plat, cnx, player.z))
+                        blockedX = true;
+
+                    if (isInWall(plat, player.x, cnz))
+                        blockedZ = true;
+                }
+
+                if (canMove(nx, player.z) && !blockedX)
                     player.x = nx;
 
-
-                if (canMove(player.x, nz))
+                if (canMove(player.x, nz) && !blockedZ)
                     player.z = nz;
 
                 // gravity
