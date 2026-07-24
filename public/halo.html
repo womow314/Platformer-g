@@ -105,7 +105,7 @@
             let camera = new THREE.PerspectiveCamera(
                 90,
                 innerWidth / innerHeight,
-                0.1,
+                0.5,
                 2000
             );
 
@@ -171,32 +171,8 @@
 
             }
 
-            function terrainHeight(x, z) {
 
 
-                raycaster.set(
-                    new THREE.Vector3(x, 200, z),
-                    new THREE.Vector3(0, -1, 0)
-                );
-
-
-                let hit =
-                    raycaster.intersectObject(
-                        terrain
-                    );
-
-
-
-                if (hit.length) {
-
-                    return hit[0].point.y;
-
-                }
-
-
-                return -100;
-
-            }
 
             const waterMat = new THREE.MeshStandardMaterial({
                 map: loader.load("images/pixil-frame-0 (72).png"),
@@ -292,6 +268,7 @@
                     enemy.health = 1
                     enemy.time = time
                     enemy.based = onPlat
+                    enemy.timeToUnlock = 0
 
                     enemy.scale.set(0.1, 0.1, 0.1); // adjust size if needed
 
@@ -323,13 +300,9 @@
 
             }
 
-            for (let i = 0; i < 15; i++) {
-                spawnTree(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000, Math.random()*6 + 3)
-            }
 
-            for (let i = 0; i < 15; i++) {
-                spawnTarget(Math.random() * 2000 - 1000, 0, Math.random() * 2000 - 1000)
-            }
+
+
             let inWater = false;
             const waterOverlay = new THREE.Mesh(
                 new THREE.PlaneGeometry(5, 5),
@@ -470,6 +443,33 @@
             terrain.updateMatrixWorld(true);
 
             scene.add(terrain);
+            const raycaster = new THREE.Raycaster();
+            function terrainHeight(x, z) {
+
+
+                raycaster.set(
+                    new THREE.Vector3(x, 200, z),
+                    new THREE.Vector3(0, -1, 0)
+                );
+
+
+                let hit =
+                    raycaster.intersectObject(
+                        terrain
+                    );
+
+
+
+                if (hit.length) {
+
+                    return hit[0].point.y;
+
+                }
+
+
+                return -100;
+
+            }
 
             // GRASS INSTANCES
             gltfLoader.load("Models/grass (1).glb", function (gltf) {
@@ -729,7 +729,7 @@
             // TERRAIN COLLISION
 
 
-            const raycaster = new THREE.Raycaster();
+
 
 
 
@@ -795,7 +795,7 @@
                 let x = -1000
                 let z = player.z + Math.random() * 2000 - 1000
 
-                spawnTarget(Math.random() * 2000 - 1000, 0, Math.random() * 2000 - 1000)
+                //spawnTarget(Math.random() * 2000 - 1000, 0, Math.random() * 2000 - 1000)
             }, 4000);
 
             let groundAt = Math.max(terrainHeight(100, -200), -50) + 5
@@ -817,6 +817,38 @@
             //enemies
             spawnTarget(40, groundAt + 61, -210, 0, true)
 
+            for (let i = 0; i < 5; i++) {
+                let groupX = 0
+                let groupZ = 0
+                do {
+                    groupX = Math.random() * 2000 - 1000
+                    groupZ = Math.random() * 2000 - 1000
+                } while (terrainHeight(groupX, groupZ) < -75);
+                const max = 5
+                const min = 2
+                let groupSize = Math.ceil(Math.random() * (max - 1) + min)
+                for (let n = 0; n < groupSize; n++) {
+                    spawnTarget(groupX + Math.random() * 20 - 10, 0, groupZ + Math.random() * 20 - 10)
+                }
+            }
+
+            //trees
+            for (let i = 0; i < 5; i++) {
+                let groupX = 0
+                let groupZ = 0
+                do {
+                    groupX = Math.random() * 2000 - 1000
+                    groupZ = Math.random() * 2000 - 1000
+                } while (terrainHeight(groupX, groupZ) < -75);
+                const max = 8
+                const min = 3
+                let groupSize = Math.ceil(Math.random() * (max - 1) + min)
+                for (let n = 0; n < groupSize; n++) {
+                    spawnTree(groupX + Math.random() * 200 - 100, groupZ + Math.random() * 200 - 100, Math.random() * 6 + 3)
+                }
+
+            }
+
 
 
 
@@ -831,7 +863,7 @@
                 requestAnimationFrame(
                     animate
                 );
-                let bulletSpeed = 80
+                let bulletSpeed = 200
 
 
                 camera.fov = isZoomed ? 15 : 90;
@@ -991,22 +1023,40 @@
                 //}
 
                 for (let target of targets) {
-                    if (target.time < 150) {
-                        target.position.x += 0.15
-                    } else if (target.time > 200 && target.time < 350) {
-                        target.position.z -= 0.15
-                    } else if (target.time > 400 && target.time < 550) {
-                        target.position.x -= 0.15
-                    } else if (target.time > 600 && target.time < 750) {
-                        target.position.z += 0.15
-                    } else if (target.time > 800) {
-                        target.time = 0
+                    let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
+                    const mobSpeed = 0.16
+                    target.timeToUnlock -= 1
+                    if (dist > 80 && target.timeToUnlock <= 0) {
+                        
+                        if (target.time < 150) {
+                            target.position.x += mobSpeed
+                        } else if (target.time > 200 && target.time < 350) {
+                            target.position.z -= mobSpeed
+                        } else if (target.time > 400 && target.time < 550) {
+                            target.position.x -= mobSpeed
+                        } else if (target.time > 600 && target.time < 750) {
+                            target.position.z += mobSpeed
+                            target.position.x += mobSpeed
+                        } else if (target.time > 800 && target.time < 950) {
+                            target.position.z -= mobSpeed
+                        } else if (target.time > 1000 && target.time < 1150) {
+                            target.position.z += mobSpeed
+                            target.position.x -= mobSpeed
+                        } else if (target.time > 1200) {
+                            target.time = 0
+                        }
+                    } else {
+                        if (dist < 80) {target.timeToUnlock = 100}
+                        let dx = player.x - target.position.x
+                        let dz = player.z - target.position.z
+                        target.position.x += dx / dist * mobSpeed* 2.2;
+                        target.position.z += dz / dist * mobSpeed*2.2;
                     }
                     target.time += 0.5
 
 
                     if (!target.based) target.position.y = terrainHeight(target.position.x, target.position.z) - 2;
-                    let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
+
                     if (dist < 4) {
                         home()
                     }
