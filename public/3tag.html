@@ -99,6 +99,15 @@
             socket.emit("setName", playerName);
 
         });
+
+        socket.on("playerMove", (data) => {
+            if (!players3d[data.id]) return;
+
+            players3d[data.id].x = data.x;
+            players3d[data.id].y = data.y;
+            players3d[data.id].z = data.z;
+            players3d[data.id].it = data.it;
+        });
         socket.on("kicked", () => {
             alert("You have been kicked from the game. Please rejoin.");
             window.location.href = "index.html";
@@ -147,6 +156,7 @@
 
             return sprite;
         }
+
         const itMat = new THREE.MeshStandardMaterial({
             color: 0xff0000
         });
@@ -565,6 +575,11 @@
         player.position.set(save.x, save.y, save.z);
         scene.add(player);
         let basegravity = gravity
+        let lastSent = {
+            x: 0,
+            y: 0,
+            z: 0
+        };
 
         function animate() {
 
@@ -756,11 +771,21 @@
             }
 
 
-            socket.emit("move", {
-                x: player.position.x,
-                y: player.position.y,
-                z: player.position.z
-            });
+            if (
+                player.position.x !== lastSent.x ||
+                player.position.y !== lastSent.y ||
+                player.position.z !== lastSent.z
+            ) {
+                socket.emit("move", {
+                    x: player.position.x,
+                    y: player.position.y,
+                    z: player.position.z
+                });
+
+                lastSent.x = player.position.x;
+                lastSent.y = player.position.y;
+                lastSent.z = player.position.z;
+            }
 
             for (const id in players3d) {
 

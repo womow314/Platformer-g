@@ -125,6 +125,14 @@
             socket.emit("setName", playerName);
 
         });
+        socket.on("playerMove", (data) => {
+            if (!gravityPlayers[data.id]) return;
+
+            gravityPlayers[data.id].x = data.x;
+            gravityPlayers[data.id].y = data.y;
+            gravityPlayers[data.id].it = data.it;
+            gravityPlayers[data.id].facing = data.facing;
+        }); 
         socket.on("kicked", () => {
             alert("You have been kicked from the game. Please rejoin.");
             window.location.href = "index.html";
@@ -142,6 +150,11 @@
             keys[e.key.toLowerCase()] = true;
 
         });
+
+        let lastSent = {
+            x: myX,
+            y: myY
+        };
 
         document.addEventListener("keyup", (e) => {
 
@@ -265,10 +278,15 @@
             }
 
 
-            socket.emit("move", {
-                x: myX,
-                y: myY
-            });
+            if (myX !== lastSent.x || myY !== lastSent.y) {
+                socket.emit("move", {
+                    x: myX,
+                    y: myY
+                });
+
+                lastSent.x = myX;
+                lastSent.y = myY;
+            }
             scrollX = player.x - canvas.width / 2;
             scrollY = player.y - canvas.height / 2;
 

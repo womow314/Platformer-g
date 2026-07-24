@@ -118,7 +118,12 @@ io.on("connection", (socket) => {
 
             }
 
-            io.emit("players", flatPlayers);
+            io.emit("playerMove", {
+                id: socket.id,
+                x: data.x,
+                y: data.y,
+                it: flatPlayers[socket.id].it
+            });
 
         });
 
@@ -221,8 +226,13 @@ io.on("connection", (socket) => {
 
             }
 
-            io.emit("players", gravityPlayers);
-
+            io.emit("playerMove", {
+                id: socket.id,
+                x: data.x,
+                y: data.y,
+                it: gravityPlayers[socket.id].it,
+                facing: gravityPlayers[socket.id].facing
+            });
         });
 
         socket.on("disconnect", () => {
@@ -354,7 +364,13 @@ io.on("connection", (socket) => {
 
             }
 
-            io.emit("players", players3d);
+            io.emit("playerMove", {
+                id: socket.id,
+                x: players3d[socket.id].x,
+                y: players3d[socket.id].y,
+                z: players3d[socket.id].z,
+                it: players3d[socket.id].it
+            });
 
         });
 
