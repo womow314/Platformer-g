@@ -92,6 +92,9 @@
 
             const gunFireSh = new Image();
             gunFireSh.src = "images/pixil-frame-0 (76).png";
+            
+            const gunFireSn = new Image();
+            gunFireSn.src = "images/sniper_rifle.png";
 
 
 
@@ -711,6 +714,7 @@
                         document.getElementById('current').innerText = `${gun}`
                         if (gun === "assult") gunIMG.src = gunIdleA.src;
                         if (gun === "shotty") gunIMG.src = gunIdleSh.src;
+                        if (gun === "snipe") gunIMG.src = gunFireSn.src;
                     }
                 });
 
@@ -1027,7 +1031,7 @@
                     const mobSpeed = 0.16
                     target.timeToUnlock -= 1
                     if (dist > 80 && target.timeToUnlock <= 0) {
-                        
+
                         if (target.time < 150) {
                             target.position.x += mobSpeed
                         } else if (target.time > 200 && target.time < 350) {
@@ -1046,11 +1050,11 @@
                             target.time = 0
                         }
                     } else {
-                        if (dist < 80) {target.timeToUnlock = 100}
+                        if (dist < 80) { target.timeToUnlock = 100 }
                         let dx = player.x - target.position.x
                         let dz = player.z - target.position.z
-                        target.position.x += dx / dist * mobSpeed* 2.2;
-                        target.position.z += dz / dist * mobSpeed*2.2;
+                        target.position.x += dx / dist * mobSpeed * 2.2;
+                        target.position.z += dz / dist * mobSpeed * 2.2;
                     }
                     target.time += 0.5
 
