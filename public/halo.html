@@ -116,7 +116,7 @@
             let camera = new THREE.PerspectiveCamera(
                 90,
                 innerWidth / innerHeight,
-                0.5,
+                0.25,
                 2000
             );
 
@@ -375,7 +375,7 @@
             }
 
             function isInWall(p, x, z) {
-                const bar = 0.2
+                const bar = 0.6
                 const withinX = x >= p.position.x - p.width / 2 - bar && x <= p.position.x + p.width / 2 + bar;
 
                 const withinZ = z >= p.position.z - p.depth / 2 - bar && z <= p.position.z + p.depth / 2 + bar;
