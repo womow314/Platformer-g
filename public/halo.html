@@ -41,6 +41,13 @@
             height: 100%;
             pointer-events: none;
         }
+        #overLay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+        }
     </style>
     <link rel="stylesheet" href="styles1.css" />
 </head>
@@ -48,7 +55,7 @@
 <body>
     <button onclick="home()" id="home">Home</button>
     <img id="gunIMG" src="images/pixil-frame-0 (73).png">
-    <img id="overLay" src="images/___">
+    <img id="overLay" src="images/sniper_scope_overlay.png">
 
     <div id="info">
         WASD Move<br>
@@ -651,7 +658,7 @@
             window.addEventListener('mousedown', (event) => {
                 if (event.button === 2) {
                     isZoomed = true
-                    document.querySelector('overLay').style.opacity = '0'
+                    document.getElementById('overLay').style.opacity = '1'
                 }
                 if (event.button === 0) {
                     isFiring = true
@@ -661,7 +668,7 @@
             window.addEventListener('mouseup', (event) => {
                 if (event.button === 2) {
                     isZoomed = false
-                    document.querySelector('overLay').style.opacity = '1'
+                    document.getElementById('overLay').style.opacity = '0'
                 }
                 if (event.button === 0) {
                     isFiring = false
