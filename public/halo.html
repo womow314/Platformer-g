@@ -81,11 +81,17 @@
 
             // Put ALL of your JavaScript here.
             const gltfLoader = new GLTFLoader();
-            const gunIdle = new Image();
-            gunIdle.src = "images/pixil-frame-0 (73).png";
+            const gunIdleA = new Image();
+            gunIdleA.src = "images/pixil-frame-0 (73).png";
 
-            const gunFire = new Image();
-            gunFire.src = "images/pixil-frame-0 (74).png";
+            const gunFireA = new Image();
+            gunFireA.src = "images/pixil-frame-0 (74).png";
+
+            const gunIdleSh = new Image();
+            gunIdleSh.src = "images/pixil-frame-0 (75).png";
+
+            const gunFireSh = new Image();
+            gunFireSh.src = "images/pixil-frame-0 (76).png";
 
 
 
@@ -178,7 +184,7 @@
                     raycaster.intersectObject(
                         terrain
                     );
-                
+
 
 
                 if (hit.length) {
@@ -318,7 +324,7 @@
             }
 
             for (let i = 0; i < 15; i++) {
-                spawnTree(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000, Math.random()*5 + 1)
+                spawnTree(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000, Math.random()*6 + 3)
             }
 
             for (let i = 0; i < 15; i++) {
@@ -611,10 +617,12 @@
                 }
                 const gunIMG = document.getElementById("gunIMG");
 
-                gunIMG.src = gunFire.src;
+                if (gun === "assult") gunIMG.src = gunFireA.src;
+                if (gun === "shotty") gunIMG.src = gunFireSh.src;
 
                 setTimeout(() => {
-                    gunIMG.src = gunIdle.src;
+                    if (gun === "assult") gunIMG.src = gunIdleA.src;
+                    if (gun === "shotty") gunIMG.src = gunIdleSh.src;
                 }, 25);
             }
 
@@ -701,6 +709,8 @@
                             document.getElementById("plus").style.fontSize = "70px"
                         }
                         document.getElementById('current').innerText = `${gun}`
+                        if (gun === "assult") gunIMG.src = gunIdleA.src;
+                        if (gun === "shotty") gunIMG.src = gunIdleSh.src;
                     }
                 });
 
@@ -805,7 +815,7 @@
             spawnPlatform(75, groundAt + 50, -185, 10, 1, 10, true)
 
             //enemies
-            spawnTarget(40, groundAt+ 61, -210, 0, true)
+            spawnTarget(40, groundAt + 61, -210, 0, true)
 
 
 
