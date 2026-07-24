@@ -304,7 +304,7 @@
             }
             function spawnTree(x, z, scale) {
 
-                gltfLoader.load("Models/treeG.glb", function (gltf) {
+                gltfLoader.load("Models/tree.glb", function (gltf) {
 
                     const tree = gltf.scene;
 
@@ -324,7 +324,7 @@
             }
 
             for (let i = 0; i < 15; i++) {
-                spawnTree(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000, Math.random()+0.2)
+                spawnTree(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000, Math.random()*6 + 3)
             }
 
             for (let i = 0; i < 15; i++) {
