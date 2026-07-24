@@ -74,7 +74,7 @@
         const canvas = document.getElementById("game");
         const ctx = canvas.getContext("2d");
 
-        
+
 
         let flatPlayers = {};
 
@@ -98,10 +98,22 @@
             socket.emit("setName", playerName);
 
         });
+        socket.on("playerMove", (data) => {
+            if (!flatPlayers[data.id]) return;
+
+            flatPlayers[data.id].x = data.x;
+            flatPlayers[data.id].y = data.y;
+            flatPlayers[data.id].it = data.it;
+            flatPlayers[data.id].facing = data.facing;
+        });
         socket.on("kicked", () => {
             alert("You have been kicked from the game. Please rejoin");
             window.location.href = "index.html";
         });
+        let lastSent = {
+            x: myX,
+            y: myY
+        };
 
 
         socket.on("players", (data) => {
@@ -135,10 +147,15 @@
             myX = Math.max(0, Math.min(canvas.width - 30, myX));
             myY = Math.max(0, Math.min(canvas.height - 30, myY));
 
-            socket.emit("move", {
-                x: myX,
-                y: myY
-            });
+            if (myX !== lastSent.x || myY !== lastSent.y) {
+                socket.emit("move", {
+                    x: myX,
+                    y: myY
+                });
+
+                lastSent.x = myX;
+                lastSent.y = myY;
+            }
 
         }
         const imageCache = {};
@@ -158,7 +175,7 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             for (let id in flatPlayers) {
-                
+
 
                 const p = flatPlayers[id];
                 if (p.facing === "side") continue;
