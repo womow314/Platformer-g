@@ -26,13 +26,19 @@
         }
 
         #plus {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            text-align: center;
-            padding: 0;
-            font-size: 70px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        #shotHair {
+            font-weight: 5px;
+            font-size: 250px;
+            transform: translateY(-20px)
+
         }
 
         #gunIMG {
@@ -41,6 +47,12 @@
             height: 100%;
             pointer-events: none;
         }
+
+        #crossHair {
+            width: 250px;
+            transform: translateY(2px);
+        }
+
         #overLay {
             position: absolute;
             width: 100%;
@@ -66,10 +78,10 @@
         Current gun: <span id="current">Assult</span>
     </div>
 
-    <span id="plus"><img src="images/halo_assault_rifle_crosshair.png" alt="Crosshair"></span>
+    <span id="plus"><img id="crossHair" src="images/halo_assault_rifle_crosshair.png" alt="Crosshair"></span>
 
 
-        <script type="importmap">
+    <script type="importmap">
         {
           "imports": {
             "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
@@ -77,496 +89,535 @@
           }
         }
         </script>
-        <script>
-            function home() {
-                window.location.href = "index.html";
-            }
-        </script>
+    <script>
+        function home() {
+            window.location.href = "index.html";
+        }
+    </script>
 
-        <script type="module">
-            import * as THREE from "three";
-            import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+    <script type="module">
+        import * as THREE from "three";
+        import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-            // Put ALL of your JavaScript here.
-            const gltfLoader = new GLTFLoader();
-            const gunIdleA = new Image();
-            gunIdleA.src = "images/pixil-frame-0 (73).png";
+        // Put ALL of your JavaScript here.
+        const gltfLoader = new GLTFLoader();
+        const gunIdleA = new Image();
+        gunIdleA.src = "images/pixil-frame-0 (73).png";
 
-            const gunFireA = new Image();
-            gunFireA.src = "images/pixil-frame-0 (74).png";
+        const gunFireA = new Image();
+        gunFireA.src = "images/pixil-frame-0 (74).png";
 
-            const gunIdleSh = new Image();
-            gunIdleSh.src = "images/pixil-frame-0 (75).png";
+        const gunIdleSh = new Image();
+        gunIdleSh.src = "images/pixil-frame-0 (75).png";
 
-            const gunFireSh = new Image();
-            gunFireSh.src = "images/pixil-frame-0 (76).png";
-            
-            const gunFireSn = new Image();
-            gunFireSn.src = "images/sniper_rifle.png";
+        const gunFireSh = new Image();
+        gunFireSh.src = "images/pixil-frame-0 (76).png";
 
-
-
-
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x74b0c8);
-
-            const loader = new THREE.TextureLoader();
-
-
-            let camera = new THREE.PerspectiveCamera(
-                90,
-                innerWidth / innerHeight,
-                0.25,
-                2000
-            );
-
-
-            const renderer = new THREE.WebGLRenderer({
-                antialias: true
-            });
-
-            renderer.setSize(
-                innerWidth,
-                innerHeight
-            );
-
-            renderer.shadowMap.enabled = true;
-
-            document.body.appendChild(renderer.domElement);
+        const gunFireSn = new Image();
+        gunFireSn.src = "images/sniper_rifle.png";
 
 
 
-            // LIGHT
 
-            const sun = new THREE.DirectionalLight(
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x74b0c8);
+
+        const loader = new THREE.TextureLoader();
+
+
+        let camera = new THREE.PerspectiveCamera(
+            90,
+            innerWidth / innerHeight,
+            0.25,
+            2000
+        );
+
+
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+
+        renderer.setSize(
+            innerWidth,
+            innerHeight
+        );
+
+        renderer.shadowMap.enabled = true;
+
+        document.body.appendChild(renderer.domElement);
+
+
+
+        // LIGHT
+
+        const sun = new THREE.DirectionalLight(
+            0xffffff,
+            2
+        );
+
+        sun.position.set(
+            100,
+            200,
+            100
+        );
+
+        sun.castShadow = true;
+
+        scene.add(sun);
+
+        scene.add(
+            new THREE.AmbientLight(
                 0xffffff,
-                2
+                0.3
+            )
+        );
+
+
+
+        // TERRAIN HEIGHT FUNCTION
+        const multiply = 4
+
+        const m1 = Math.random() * multiply
+        const m2 = Math.random() * multiply
+        const m3 = Math.random() * multiply
+        const m4 = Math.random() * multiply
+
+
+        function getHeight(x, z) {
+
+            return (
+                Math.sin(x * .02) * 8 * m1 +
+                Math.cos(z * .025) * 8 * m2 +
+                Math.sin((x + z) * .01) * 15 * m3 +
+                Math.sin(x * .004) * Math.cos(z * .006) * 35 * m4
             );
 
-            sun.position.set(
-                100,
-                200,
-                100
-            );
-
-            sun.castShadow = true;
-
-            scene.add(sun);
-
-            scene.add(
-                new THREE.AmbientLight(
-                    0xffffff,
-                    0.3
-                )
-            );
+        }
 
 
 
-            // TERRAIN HEIGHT FUNCTION
-            const multiply = 4
 
-            const m1 = Math.random() * multiply
-            const m2 = Math.random() * multiply
-            const m3 = Math.random() * multiply
-            const m4 = Math.random() * multiply
+        const waterMat = new THREE.MeshStandardMaterial({
+            map: loader.load("images/pixil-frame-0 (72).png"),
+            transparent: true,
+            opacity: 0.5
+        });
 
+        const waterTexture = waterMat.map; // or whatever texture you use
 
-            function getHeight(x, z) {
+        waterTexture.wrapS = THREE.RepeatWrapping;
+        waterTexture.wrapT = THREE.RepeatWrapping;
 
-                return (
-                    Math.sin(x * .02) * 8 * m1 +
-                    Math.cos(z * .025) * 8 * m2 +
-                    Math.sin((x + z) * .01) * 15 * m3 +
-                    Math.sin(x * .004) * Math.cos(z * .006) * 35 * m4
-                );
+        waterTexture.repeat.set(60, 60); // 100 tiles across X and Z
 
+        waterTexture.needsUpdate = true;
+
+        const platMat = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+        ];
+        const targetMAT = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
+        ];
+        const ironMAT = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
+        ];
+
+        const bullet = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") })
+        ];
+
+        let platforms = []
+        let bullets = []
+
+        const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, iron = false) => {
+            let p;
+            x -= 0.5 * width
+            y += 1 / 2 * height
+            z -= 1 / 2 * depth
+
+            if (!iron) {
+                p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
+            } else {
+                p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), ironMAT);
             }
 
+            p.position.set(x, y, z);
+
+            scene.add(p);       // instead of scene.add(p)
+
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
+
+            platforms.push(p);
+        };
+        let p = new THREE.Mesh(new THREE.BoxGeometry(10000, 100, 10000), waterMat);
+        p.position.set(0, -100, 0)
+        scene.add(p)
+        let p1 = new THREE.Mesh(new THREE.BoxGeometry(10000, 1, 10000), waterMat);
+        p1.position.set(0, -50, 0)
+        scene.add(p1)
+
+        let targets = []
+
+        function spawnTarget(x, y, z, time = Math.random() * 600, onPlat = false) {
+
+            gltfLoader.load("Models/enemy.glb", function (gltf) {
+
+                const enemy = gltf.scene;
+
+                enemy.position.set(x, y, z);
+                enemy.rotation.y = Math.PI / 2
+                enemy.health = 1
+                enemy.time = time
+                enemy.based = onPlat
+                enemy.timeToUnlock = 0
+
+                enemy.scale.set(0.1, 0.1, 0.1); // adjust size if needed
+
+                scene.add(enemy);
+
+                targets.push(enemy);
+
+            });
+
+        }
+        function spawnTree(x, z, scale) {
+
+            gltfLoader.load("Models/tree.glb", function (gltf) {
+
+                const tree = gltf.scene;
+
+                tree.position.set(x, terrainHeight(x, z) - 1, z);
+                if (terrainHeight(x, z) - 1 < -50) {
+                    return
+                }
+                tree.rotation.y = 1
+
+                tree.scale.set(scale, scale, scale); // adjust size if needed
+
+                scene.add(tree);
+
+
+            });
+
+        }
 
 
 
-            const waterMat = new THREE.MeshStandardMaterial({
-                map: loader.load("images/pixil-frame-0 (72).png"),
+
+        let inWater = false;
+        const waterOverlay = new THREE.Mesh(
+            new THREE.PlaneGeometry(5, 5),
+            new THREE.MeshBasicMaterial({
+                color: 0x0022ff,
                 transparent: true,
-                opacity: 0.5
-            });
+                opacity: 0
+            })
+        );
 
-            const waterTexture = waterMat.map; // or whatever texture you use
+        waterOverlay.position.z = -1;
+        camera.add(waterOverlay);
+        scene.add(camera);
+        function checkWater() {
 
-            waterTexture.wrapS = THREE.RepeatWrapping;
-            waterTexture.wrapT = THREE.RepeatWrapping;
+            // water surface is at y = -50
+            // because your water box is 100 tall centered at -100
+            const waterLevel = -50;
 
-            waterTexture.repeat.set(60, 60); // 100 tiles across X and Z
-
-            waterTexture.needsUpdate = true;
-
-            const platMat = [
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
-            ];
-            const targetMAT = [
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (71).png") }),
-            ];
-            const ironMAT = [
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (70).png") }),
-            ];
-
-            const bullet = [
-                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
-                new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") })
-            ];
-
-            let platforms = []
-            let bullets = []
-
-            const spawnPlatform = (x, y, z, width = 5, height = 1, depth = 5, iron = false) => {
-                let p;
-                x -= 0.5 * width
-                y += 1 / 2 * height
-                z -= 1 / 2 * depth
-
-                if (!iron) {
-                    p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
-                } else {
-                    p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), ironMAT);
-                }
-
-                p.position.set(x, y, z);
-
-                scene.add(p);       // instead of scene.add(p)
-
-                p.width = width;
-                p.height = height;
-                p.depth = depth;
-
-                platforms.push(p);
-            };
-            let p = new THREE.Mesh(new THREE.BoxGeometry(10000, 100, 10000), waterMat);
-            p.position.set(0, -100, 0)
-            scene.add(p)
-            let p1 = new THREE.Mesh(new THREE.BoxGeometry(10000, 1, 10000), waterMat);
-            p1.position.set(0, -50, 0)
-            scene.add(p1)
-
-            let targets = []
-
-            function spawnTarget(x, y, z, time = Math.random() * 600, onPlat = false) {
-
-                gltfLoader.load("Models/enemy.glb", function (gltf) {
-
-                    const enemy = gltf.scene;
-
-                    enemy.position.set(x, y, z);
-                    enemy.rotation.y = Math.PI / 2
-                    enemy.health = 1
-                    enemy.time = time
-                    enemy.based = onPlat
-                    enemy.timeToUnlock = 0
-
-                    enemy.scale.set(0.1, 0.1, 0.1); // adjust size if needed
-
-                    scene.add(enemy);
-
-                    targets.push(enemy);
-
-                });
-
-            }
-            function spawnTree(x, z, scale) {
-
-                gltfLoader.load("Models/tree.glb", function (gltf) {
-
-                    const tree = gltf.scene;
-
-                    tree.position.set(x, terrainHeight(x, z) - 1, z);
-                    if (terrainHeight(x, z) - 1 < -50) {
-                        return
-                    }
-                    tree.rotation.y = 1
-
-                    tree.scale.set(scale, scale, scale); // adjust size if needed
-
-                    scene.add(tree);
-
-
-                });
-
+            if (player.y < waterLevel) {
+                inWater = true;
+            } else {
+                inWater = false;
             }
 
+            waterOverlay.material.opacity = inWater ? 0.15 : 0;
+        }
 
 
 
-            let inWater = false;
-            const waterOverlay = new THREE.Mesh(
-                new THREE.PlaneGeometry(5, 5),
-                new THREE.MeshBasicMaterial({
-                    color: 0x0022ff,
-                    transparent: true,
-                    opacity: 0
-                })
+
+        function playerHitsPlatform(p) {
+
+            const withinX =
+                player.x >= p.position.x - p.width / 2 - 0.5 &&
+                player.x <= p.position.x + p.width / 2 + 0.5;
+
+
+            const withinZ =
+                player.z >= p.position.z - p.depth / 2 - 0.5 &&
+                player.z <= p.position.z + p.depth / 2 + 0.5;
+
+
+            const feet = player.y - player.height;
+
+
+            const topOfPlatform =
+                p.position.y + p.height / 2;
+
+
+            const hittingTop =
+                feet <= topOfPlatform &&
+                feet >= topOfPlatform - 2;
+
+
+
+            return withinX && withinZ && hittingTop;
+
+        }
+
+        function isInWall(p, x, z) {
+            const bar = 0.6
+            const withinX = x >= p.position.x - p.width / 2 - bar && x <= p.position.x + p.width / 2 + bar;
+
+            const withinZ = z >= p.position.z - p.depth / 2 - bar && z <= p.position.z + p.depth / 2 + bar;
+
+            const feet = player.y - player.height;
+            const head = player.y;
+
+            const withinY =
+                head > p.position.y - p.height / 2 &&
+                feet < p.position.y + p.height / 2;
+
+            return withinX && withinZ && withinY;
+        }
+
+
+
+
+        // TERRAIN
+
+        const size = 2000;
+        const segments = 100;
+        let gun = "assult"
+
+
+        const geo = new THREE.PlaneGeometry(
+            size,
+            size,
+            segments,
+            segments
+        );
+
+
+        const verts = geo.attributes.position;
+
+
+        for (let i = 0; i < verts.count; i++) {
+
+            let x = verts.getX(i);
+            let z = verts.getY(i);
+
+
+            verts.setZ(
+                i,
+                getHeight(x, z)
             );
 
-            waterOverlay.position.z = -1;
-            camera.add(waterOverlay);
-            scene.add(camera);
-            function checkWater() {
-
-                // water surface is at y = -50
-                // because your water box is 100 tall centered at -100
-                const waterLevel = -50;
-
-                if (player.y < waterLevel) {
-                    inWater = true;
-                } else {
-                    inWater = false;
-                }
-
-                waterOverlay.material.opacity = inWater ? 0.15 : 0;
-            }
+        }
 
 
 
+        geo.computeVertexNormals();
 
-            function playerHitsPlatform(p) {
+        const grass = new THREE.MeshStandardMaterial({
+            map: loader.load("images/pixil-frame-0 (69).png")
+        });
+        const grassTexture = grass.map; // or whatever texture you use
 
-                const withinX =
-                    player.x >= p.position.x - p.width / 2 - 0.5 &&
-                    player.x <= p.position.x + p.width / 2 + 0.5;
+        grassTexture.wrapS = THREE.RepeatWrapping;
+        grassTexture.wrapT = THREE.RepeatWrapping;
 
+        grassTexture.repeat.set(500, 500); // 100 tiles across X and Z
 
-                const withinZ =
-                    player.z >= p.position.z - p.depth / 2 - 0.5 &&
-                    player.z <= p.position.z + p.depth / 2 + 0.5;
-
-
-                const feet = player.y - player.height;
-
-
-                const topOfPlatform =
-                    p.position.y + p.height / 2;
+        grassTexture.needsUpdate = true;
 
 
-                const hittingTop =
-                    feet <= topOfPlatform &&
-                    feet >= topOfPlatform - 2;
+        const terrain = new THREE.Mesh(
+            geo,
+            grass
+        );
 
 
+        // keep terrain aligned with collision
 
-                return withinX && withinZ && hittingTop;
+        terrain.rotation.x = -Math.PI / 2;
 
-            }
+        terrain.updateMatrixWorld(true);
 
-            function isInWall(p, x, z) {
-                const bar = 0.6
-                const withinX = x >= p.position.x - p.width / 2 - bar && x <= p.position.x + p.width / 2 + bar;
-
-                const withinZ = z >= p.position.z - p.depth / 2 - bar && z <= p.position.z + p.depth / 2 + bar;
-
-                const feet = player.y - player.height;
-                const head = player.y;
-
-                const withinY =
-                    head > p.position.y - p.height / 2 &&
-                    feet < p.position.y + p.height / 2;
-
-                return withinX && withinZ && withinY;
-            }
+        scene.add(terrain);
+        const raycaster = new THREE.Raycaster();
+        function terrainHeight(x, z) {
 
 
-
-
-            // TERRAIN
-
-            const size = 2000;
-            const segments = 100;
-            let gun = "assult"
-
-
-            const geo = new THREE.PlaneGeometry(
-                size,
-                size,
-                segments,
-                segments
+            raycaster.set(
+                new THREE.Vector3(x, 200, z),
+                new THREE.Vector3(0, -1, 0)
             );
 
 
-            const verts = geo.attributes.position;
-
-
-            for (let i = 0; i < verts.count; i++) {
-
-                let x = verts.getX(i);
-                let z = verts.getY(i);
-
-
-                verts.setZ(
-                    i,
-                    getHeight(x, z)
-                );
-
-            }
-
-
-
-            geo.computeVertexNormals();
-
-            const grass = new THREE.MeshStandardMaterial({
-                map: loader.load("images/pixil-frame-0 (69).png")
-            });
-            const grassTexture = grass.map; // or whatever texture you use
-
-            grassTexture.wrapS = THREE.RepeatWrapping;
-            grassTexture.wrapT = THREE.RepeatWrapping;
-
-            grassTexture.repeat.set(500, 500); // 100 tiles across X and Z
-
-            grassTexture.needsUpdate = true;
-
-
-            const terrain = new THREE.Mesh(
-                geo,
-                grass
-            );
-
-
-            // keep terrain aligned with collision
-
-            terrain.rotation.x = -Math.PI / 2;
-
-            terrain.updateMatrixWorld(true);
-
-            scene.add(terrain);
-            const raycaster = new THREE.Raycaster();
-            function terrainHeight(x, z) {
-
-
-                raycaster.set(
-                    new THREE.Vector3(x, 200, z),
-                    new THREE.Vector3(0, -1, 0)
+            let hit =
+                raycaster.intersectObject(
+                    terrain
                 );
 
 
-                let hit =
-                    raycaster.intersectObject(
-                        terrain
-                    );
 
+            if (hit.length) {
 
-
-                if (hit.length) {
-
-                    return hit[0].point.y;
-
-                }
-
-
-                return -100;
+                return hit[0].point.y;
 
             }
 
-            // GRASS INSTANCES
-            gltfLoader.load("Models/grass (1).glb", function (gltf) {
+
+            return -100;
+
+        }
+
+        // GRASS INSTANCES
+        gltfLoader.load("Models/grass (1).glb", function (gltf) {
+            return;
+
+            let mesh;
+
+            // find the actual mesh inside the glb
+            gltf.scene.traverse((child) => {
+                if (child.isMesh) {
+                    mesh = child;
+                }
+            });
+
+            if (!mesh) {
+                console.log("No grass mesh found");
                 return;
+            }
 
-                let mesh;
+            const count = 1500;
 
-                // find the actual mesh inside the glb
-                gltf.scene.traverse((child) => {
-                    if (child.isMesh) {
-                        mesh = child;
-                    }
-                });
+            const grassInstances = new THREE.InstancedMesh(
+                mesh.geometry,
+                mesh.material,
+                count
+            );
 
-                if (!mesh) {
-                    console.log("No grass mesh found");
-                    return;
-                }
+            const dummy = new THREE.Object3D();
 
-                const count = 1500;
+            for (let i = 0; i < count; i++) {
 
-                const grassInstances = new THREE.InstancedMesh(
-                    mesh.geometry,
-                    mesh.material,
-                    count
+                let x = Math.random() * 2000 - 1000;
+                let z = Math.random() * 2000 - 1000;
+
+                dummy.position.set(
+                    x,
+                    terrainHeight(x, z) - 4,
+                    z
+                );
+                dummy.rotation.x = -Math.PI / 2
+
+
+                let s = Math.random() * 0.25 + 0.1;
+                dummy.scale.set(s, s, s);
+
+                dummy.updateMatrix();
+
+                grassInstances.setMatrixAt(i, dummy.matrix);
+            }
+
+            grassInstances.instanceMatrix.needsUpdate = true;
+
+            scene.add(grassInstances);
+
+        });
+
+
+
+        // PLAYER
+
+        const player = {
+
+            x: 0,
+
+            z: 0,
+
+            y: 50,
+
+            height: 3,
+
+            speed: .7,
+
+            velocityY: 0,
+
+            grounded: false
+
+        };
+        let yaw = 0;
+        let pitch = 0;
+
+
+        const gravity = -.025;
+        const jump = .8;
+        let guns = ["assult", "snipe"]
+        function fire() {
+            if (gun === "assult") {
+                let p = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.6, 0.6, 0.6),
+                    bullet
                 );
 
-                const dummy = new THREE.Object3D();
+                p.position.copy(camera.position);
 
-                for (let i = 0; i < count; i++) {
+                const dir = new THREE.Vector3();
+                camera.getWorldDirection(dir);
 
-                    let x = Math.random() * 2000 - 1000;
-                    let z = Math.random() * 2000 - 1000;
+                p.dx = dir.x + Math.random() / 10 - 0.05;
+                p.dy = dir.y + Math.random() / 10 - 0.05;
+                p.dz = dir.z + Math.random() / 10 - 0.05;
+                p.damage = 0.2
+                p.type = "assult"
 
-                    dummy.position.set(
-                        x,
-                        terrainHeight(x, z) - 4,
-                        z
-                    );
-                    dummy.rotation.x = -Math.PI / 2
+                scene.add(p);
+                bullets.push(p);
+            } else if (gun === "snipe") {
+                let p = new THREE.Mesh(
+                    new THREE.BoxGeometry(1, 1, 1),
+                    bullet
+                );
 
+                p.position.copy(camera.position);
 
-                    let s = Math.random() * 0.25 + 0.1;
-                    dummy.scale.set(s, s, s);
+                const dir = new THREE.Vector3();
+                camera.getWorldDirection(dir);
 
-                    dummy.updateMatrix();
+                p.dx = dir.x
+                p.dy = dir.y
+                p.dz = dir.z
+                p.damage = 1
+                p.type = "snipe"
 
-                    grassInstances.setMatrixAt(i, dummy.matrix);
-                }
-
-                grassInstances.instanceMatrix.needsUpdate = true;
-
-                scene.add(grassInstances);
-
-            });
-
-
-
-            // PLAYER
-
-            const player = {
-
-                x: 0,
-
-                z: 0,
-
-                y: 50,
-
-                height: 3,
-
-                speed: .7,
-
-                velocityY: 0,
-
-                grounded: false
-
-            };
-            let yaw = 0;
-            let pitch = 0;
-
-
-            const gravity = -.025;
-            const jump = .8;
-            let guns = ["assult", "snipe"]
-            function fire() {
-                if (gun === "assult") {
+                scene.add(p);
+                bullets.push(p);
+            } else if (gun === "shotty") {
+                for (let i = 0; i < 60; i++) {
                     let p = new THREE.Mesh(
                         new THREE.BoxGeometry(0.6, 0.6, 0.6),
                         bullet
@@ -580,634 +631,605 @@
                     p.dx = dir.x + Math.random() / 10 - 0.05;
                     p.dy = dir.y + Math.random() / 10 - 0.05;
                     p.dz = dir.z + Math.random() / 10 - 0.05;
-                    p.damage = 0.2
-                    p.type = "assult"
+                    p.damage = 0.1
+                    p.type = "shotty"
 
                     scene.add(p);
                     bullets.push(p);
-                } else if (gun === "snipe") {
-                    let p = new THREE.Mesh(
-                        new THREE.BoxGeometry(1, 1, 1),
-                        bullet
-                    );
-
-                    p.position.copy(camera.position);
-
-                    const dir = new THREE.Vector3();
-                    camera.getWorldDirection(dir);
-
-                    p.dx = dir.x
-                    p.dy = dir.y
-                    p.dz = dir.z
-                    p.damage = 1
-                    p.type = "snipe"
-
-                    scene.add(p);
-                    bullets.push(p);
-                } else if (gun === "shotty") {
-                    for (let i = 0; i < 60; i++) {
-                        let p = new THREE.Mesh(
-                            new THREE.BoxGeometry(0.6, 0.6, 0.6),
-                            bullet
-                        );
-
-                        p.position.copy(camera.position);
-
-                        const dir = new THREE.Vector3();
-                        camera.getWorldDirection(dir);
-
-                        p.dx = dir.x + Math.random() / 10 - 0.05;
-                        p.dy = dir.y + Math.random() / 10 - 0.05;
-                        p.dz = dir.z + Math.random() / 10 - 0.05;
-                        p.damage = 0.1
-                        p.type = "shotty"
-
-                        scene.add(p);
-                        bullets.push(p);
-                    }
                 }
-                const gunIMG = document.getElementById("gunIMG");
+            }
+            const gunIMG = document.getElementById("gunIMG");
 
-                if (gun === "assult") gunIMG.src = gunFireA.src;
-                if (gun === "shotty") gunIMG.src = gunFireSh.src;
+            if (gun === "assult") gunIMG.src = gunFireA.src;
+            if (gun === "shotty") gunIMG.src = gunFireSh.src;
 
-                setTimeout(() => {
+            setTimeout(() => {
+                if (gun === "assult") gunIMG.src = gunIdleA.src;
+                if (gun === "shotty") gunIMG.src = gunIdleSh.src;
+            }, 25);
+        }
+
+
+
+        // MOUSE LOOK
+
+
+
+
+
+        renderer.domElement.onclick = () => {
+
+            renderer.domElement.requestPointerLock();
+
+        };
+
+
+        let isZoomed = false
+        let isFiring = false
+
+        window.addEventListener('mousedown', (event) => {
+            if (event.button === 2) {
+                isZoomed = true
+                if (gun === "snipe") {
+                    document.getElementById('overLay').style.opacity = '1'
+                    document.getElementById('gunIMG').style.opacity = '0'
+                    document.getElementById('plus').style.opacity = '0'
+                }
+
+            }
+            if (event.button === 0) {
+                isFiring = true
+            }
+        });
+
+        window.addEventListener('mouseup', (event) => {
+            if (event.button === 2) {
+                isZoomed = false
+                if (gun === "snipe") {
+                    document.getElementById('overLay').style.opacity = '0'
+                    document.getElementById('gunIMG').style.opacity = '1'
+                    document.getElementById('plus').style.opacity = '1'
+                }
+            }
+            if (event.button === 0) {
+                isFiring = false
+            }
+        });
+
+
+        let sensitivity = 0.002
+        document.addEventListener(
+            "mousemove",
+            e => {
+
+                if (document.pointerLockElement !== renderer.domElement)
+                    return;
+
+
+                yaw -= e.movementX * sensitivity;
+
+                pitch -= e.movementY * sensitivity;
+
+
+                pitch = Math.max(
+                    -1.5,
+                    Math.min(1.5, pitch)
+                );
+
+            });
+
+
+
+        // INPUT
+
+
+        let keys = {};
+
+
+        addEventListener(
+            "keydown",
+            e => {
+                keys[e.code] = true;
+                if (keys.KeyQ) {
+                    if (gun === "assult") {
+                        gun = "snipe"
+                        document.getElementById("crossHair").style.width = "20px"
+                    } else if (gun === "snipe") {
+                        gun = "shotty"
+                        document.getElementById("plus").innerHTML = `<p id="shotHair">o</p>`
+                    } else if (gun === "shotty") {
+                        gun = "assult"
+                        document.getElementById("plus").innerHTML = `<img id="crossHair" src="images/halo_assault_rifle_crosshair.png" alt="Crosshair">`
+                        document.getElementById("crossHair").style.width = "250px"
+                    }
+                    document.getElementById('current').innerText = `${gun}`
                     if (gun === "assult") gunIMG.src = gunIdleA.src;
                     if (gun === "shotty") gunIMG.src = gunIdleSh.src;
-                }, 25);
+                    if (gun === "snipe") gunIMG.src = gunFireSn.src;
+                }
+            });
+
+
+
+        addEventListener(
+            "keyup",
+            e => {
+                keys[e.code] = false;
+            });
+
+
+
+
+
+        // TERRAIN COLLISION
+
+
+
+
+
+
+
+
+
+        function canMove(x, z) {
+
+            let current =
+                terrainHeight(
+                    player.x,
+                    player.z
+                );
+
+
+            let next =
+                terrainHeight(
+                    x,
+                    z
+                );
+
+
+            // prevent walking into cliffs
+
+            if (next - current > 1.5)
+                return false;
+
+
+            return true;
+
+        }
+
+
+
+        function updateGround() {
+
+            let ground =
+                terrainHeight(
+                    player.x,
+                    player.z
+                );
+
+
+
+            if (player.y - player.height <= ground) {
+
+                player.y =
+                    ground + player.height;
+
+                player.velocityY = 0;
+
+                player.grounded = true;
+
+            }
+            else {
+
+                player.grounded = false;
+
             }
 
+        }
+        setInterval(() => {
+            let x = -1000
+            let z = player.z + Math.random() * 2000 - 1000
+
+            //spawnTarget(Math.random() * 2000 - 1000, 0, Math.random() * 2000 - 1000)
+        }, 4000);
+
+        let groundAt = Math.max(terrainHeight(100, -200), -50) + 5
+        //Ground level
+        spawnPlatform(100, groundAt - 19, -200, 60, 20, 60, true)
+        //walls
+        spawnPlatform(100, groundAt + 1, -200, 1, 60, 60, true)
+        spawnPlatform(100, groundAt + 1, -260, 60, 60, 1, true)
+        spawnPlatform(40, groundAt + 1, -200, 1, 60, 60, true)
+        //roof
+        spawnPlatform(100, groundAt + 60, -200, 60, 1, 60, true)
+        //stair
+        spawnPlatform(75, groundAt + 10, -185, 10, 1, 10, true)
+        spawnPlatform(60, groundAt + 20, -185, 10, 1, 10, true)
+        spawnPlatform(75, groundAt + 30, -185, 10, 1, 10, true)
+        spawnPlatform(60, groundAt + 40, -185, 10, 1, 10, true)
+        spawnPlatform(75, groundAt + 50, -185, 10, 1, 10, true)
+
+        //enemies
+        spawnTarget(40, groundAt + 61, -210, 0, true)
+
+        for (let i = 0; i < 5; i++) {
+            let groupX = 0
+            let groupZ = 0
+            do {
+                groupX = Math.random() * 2000 - 1000
+                groupZ = Math.random() * 2000 - 1000
+            } while (terrainHeight(groupX, groupZ) < -75);
+            const max = 5
+            const min = 2
+            let groupSize = Math.ceil(Math.random() * (max - 1) + min)
+            for (let n = 0; n < groupSize; n++) {
+                spawnTarget(groupX + Math.random() * 20 - 10, 0, groupZ + Math.random() * 20 - 10)
+            }
+        }
+
+        //trees
+        for (let i = 0; i < 5; i++) {
+            let groupX = 0
+            let groupZ = 0
+            do {
+                groupX = Math.random() * 2000 - 1000
+                groupZ = Math.random() * 2000 - 1000
+            } while (terrainHeight(groupX, groupZ) < -75);
+            const max = 8
+            const min = 3
+            let groupSize = Math.ceil(Math.random() * (max - 1) + min)
+            for (let n = 0; n < groupSize; n++) {
+                spawnTree(groupX + Math.random() * 200 - 100, groupZ + Math.random() * 200 - 100, Math.random() * 6 + 3)
+            }
+
+        }
 
 
-            // MOUSE LOOK
 
 
+        // GAME LOOP
+
+        let maxCooldown = 2.5
+        let cooldown = 0
 
 
+        function animate() {
 
-            renderer.domElement.onclick = () => {
-
-                renderer.domElement.requestPointerLock();
-
-            };
-
-
-            let isZoomed = false
-            let isFiring = false
-
-            window.addEventListener('mousedown', (event) => {
-                if (event.button === 2) {
-                    isZoomed = true
-                    document.getElementById('overLay').style.opacity = '1'
-                }
-                if (event.button === 0) {
-                    isFiring = true
-                }
-            });
-
-            window.addEventListener('mouseup', (event) => {
-                if (event.button === 2) {
-                    isZoomed = false
-                    document.getElementById('overLay').style.opacity = '0'
-                }
-                if (event.button === 0) {
-                    isFiring = false
-                }
-            });
+            requestAnimationFrame(
+                animate
+            );
+            let bulletSpeed = 200
 
 
-            let sensitivity = 0.002
-            document.addEventListener(
-                "mousemove",
-                e => {
+            camera.fov = isZoomed ? 15 : 90;
+            camera.updateProjectionMatrix();
+            sensitivity = 0.002
+            if (isZoomed) {
+                sensitivity = 0.0005
+            }
+            for (let bullet of bullets) {
 
-                    if (document.pointerLockElement !== renderer.domElement)
-                        return;
+                const oldPos = bullet.position.clone();
 
+                bullet.position.x += bullet.dx * bulletSpeed;
+                bullet.position.y += bullet.dy * bulletSpeed;
+                bullet.position.z += bullet.dz * bulletSpeed;
 
-                    yaw -= e.movementX * sensitivity;
+                const direction = new THREE.Vector3()
+                    .subVectors(bullet.position, oldPos);
 
-                    pitch -= e.movementY * sensitivity;
+                const raycaster = new THREE.Raycaster(
+                    oldPos,
+                    direction.clone().normalize(),
+                    0,
+                    direction.length()
+                );
 
+                const hits = raycaster.intersectObjects(targets);
 
-                    pitch = Math.max(
-                        -1.5,
-                        Math.min(1.5, pitch)
-                    );
+                if (hits.length > 0) {
 
-                });
+                    let target = hits[0].object;
 
-
-
-            // INPUT
-
-
-            let keys = {};
-
-
-            addEventListener(
-                "keydown",
-                e => {
-                    keys[e.code] = true;
-                    if (keys.KeyQ) {
-                        if (gun === "assult") {
-                            gun = "snipe"
-                            document.getElementById("plus").style.fontSize = "10px"
-                        } else if (gun === "snipe") {
-                            gun = "shotty"
-                            document.getElementById("plus").style.fontSize = "100px"
-                        } else if (gun === "shotty") {
-                            gun = "assult"
-                            document.getElementById("plus").style.fontSize = "70px"
-                        }
-                        document.getElementById('current').innerText = `${gun}`
-                        if (gun === "assult") gunIMG.src = gunIdleA.src;
-                        if (gun === "shotty") gunIMG.src = gunIdleSh.src;
-                        if (gun === "snipe") gunIMG.src = gunFireSn.src;
+                    // Go up until we find the object stored in targets[]
+                    while (target && !targets.includes(target)) {
+                        target = target.parent;
                     }
-                });
+
+                    if (target) {
+                        target.health -= bullet.damage
+                        if (target.health <= 0) {
+                            scene.remove(target);
+
+                            const index = targets.indexOf(target);
+                            if (index !== -1) {
+                                targets.splice(index, 1);
+                            }
+                        }
+                    }
+
+                    scene.remove(bullet);
+
+                    const bulletIndex = bullets.indexOf(bullet);
+                    if (bulletIndex !== -1) {
+                        bullets.splice(bulletIndex, 1);
+                    }
+                }
+                let dist = Math.sqrt((player.x - bullet.position.x) * (player.x - bullet.position.x) + (player.z - bullet.position.z) * (player.z - bullet.position.z))
+                if (dist > 1500) {
+                    bullets.splice(bullets.indexOf(bullet), 1)
+                    scene.remove(bullet)
+                }
+                if (dist > 400 && bullet.type === "shotty" || bullet.type === "assult") {
+                    bullets.splice(bullets.indexOf(bullet), 1)
+                    scene.remove(bullet)
+                }
+            }
+
+            let speed = player.speed;
+
+            if (gun === "assult") {
+                maxCooldown = 2.5
+            } else if (gun === "snipe") {
+                maxCooldown = 50
+            } else if (gun === "shotty") {
+                maxCooldown = 50
+            }
+
+
+            if (keys.ShiftLeft || keys.ShiftRight)
+                speed *= 2;
 
 
 
-            addEventListener(
-                "keyup",
-                e => {
-                    keys[e.code] = false;
-                });
+            let mx = 0;
+            let mz = 0;
 
 
 
-
-
-            // TERRAIN COLLISION
-
-
+            let fx = Math.sin(yaw);
+            let fz = Math.cos(yaw);
 
 
 
+            if (keys.KeyW) {
 
-
-
-
-            function canMove(x, z) {
-
-                let current =
-                    terrainHeight(
-                        player.x,
-                        player.z
-                    );
-
-
-                let next =
-                    terrainHeight(
-                        x,
-                        z
-                    );
-
-
-                // prevent walking into cliffs
-
-                if (next - current > 1.5)
-                    return false;
-
-
-                return true;
+                mx -= fx;
+                mz -= fz;
 
             }
 
 
 
-            function updateGround() {
+            if (keys.KeyS) {
 
-                let ground =
-                    terrainHeight(
-                        player.x,
-                        player.z
-                    );
+                mx += fx;
+                mz += fz;
+
+            }
+
+            cooldown -= 1
+            if (cooldown < 0 && isFiring) {
+                fire()
+                cooldown = maxCooldown
+            }
+
+
+            if (keys.KeyA) {
+
+                mx -= Math.cos(yaw);
+                mz += Math.sin(yaw);
+
+            }
+
+
+            if (keys.KeyD) {
+
+                mx += Math.cos(yaw);
+                mz -= Math.sin(yaw);
+
+            }
 
 
 
-                if (player.y - player.height <= ground) {
+            let len = Math.sqrt(
+                mx * mx + mz * mz
+            );
+
+
+            if (len) {
+
+                mx /= len;
+                mz /= len;
+
+            }
+
+            //for (let target of targets) {
+            //const speed = 0.5
+            //let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
+            //let dx = (player.x - target.position.x) / dist * speed
+            //let dz = (player.z - target.position.z) / dist * speed
+            //target.position.x += dx
+            //target.position.z += dz
+            //target.position.y = terrainHeight(target.position.x, target.position.z) - 2
+            //if (dist < 10) {
+            //home()
+            //}
+            //}
+
+            for (let target of targets) {
+                let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
+                const mobSpeed = 0.16
+                target.timeToUnlock -= 1
+                if (dist > 80 && target.timeToUnlock <= 0) {
+
+                    if (target.time < 150) {
+                        target.position.x += mobSpeed
+                    } else if (target.time > 200 && target.time < 350) {
+                        target.position.z -= mobSpeed
+                    } else if (target.time > 400 && target.time < 550) {
+                        target.position.x -= mobSpeed
+                    } else if (target.time > 600 && target.time < 750) {
+                        target.position.z += mobSpeed
+                        target.position.x += mobSpeed
+                    } else if (target.time > 800 && target.time < 950) {
+                        target.position.z -= mobSpeed
+                    } else if (target.time > 1000 && target.time < 1150) {
+                        target.position.z += mobSpeed
+                        target.position.x -= mobSpeed
+                    } else if (target.time > 1200) {
+                        target.time = 0
+                    }
+                } else {
+                    if (dist < 80) { target.timeToUnlock = 100 }
+                    let dx = player.x - target.position.x
+                    let dz = player.z - target.position.z
+                    target.position.x += dx / dist * mobSpeed * 2.2;
+                    target.position.z += dz / dist * mobSpeed * 2.2;
+                }
+                target.time += 0.5
+
+
+                if (!target.based) target.position.y = terrainHeight(target.position.x, target.position.z) - 2;
+
+                if (dist < 4) {
+                    home()
+                }
+            }
+
+
+
+
+
+            let nx =
+                player.x + mx * speed;
+
+
+            let nz =
+                player.z + mz * speed;
+
+            const wierd = 1
+            let cnx =
+                player.x + mx * (speed * wierd);
+
+
+            let cnz =
+                player.z + mz * (speed * wierd);
+
+
+
+            let blockedX = false;
+            let blockedZ = false;
+
+            for (let plat of platforms) {
+                if (isInWall(plat, cnx, player.z))
+                    blockedX = true;
+
+                if (isInWall(plat, player.x, cnz))
+                    blockedZ = true;
+            }
+
+            if (canMove(nx, player.z) && !blockedX)
+                player.x = nx;
+
+            if (canMove(player.x, nz) && !blockedZ)
+                player.z = nz;
+
+            // gravity
+
+            player.velocityY += gravity;
+            player.y += player.velocityY;
+
+
+            // terrain collision
+
+            updateGround();
+
+            if (player.y < -50) {
+                player.grounded = true
+            }
+            checkWater();
+
+
+            // platform collision
+
+            platforms.forEach(p => {
+
+                if (playerHitsPlatform(p) && player.velocityY <= 0) {
 
                     player.y =
-                        ground + player.height;
+                        p.position.y +
+                        p.height / 2 +
+                        player.height;
 
                     player.velocityY = 0;
 
                     player.grounded = true;
 
                 }
-                else {
 
-                    player.grounded = false;
+            });
 
-                }
 
-            }
-            setInterval(() => {
-                let x = -1000
-                let z = player.z + Math.random() * 2000 - 1000
 
-                //spawnTarget(Math.random() * 2000 - 1000, 0, Math.random() * 2000 - 1000)
-            }, 4000);
+            // jump
 
-            let groundAt = Math.max(terrainHeight(100, -200), -50) + 5
-            //Ground level
-            spawnPlatform(100, groundAt - 19, -200, 60, 20, 60, true)
-            //walls
-            spawnPlatform(100, groundAt + 1, -200, 1, 60, 60, true)
-            spawnPlatform(100, groundAt + 1, -260, 60, 60, 1, true)
-            spawnPlatform(40, groundAt + 1, -200, 1, 60, 60, true)
-            //roof
-            spawnPlatform(100, groundAt + 60, -200, 60, 1, 60, true)
-            //stair
-            spawnPlatform(75, groundAt + 10, -185, 10, 1, 10, true)
-            spawnPlatform(60, groundAt + 20, -185, 10, 1, 10, true)
-            spawnPlatform(75, groundAt + 30, -185, 10, 1, 10, true)
-            spawnPlatform(60, groundAt + 40, -185, 10, 1, 10, true)
-            spawnPlatform(75, groundAt + 50, -185, 10, 1, 10, true)
+            if (keys.Space && player.grounded) {
 
-            //enemies
-            spawnTarget(40, groundAt + 61, -210, 0, true)
-
-            for (let i = 0; i < 5; i++) {
-                let groupX = 0
-                let groupZ = 0
-                do {
-                    groupX = Math.random() * 2000 - 1000
-                    groupZ = Math.random() * 2000 - 1000
-                } while (terrainHeight(groupX, groupZ) < -75);
-                const max = 5
-                const min = 2
-                let groupSize = Math.ceil(Math.random() * (max - 1) + min)
-                for (let n = 0; n < groupSize; n++) {
-                    spawnTarget(groupX + Math.random() * 20 - 10, 0, groupZ + Math.random() * 20 - 10)
-                }
-            }
-
-            //trees
-            for (let i = 0; i < 5; i++) {
-                let groupX = 0
-                let groupZ = 0
-                do {
-                    groupX = Math.random() * 2000 - 1000
-                    groupZ = Math.random() * 2000 - 1000
-                } while (terrainHeight(groupX, groupZ) < -75);
-                const max = 8
-                const min = 3
-                let groupSize = Math.ceil(Math.random() * (max - 1) + min)
-                for (let n = 0; n < groupSize; n++) {
-                    spawnTree(groupX + Math.random() * 200 - 100, groupZ + Math.random() * 200 - 100, Math.random() * 6 + 3)
-                }
+                player.velocityY = jump;
+                player.grounded = false;
 
             }
 
 
 
 
-            // GAME LOOP
-
-            let maxCooldown = 2.5
-            let cooldown = 0
-
-
-            function animate() {
-
-                requestAnimationFrame(
-                    animate
-                );
-                let bulletSpeed = 200
+            camera.position.set(
+                player.x,
+                player.y,
+                player.z
+            );
 
 
-                camera.fov = isZoomed ? 15 : 90;
+            camera.rotation.order = "YXZ";
+
+            camera.rotation.y = yaw;
+
+            camera.rotation.x = pitch;
+
+
+
+            renderer.render(
+                scene,
+                camera
+            );
+
+        }
+
+
+        animate();
+
+
+
+
+
+        addEventListener(
+            "resize",
+            () => {
+
+                camera.aspect =
+                    innerWidth / innerHeight;
+
                 camera.updateProjectionMatrix();
-                sensitivity = 0.002
-                if (isZoomed) {
-                    sensitivity = 0.0005
-                }
-                for (let bullet of bullets) {
 
-                    const oldPos = bullet.position.clone();
-
-                    bullet.position.x += bullet.dx * bulletSpeed;
-                    bullet.position.y += bullet.dy * bulletSpeed;
-                    bullet.position.z += bullet.dz * bulletSpeed;
-
-                    const direction = new THREE.Vector3()
-                        .subVectors(bullet.position, oldPos);
-
-                    const raycaster = new THREE.Raycaster(
-                        oldPos,
-                        direction.clone().normalize(),
-                        0,
-                        direction.length()
-                    );
-
-                    const hits = raycaster.intersectObjects(targets);
-
-                    if (hits.length > 0) {
-
-                        let target = hits[0].object;
-
-                        // Go up until we find the object stored in targets[]
-                        while (target && !targets.includes(target)) {
-                            target = target.parent;
-                        }
-
-                        if (target) {
-                            target.health -= bullet.damage
-                            if (target.health <= 0) {
-                                scene.remove(target);
-
-                                const index = targets.indexOf(target);
-                                if (index !== -1) {
-                                    targets.splice(index, 1);
-                                }
-                            }
-                        }
-
-                        scene.remove(bullet);
-
-                        const bulletIndex = bullets.indexOf(bullet);
-                        if (bulletIndex !== -1) {
-                            bullets.splice(bulletIndex, 1);
-                        }
-                    }
-                    let dist = Math.sqrt((player.x - bullet.position.x) * (player.x - bullet.position.x) + (player.z - bullet.position.z) * (player.z - bullet.position.z))
-                    if (dist > 1500) {
-                        bullets.splice(bullets.indexOf(bullet), 1)
-                        scene.remove(bullet)
-                    }
-                    if (dist > 400 && bullet.type === "shotty" || bullet.type === "assult") {
-                        bullets.splice(bullets.indexOf(bullet), 1)
-                        scene.remove(bullet)
-                    }
-                }
-
-                let speed = player.speed;
-
-                if (gun === "assult") {
-                    maxCooldown = 2.5
-                } else if (gun === "snipe") {
-                    maxCooldown = 50
-                } else if (gun === "shotty") {
-                    maxCooldown = 50
-                }
-
-
-                if (keys.ShiftLeft || keys.ShiftRight)
-                    speed *= 2;
-
-
-
-                let mx = 0;
-                let mz = 0;
-
-
-
-                let fx = Math.sin(yaw);
-                let fz = Math.cos(yaw);
-
-
-
-                if (keys.KeyW) {
-
-                    mx -= fx;
-                    mz -= fz;
-
-                }
-
-
-
-                if (keys.KeyS) {
-
-                    mx += fx;
-                    mz += fz;
-
-                }
-
-                cooldown -= 1
-                if (cooldown < 0 && isFiring) {
-                    fire()
-                    cooldown = maxCooldown
-                }
-
-
-                if (keys.KeyA) {
-
-                    mx -= Math.cos(yaw);
-                    mz += Math.sin(yaw);
-
-                }
-
-
-                if (keys.KeyD) {
-
-                    mx += Math.cos(yaw);
-                    mz -= Math.sin(yaw);
-
-                }
-
-
-
-                let len = Math.sqrt(
-                    mx * mx + mz * mz
+                renderer.setSize(
+                    innerWidth,
+                    innerHeight
                 );
 
+            });
 
-                if (len) {
-
-                    mx /= len;
-                    mz /= len;
-
-                }
-
-                //for (let target of targets) {
-                //const speed = 0.5
-                //let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
-                //let dx = (player.x - target.position.x) / dist * speed
-                //let dz = (player.z - target.position.z) / dist * speed
-                //target.position.x += dx
-                //target.position.z += dz
-                //target.position.y = terrainHeight(target.position.x, target.position.z) - 2
-                //if (dist < 10) {
-                //home()
-                //}
-                //}
-
-                for (let target of targets) {
-                    let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
-                    const mobSpeed = 0.16
-                    target.timeToUnlock -= 1
-                    if (dist > 80 && target.timeToUnlock <= 0) {
-
-                        if (target.time < 150) {
-                            target.position.x += mobSpeed
-                        } else if (target.time > 200 && target.time < 350) {
-                            target.position.z -= mobSpeed
-                        } else if (target.time > 400 && target.time < 550) {
-                            target.position.x -= mobSpeed
-                        } else if (target.time > 600 && target.time < 750) {
-                            target.position.z += mobSpeed
-                            target.position.x += mobSpeed
-                        } else if (target.time > 800 && target.time < 950) {
-                            target.position.z -= mobSpeed
-                        } else if (target.time > 1000 && target.time < 1150) {
-                            target.position.z += mobSpeed
-                            target.position.x -= mobSpeed
-                        } else if (target.time > 1200) {
-                            target.time = 0
-                        }
-                    } else {
-                        if (dist < 80) { target.timeToUnlock = 100 }
-                        let dx = player.x - target.position.x
-                        let dz = player.z - target.position.z
-                        target.position.x += dx / dist * mobSpeed * 2.2;
-                        target.position.z += dz / dist * mobSpeed * 2.2;
-                    }
-                    target.time += 0.5
-
-
-                    if (!target.based) target.position.y = terrainHeight(target.position.x, target.position.z) - 2;
-
-                    if (dist < 4) {
-                        home()
-                    }
-                }
-
-
-
-
-
-                let nx =
-                    player.x + mx * speed;
-
-
-                let nz =
-                    player.z + mz * speed;
-
-                const wierd = 1
-                let cnx =
-                    player.x + mx * (speed * wierd);
-
-
-                let cnz =
-                    player.z + mz * (speed * wierd);
-
-
-
-                let blockedX = false;
-                let blockedZ = false;
-
-                for (let plat of platforms) {
-                    if (isInWall(plat, cnx, player.z))
-                        blockedX = true;
-
-                    if (isInWall(plat, player.x, cnz))
-                        blockedZ = true;
-                }
-
-                if (canMove(nx, player.z) && !blockedX)
-                    player.x = nx;
-
-                if (canMove(player.x, nz) && !blockedZ)
-                    player.z = nz;
-
-                // gravity
-
-                player.velocityY += gravity;
-                player.y += player.velocityY;
-
-
-                // terrain collision
-
-                updateGround();
-
-                if (player.y < -50) {
-                    player.grounded = true
-                }
-                checkWater();
-
-
-                // platform collision
-
-                platforms.forEach(p => {
-
-                    if (playerHitsPlatform(p) && player.velocityY <= 0) {
-
-                        player.y =
-                            p.position.y +
-                            p.height / 2 +
-                            player.height;
-
-                        player.velocityY = 0;
-
-                        player.grounded = true;
-
-                    }
-
-                });
-
-
-
-                // jump
-
-                if (keys.Space && player.grounded) {
-
-                    player.velocityY = jump;
-                    player.grounded = false;
-
-                }
-
-
-
-
-                camera.position.set(
-                    player.x,
-                    player.y,
-                    player.z
-                );
-
-
-                camera.rotation.order = "YXZ";
-
-                camera.rotation.y = yaw;
-
-                camera.rotation.x = pitch;
-
-
-
-                renderer.render(
-                    scene,
-                    camera
-                );
-
-            }
-
-
-            animate();
-
-
-
-
-
-            addEventListener(
-                "resize",
-                () => {
-
-                    camera.aspect =
-                        innerWidth / innerHeight;
-
-                    camera.updateProjectionMatrix();
-
-                    renderer.setSize(
-                        innerWidth,
-                        innerHeight
-                    );
-
-                });
-
-        </script>
+    </script>
 
 </body>
 
