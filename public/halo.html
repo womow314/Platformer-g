@@ -38,7 +38,6 @@
             font-weight: 5px;
             font-size: 250px;
             transform: translateY(-20px)
-
         }
 
         #gunIMG {
@@ -245,6 +244,9 @@
             new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") }),
             new THREE.MeshStandardMaterial({ map: loader.load("images/Screen Shot 2026-05-04 at 2.50.58 PM.png") })
         ];
+        const eBulletMAT = new THREE.MeshBasicMaterial({
+            color: 0x22ff22
+        });
 
         let platforms = []
         let bullets = []
@@ -280,7 +282,7 @@
 
         let targets = []
 
-        function spawnTarget(x, y, z, time = Math.random() * 600, onPlat = false) {
+        function spawnTarget(x, y, z, time = Math.random() * 1200, onPlat = false) {
 
             gltfLoader.load("Models/enemy.glb", function (gltf) {
 
@@ -293,7 +295,7 @@
                 enemy.based = onPlat
                 enemy.timeToUnlock = 0
 
-                enemy.scale.set(0.1, 0.1, 0.1); // adjust size if needed
+                enemy.scale.set(0.07, 0.07, 0.07); // adjust size if needed
 
                 scene.add(enemy);
 
@@ -308,16 +310,44 @@
 
                 const tree = gltf.scene;
 
-                tree.position.set(x, terrainHeight(x, z) - 1, z);
-                if (terrainHeight(x, z) - 1 < -50) {
-                    return
-                }
-                tree.rotation.y = 1
+                const y = terrainHeight(x, z) - 1;
+                if (y < -50) return;
 
-                tree.scale.set(scale, scale, scale); // adjust size if needed
+                tree.position.set(x, y, z);
+                tree.rotation.y = 1;
+                tree.scale.set(scale, scale, scale);
 
                 scene.add(tree);
 
+                // Find the size of the model
+                const box = new THREE.Box3().setFromObject(tree);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+
+                // Trunk collider (about 25% of tree width)
+                const trunkWidth = size.x * 0.25;
+                const trunkDepth = size.z * 0.25;
+                const trunkHeight = size.y;
+
+                const collider = new THREE.Mesh(
+                    new THREE.BoxGeometry(trunkWidth, trunkHeight, trunkDepth),
+                    new THREE.MeshBasicMaterial({
+                        visible: false
+                    })
+                );
+
+                collider.position.set(
+                    tree.position.x,
+                    tree.position.y + trunkHeight / 2,
+                    tree.position.z
+                );
+
+                collider.width = trunkWidth;
+                collider.height = trunkHeight;
+                collider.depth = trunkDepth;
+
+                scene.add(collider);
+                treeColliders.push(collider);
 
             });
 
@@ -400,6 +430,17 @@
                 feet < p.position.y + p.height / 2;
 
             return withinX && withinZ && withinY;
+        }
+
+        function bulletHitsWall(p, x, y, z) {
+            return (
+                x >= p.position.x - p.width / 2 &&
+                x <= p.position.x + p.width / 2 &&
+                y >= p.position.y - p.height / 2 &&
+                y <= p.position.y + p.height / 2 &&
+                z >= p.position.z - p.depth / 2 &&
+                z <= p.position.z + p.depth / 2
+            );
         }
 
 
@@ -555,11 +596,11 @@
 
         const player = {
 
-            x: 0,
+            x: 70,
 
-            z: 0,
+            z: -230,
 
-            y: 50,
+            y: terrainHeight(130, -230) + 40,
 
             height: 3,
 
@@ -570,6 +611,7 @@
             grounded: false
 
         };
+        let treeColliders = [];
         let yaw = 0;
         let pitch = 0;
 
@@ -653,7 +695,7 @@
 
         // MOUSE LOOK
 
-
+        let eBullets = []
 
 
 
@@ -789,7 +831,7 @@
 
             // prevent walking into cliffs
 
-            if (next - current > 1.5)
+            if (next - current > 2.5)
                 return false;
 
 
@@ -850,7 +892,7 @@
         spawnPlatform(75, groundAt + 50, -185, 10, 1, 10, true)
 
         //enemies
-        spawnTarget(40, groundAt + 61, -210, 0, true)
+        spawnTarget(40, groundAt + 61, -210, 1, true)
 
         for (let i = 0; i < 5; i++) {
             let groupX = 0
@@ -880,6 +922,58 @@
             let groupSize = Math.ceil(Math.random() * (max - 1) + min)
             for (let n = 0; n < groupSize; n++) {
                 spawnTree(groupX + Math.random() * 200 - 100, groupZ + Math.random() * 200 - 100, Math.random() * 6 + 3)
+            }
+
+        }
+        function removeBulletsInWalls(bullet) {
+
+            const oldPos = bullet.position.clone().sub(
+                new THREE.Vector3(bullet.dx, bullet.dy, bullet.dz)
+            );
+
+            const direction = new THREE.Vector3().subVectors(
+                bullet.position,
+                oldPos
+            );
+
+            const raycaster = new THREE.Raycaster(
+                oldPos,
+                direction.clone().normalize(),
+                0,
+                direction.length()
+            );
+
+            let hitWall = false;
+
+            for (const obj of [...platforms, ...treeColliders]) {
+
+                if (raycaster.intersectObject(obj).length > 0) {
+                    hitWall = true;
+                    break;
+                }
+
+            }
+
+            if (bullet.position.y < terrainHeight(
+                bullet.position.x,
+                bullet.position.z
+            ) - 3) {
+                hitWall = true;
+            }
+
+            if (hitWall) {
+
+                scene.remove(bullet);
+
+                const list = bullets.includes(bullet)
+                    ? bullets
+                    : eBullets;
+
+                const index = list.indexOf(bullet);
+
+                if (index !== -1)
+                    list.splice(index, 1);
+
             }
 
         }
@@ -960,10 +1054,12 @@
                     bullets.splice(bullets.indexOf(bullet), 1)
                     scene.remove(bullet)
                 }
-                if (dist > 400 && bullet.type === "shotty" || bullet.type === "assult") {
+                if (dist > 400 && (bullet.type === "shotty" || bullet.type === "assult")) {
                     bullets.splice(bullets.indexOf(bullet), 1)
                     scene.remove(bullet)
                 }
+
+                removeBulletsInWalls(bullet)
             }
 
             let speed = player.speed;
@@ -1059,9 +1155,14 @@
 
             for (let target of targets) {
                 let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
+                let dx = player.x - target.position.x
+                let dz = player.z - target.position.z
+                let dy = player.y - target.position.y
+                const enemyBulletSpeed = 0.06
                 const mobSpeed = 0.16
                 target.timeToUnlock -= 1
-                if (dist > 80 && target.timeToUnlock <= 0) {
+                //dist > 80 && 
+                if (target.timeToUnlock <= 0) {
 
                     if (target.time < 150) {
                         target.position.x += mobSpeed
@@ -1081,19 +1182,75 @@
                         target.time = 0
                     }
                 } else {
-                    if (dist < 80) { target.timeToUnlock = 100 }
-                    let dx = player.x - target.position.x
-                    let dz = player.z - target.position.z
-                    target.position.x += dx / dist * mobSpeed * 2.2;
-                    target.position.z += dz / dist * mobSpeed * 2.2;
+                    //if (dist < 80) { target.timeToUnlock = 100 }
+                    //target.position.x -= dx / dist * mobSpeed * 2.2;
+                    //target.position.z -= dz / dist * mobSpeed * 2.2;
+                }
+
+                if (target.time % 100 < 0.6 && dist < 600) {
+                    let p = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.6, 0.6, 0.6),
+                        eBulletMAT
+                    );
+                    p.position.set(target.position.x, target.position.y, target.position.z)
+                    p.dx = dx * enemyBulletSpeed
+                    p.dy = dy * enemyBulletSpeed
+                    p.dz = dz * enemyBulletSpeed
+
+
+                    eBullets.push(p)
+                    scene.add(p)
+                    setTimeout(() => {
+                        let p = new THREE.Mesh(
+                            new THREE.BoxGeometry(0.6, 0.6, 0.6),
+                            eBulletMAT
+                        );
+                        p.position.set(target.position.x, target.position.y, target.position.z)
+                        p.dx = dx * enemyBulletSpeed
+                        p.dy = dy * enemyBulletSpeed
+                        p.dz = dz * enemyBulletSpeed
+
+
+                        eBullets.push(p)
+                        scene.add(p)
+                    }, 300);
+                    setTimeout(() => {
+                        let p = new THREE.Mesh(
+                            new THREE.BoxGeometry(0.6, 0.6, 0.6),
+                            eBulletMAT
+                        );
+                        p.position.set(target.position.x, target.position.y, target.position.z)
+                        p.dx = dx * enemyBulletSpeed
+                        p.dy = dy * enemyBulletSpeed
+                        p.dz = dz * enemyBulletSpeed
+
+
+                        eBullets.push(p)
+                        scene.add(p)
+                    }, 600);
                 }
                 target.time += 0.5
 
 
                 if (!target.based) target.position.y = terrainHeight(target.position.x, target.position.z) - 2;
 
+            }
+
+            for (let bullet of eBullets) {
+                let dist = Math.sqrt(
+                    (player.x - bullet.position.x) ** 2 +
+                    (player.z - bullet.position.z) ** 2
+                );
+
+
+                bullet.position.x += bullet.dx;
+                bullet.position.y += bullet.dy;
+                bullet.position.z += bullet.dz;
+
+                removeBulletsInWalls(bullet)
+
                 if (dist < 4) {
-                    home()
+                    home();
                 }
             }
 
@@ -1121,12 +1278,16 @@
             let blockedX = false;
             let blockedZ = false;
 
-            for (let plat of platforms) {
-                if (isInWall(plat, cnx, player.z))
+            const colliders = [...platforms, ...treeColliders];
+
+            for (let obj of colliders) {
+
+                if (isInWall(obj, cnx, player.z))
                     blockedX = true;
 
-                if (isInWall(plat, player.x, cnz))
+                if (isInWall(obj, player.x, cnz))
                     blockedZ = true;
+
             }
 
             if (canMove(nx, player.z) && !blockedX)
@@ -1153,7 +1314,7 @@
 
             // platform collision
 
-            platforms.forEach(p => {
+            [...platforms, ...treeColliders].forEach(p => {
 
                 if (playerHitsPlatform(p) && player.velocityY <= 0) {
 
