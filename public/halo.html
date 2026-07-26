@@ -596,11 +596,11 @@
 
         const player = {
 
-            x: 0,
+            x: 70,
 
-            z: 0,
+            z: -230,
 
-            y: 50,
+            y: terrainHeight(130, -230) + 40,
 
             height: 3,
 
@@ -957,7 +957,7 @@
             if (bullet.position.y < terrainHeight(
                 bullet.position.x,
                 bullet.position.z
-            )) {
+            ) - 3) {
                 hitWall = true;
             }
 
@@ -1187,7 +1187,7 @@
                     //target.position.z -= dz / dist * mobSpeed * 2.2;
                 }
 
-                if (target.time % 100 < 0.7 && dist < 400) {
+                if (target.time % 100 < 0.6 && dist < 600) {
                     let p = new THREE.Mesh(
                         new THREE.BoxGeometry(0.6, 0.6, 0.6),
                         eBulletMAT
