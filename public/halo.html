@@ -76,6 +76,7 @@
         Q switch guns <br>
         Current gun: <span id="current">Assult</span>
     </div>
+    <h1>HEALTH: 100%</h1>
 
     <span id="plus"><img id="crossHair" src="images/halo_assault_rifle_crosshair.png" alt="Crosshair"></span>
 
@@ -247,6 +248,7 @@
         const eBulletMAT = new THREE.MeshBasicMaterial({
             color: 0x22ff22
         });
+        let health = 100
 
         let platforms = []
         let bullets = []
@@ -352,6 +354,9 @@
             });
 
         }
+        setInterval(() => {
+            document.querySelector('h1').innerText = `HEALTH: ${health}%`
+        }, 200);
 
 
 
@@ -594,13 +599,13 @@
 
         // PLAYER
 
-        const player = {
+        let player = {
 
             x: 70,
 
             z: -230,
 
-            y: terrainHeight(130, -230) + 40,
+            y: terrainHeight(70, -230) + 40,
 
             height: 3,
 
@@ -875,13 +880,14 @@
             //spawnTarget(Math.random() * 2000 - 1000, 0, Math.random() * 2000 - 1000)
         }, 4000);
 
-        let groundAt = Math.max(terrainHeight(100, -200), -50) + 5
+        let groundAt = Math.max(terrainHeight(100, -200), -50) + 7
         //Ground level
         spawnPlatform(100, groundAt - 19, -200, 60, 20, 60, true)
         //walls
         spawnPlatform(100, groundAt + 1, -200, 1, 60, 60, true)
         spawnPlatform(100, groundAt + 1, -260, 60, 60, 1, true)
         spawnPlatform(40, groundAt + 1, -200, 1, 60, 60, true)
+        spawnPlatform(100, groundAt + 1, -200, 60, 10, 1, true)
         //roof
         spawnPlatform(100, groundAt + 60, -200, 60, 1, 60, true)
         //stair
@@ -893,6 +899,16 @@
 
         //enemies
         spawnTarget(40, groundAt + 61, -210, 1, true)
+
+        for (let i = 0; i < 30; i++) {
+            let groupX = 0
+            let groupZ = 0
+
+            groupX = Math.random() * 2000 - 1000
+            groupZ = Math.random() * 2000 - 1000
+
+            spawnPlatform(groupX, terrainHeight(groupX, groupZ) - 35, groupZ, Math.random() * 50 + 5, Math.random() * 50 + 35, Math.random() * 50 + 5, true)
+        }
 
         for (let i = 0; i < 5; i++) {
             let groupX = 0
@@ -1158,7 +1174,7 @@
                 let dx = player.x - target.position.x
                 let dz = player.z - target.position.z
                 let dy = player.y - target.position.y
-                const enemyBulletSpeed = 0.06
+                const enemyBulletSpeed = 0.08
                 const mobSpeed = 0.16
                 target.timeToUnlock -= 1
                 //dist > 80 && 
@@ -1187,12 +1203,15 @@
                     //target.position.z -= dz / dist * mobSpeed * 2.2;
                 }
 
-                if (target.time % 100 < 0.6 && dist < 600) {
+                if (target.time % 100 < 0.5 && dist < 300) {
+                    let dx = player.x - target.position.x
+                    let dz = player.z - target.position.z
+                    let dy = player.y - target.position.y
                     let p = new THREE.Mesh(
                         new THREE.BoxGeometry(0.6, 0.6, 0.6),
                         eBulletMAT
                     );
-                    p.position.set(target.position.x, target.position.y, target.position.z)
+                    p.position.set(target.position.x, target.position.y + 2, target.position.z)
                     p.dx = dx * enemyBulletSpeed
                     p.dy = dy * enemyBulletSpeed
                     p.dz = dz * enemyBulletSpeed
@@ -1201,6 +1220,9 @@
                     eBullets.push(p)
                     scene.add(p)
                     setTimeout(() => {
+                        let dx = player.x - target.position.x
+                        let dz = player.z - target.position.z
+                        let dy = player.y - target.position.y
                         let p = new THREE.Mesh(
                             new THREE.BoxGeometry(0.6, 0.6, 0.6),
                             eBulletMAT
@@ -1215,6 +1237,9 @@
                         scene.add(p)
                     }, 300);
                     setTimeout(() => {
+                        let dx = player.x - target.position.x
+                        let dz = player.z - target.position.z
+                        let dy = player.y - target.position.y
                         let p = new THREE.Mesh(
                             new THREE.BoxGeometry(0.6, 0.6, 0.6),
                             eBulletMAT
@@ -1237,9 +1262,10 @@
             }
 
             for (let bullet of eBullets) {
-                let dist = Math.sqrt(
-                    (player.x - bullet.position.x) ** 2 +
-                    (player.z - bullet.position.z) ** 2
+                let dist = Math.cbrt(
+                    (player.x - bullet.position.x) * (player.x - bullet.position.x) +
+                    (player.z - bullet.position.z) * (player.z - bullet.position.z) +
+                    (player.y - bullet.position.y) * (player.y - bullet.position.y)
                 );
 
 
@@ -1250,7 +1276,34 @@
                 removeBulletsInWalls(bullet)
 
                 if (dist < 4) {
-                    home();
+                    health -= 15
+                    scene.remove(bullet);
+
+                    const list = bullets.includes(bullet)
+                        ? bullets
+                        : eBullets;
+
+                    const index = list.indexOf(bullet);
+
+                    if (index !== -1)
+                        list.splice(index, 1);
+
+                    if (health <= 0) {
+                        home()
+                    }
+
+                }
+                if (dist > 300) {
+                    scene.remove(bullet);
+
+                    const list = bullets.includes(bullet)
+                        ? bullets
+                        : eBullets;
+
+                    const index = list.indexOf(bullet);
+
+                    if (index !== -1)
+                        list.splice(index, 1);
                 }
             }
 
