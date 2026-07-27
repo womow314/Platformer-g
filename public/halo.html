@@ -74,11 +74,13 @@
         Mouse Look<br>
         Space Jump<br>
         Q switch guns <br>
-        <span style="color: red;">Kills: <span id="kills">0</span></span> <br> 
+        <span style="color: red;">Kills: <span id="kills">0</span></span> <br>
         Ammo: <span id="ammoTag">160</span> <br> <br>
         Current gun: <span id="current">Assult</span>
     </div>
-    <h1>HEALTH: 100%</h1>
+    <div id="progressContainer">
+        <div id="progressBar"></div>
+    </div>
 
     <span id="plus"><img id="crossHair" src="images/halo_assault_rifle_crosshair.png" alt="Crosshair"></span>
 
@@ -145,6 +147,7 @@
         );
 
         renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.BasicShadowMap;
 
         document.body.appendChild(renderer.domElement);
 
@@ -177,7 +180,7 @@
 
 
         // TERRAIN HEIGHT FUNCTION
-        const multiply = 4
+        const multiply = 5
 
         const m1 = Math.random() * multiply
         const m2 = Math.random() * multiply
@@ -281,7 +284,7 @@
             platforms.push(p);
         };
         let ammos = []
-        function updateAmmo () {
+        function updateAmmo() {
             let ammoTag = document.getElementById('ammoTag')
             ammoTag.innerText = `${ammo[gun]}`
         }
@@ -379,9 +382,7 @@
             });
 
         }
-        setInterval(() => {
-            document.querySelector('h1').innerText = `HEALTH: ${health}%`
-        }, 200);
+
 
 
 
@@ -478,8 +479,8 @@
 
         // TERRAIN
 
-        const size = 2000;
-        const segments = 100;
+        const size = 3000;
+        const segments = 60;
         let gun = "assult"
 
 
@@ -595,8 +596,8 @@
 
             for (let i = 0; i < count; i++) {
 
-                let x = Math.random() * 2000 - 1000;
-                let z = Math.random() * 2000 - 1000;
+                let x = Math.random() * size - size / 2;
+                let z = Math.random() * size - size / 2;
 
                 dummy.position.set(
                     x,
@@ -657,7 +658,7 @@
         }
         function fire() {
             if (gun === "assult") {
-                if (ammo.assult <=0) return;
+                if (ammo.assult <= 0) return;
                 let p = new THREE.Mesh(
                     new THREE.BoxGeometry(0.6, 0.6, 0.6),
                     bullet
@@ -719,7 +720,7 @@
 
                     scene.add(p);
                     bullets.push(p);
-                    
+
                 }
                 ammo.shotty -= 1
             }
@@ -913,12 +914,6 @@
             }
 
         }
-        setInterval(() => {
-            let x = -1000
-            let z = player.z + Math.random() * 2000 - 1000
-
-            //spawnTarget(Math.random() * 2000 - 1000, 0, Math.random() * 2000 - 1000)
-        }, 4000);
 
         let groundAt = Math.max(terrainHeight(100, -200), -50) + 7
         //Ground level
@@ -944,34 +939,34 @@
             let groupX = 0
             let groupZ = 0
 
-            groupX = Math.random() * 2000 - 1000
-            groupZ = Math.random() * 2000 - 1000
+            groupX = Math.random() * size - size / 2
+            groupZ = Math.random() * size - size / 2
 
             spawnPlatform(groupX, terrainHeight(groupX, groupZ) - 35, groupZ, Math.random() * 50 + 5, Math.random() * 50 + 35, Math.random() * 50 + 5, true)
         }
 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 13; i++) {
             let groupX = 0
             let groupZ = 0
             do {
-                groupX = Math.random() * 2000 - 1000
-                groupZ = Math.random() * 2000 - 1000
+                groupX = Math.random() * size - size / 2
+                groupZ = Math.random() * size - size / 2
             } while (terrainHeight(groupX, groupZ) < -75);
-            const max = 5
+            const max = 8
             const min = 2
             let groupSize = Math.ceil(Math.random() * (max - 1) + min)
             for (let n = 0; n < groupSize; n++) {
-                spawnTarget(groupX + Math.random() * 20 - 10, 0, groupZ + Math.random() * 20 - 10)
+                spawnTarget(groupX + Math.random() * 40 - 20, 0, groupZ + Math.random() * 40 - 20)
             }
         }
 
         //trees
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 4; i++) {
             let groupX = 0
             let groupZ = 0
             do {
-                groupX = Math.random() * 2000 - 1000
-                groupZ = Math.random() * 2000 - 1000
+                groupX = Math.random() * size - size / 2
+                groupZ = Math.random() * size - size / 2
             } while (terrainHeight(groupX, groupZ) < -75);
             const max = 8
             const min = 3
@@ -987,8 +982,8 @@
             let groupX = 0
             let groupZ = 0
             do {
-                groupX = Math.random() * 2000 - 1000
-                groupZ = Math.random() * 2000 - 1000
+                groupX = Math.random() * size - size / 2
+                groupZ = Math.random() * size - size / 2
             } while (terrainHeight(groupX, groupZ) < -75);
             const max = 1
             const min = 1
@@ -1050,11 +1045,18 @@
             }
 
         }
+        let healCooldown = 300
 
 
 
 
-        // GAME LOOP
+        // GAME LOOP ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         let kills = 0
 
         let maxCooldown = 2.5
@@ -1215,20 +1217,6 @@
                 mz /= len;
 
             }
-
-            //for (let target of targets) {
-            //const speed = 0.5
-            //let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
-            //let dx = (player.x - target.position.x) / dist * speed
-            //let dz = (player.z - target.position.z) / dist * speed
-            //target.position.x += dx
-            //target.position.z += dz
-            //target.position.y = terrainHeight(target.position.x, target.position.z) - 2
-            //if (dist < 10) {
-            //home()
-            //}
-            //}
-
             for (let target of targets) {
                 let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
                 let dx = player.x - target.position.x
@@ -1263,7 +1251,7 @@
                     //target.position.z -= dz / dist * mobSpeed * 2.2;
                 }
 
-                if (target.time % 100 < 0.5 && dist < 300) {
+                if (target.time % 120 < 0.5 && dist < 180) {
                     let dx = player.x - target.position.x
                     let dz = player.z - target.position.z
                     let dy = player.y - target.position.y
@@ -1272,9 +1260,9 @@
                         eBulletMAT
                     );
                     p.position.set(target.position.x, target.position.y + 2, target.position.z)
-                    p.dx = dx * enemyBulletSpeed
-                    p.dy = dy * enemyBulletSpeed
-                    p.dz = dz * enemyBulletSpeed
+                    p.dx = dx * enemyBulletSpeed + Math.random() - 0.5
+                    p.dy = dy * enemyBulletSpeed + Math.random() - 0.5
+                    p.dz = dz * enemyBulletSpeed + Math.random() - 0.5
 
 
                     eBullets.push(p)
@@ -1288,9 +1276,9 @@
                             eBulletMAT
                         );
                         p.position.set(target.position.x, target.position.y, target.position.z)
-                        p.dx = dx * enemyBulletSpeed
-                        p.dy = dy * enemyBulletSpeed
-                        p.dz = dz * enemyBulletSpeed
+                        p.dx = dx * enemyBulletSpeed + Math.random() - 0.5
+                        p.dy = dy * enemyBulletSpeed + Math.random() - 0.5
+                        p.dz = dz * enemyBulletSpeed + Math.random() - 0.5
 
 
                         eBullets.push(p)
@@ -1305,9 +1293,9 @@
                             eBulletMAT
                         );
                         p.position.set(target.position.x, target.position.y, target.position.z)
-                        p.dx = dx * enemyBulletSpeed
-                        p.dy = dy * enemyBulletSpeed
-                        p.dz = dz * enemyBulletSpeed
+                        p.dx = dx * enemyBulletSpeed + Math.random() - 0.5
+                        p.dy = dy * enemyBulletSpeed + Math.random() - 0.5
+                        p.dz = dz * enemyBulletSpeed + Math.random() - 0.5
 
 
                         eBullets.push(p)
@@ -1337,6 +1325,7 @@
 
                 if (dist < 4) {
                     health -= 15
+                    healCooldown = 160
                     scene.remove(bullet);
 
                     const list = bullets.includes(bullet)
@@ -1385,6 +1374,14 @@
                     updateAmmo();
                 }
             }
+
+            if (healCooldown <= 0) {
+                health += 0.5
+                health = Math.min(health, 100)
+            }
+            healCooldown -= 1
+            document.getElementById("progressBar").style.width = `${health}%`;
+
 
 
 
