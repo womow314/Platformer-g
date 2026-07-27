@@ -74,6 +74,8 @@
         Mouse Look<br>
         Space Jump<br>
         Q switch guns <br>
+        <span style="color: red;">Kills: <span id="kills">0</span></span> <br> 
+        Ammo: <span id="ammoTag">160</span> <br> <br>
         Current gun: <span id="current">Assult</span>
     </div>
     <h1>HEALTH: 100%</h1>
@@ -248,6 +250,9 @@
         const eBulletMAT = new THREE.MeshBasicMaterial({
             color: 0x22ff22
         });
+        const ammoMAT = new THREE.MeshBasicMaterial({
+            color: 0x000000
+        });
         let health = 100
 
         let platforms = []
@@ -267,13 +272,33 @@
 
             p.position.set(x, y, z);
 
-            scene.add(p);       // instead of scene.add(p)
+            scene.add(p);
 
             p.width = width;
             p.height = height;
             p.depth = depth;
 
             platforms.push(p);
+        };
+        let ammos = []
+        function updateAmmo () {
+            let ammoTag = document.getElementById('ammoTag')
+            ammoTag.innerText = `${ammo[gun]}`
+        }
+        const dropAmmo = (x, z) => {
+            let p;
+
+            p = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 5), ammoMAT);
+
+            p.position.set(x, terrainHeight(x, z), z);
+
+            scene.add(p);
+
+            p.width = 5;
+            p.height = 5;
+            p.depth = 5;
+
+            ammos.push(p);
         };
         let p = new THREE.Mesh(new THREE.BoxGeometry(10000, 100, 10000), waterMat);
         p.position.set(0, -100, 0)
@@ -624,8 +649,15 @@
         const gravity = -.025;
         const jump = .8;
         let guns = ["assult", "snipe"]
+
+        let ammo = {
+            "assult": 160,
+            "snipe": 8,
+            "shotty": 5
+        }
         function fire() {
             if (gun === "assult") {
+                if (ammo.assult <=0) return;
                 let p = new THREE.Mesh(
                     new THREE.BoxGeometry(0.6, 0.6, 0.6),
                     bullet
@@ -639,12 +671,14 @@
                 p.dx = dir.x + Math.random() / 10 - 0.05;
                 p.dy = dir.y + Math.random() / 10 - 0.05;
                 p.dz = dir.z + Math.random() / 10 - 0.05;
-                p.damage = 0.2
+                p.damage = 0.34
                 p.type = "assult"
 
                 scene.add(p);
                 bullets.push(p);
+                ammo.assult -= 1
             } else if (gun === "snipe") {
+                if (ammo.snipe <= 0) return;
                 let p = new THREE.Mesh(
                     new THREE.BoxGeometry(1, 1, 1),
                     bullet
@@ -663,7 +697,9 @@
 
                 scene.add(p);
                 bullets.push(p);
+                ammo.snipe -= 1
             } else if (gun === "shotty") {
+                if (ammo.shotty <= 0) return;
                 for (let i = 0; i < 60; i++) {
                     let p = new THREE.Mesh(
                         new THREE.BoxGeometry(0.6, 0.6, 0.6),
@@ -683,7 +719,9 @@
 
                     scene.add(p);
                     bullets.push(p);
+                    
                 }
+                ammo.shotty -= 1
             }
             const gunIMG = document.getElementById("gunIMG");
 
@@ -694,6 +732,7 @@
                 if (gun === "assult") gunIMG.src = gunIdleA.src;
                 if (gun === "shotty") gunIMG.src = gunIdleSh.src;
             }, 25);
+            updateAmmo()
         }
 
 
@@ -793,6 +832,7 @@
                     if (gun === "assult") gunIMG.src = gunIdleA.src;
                     if (gun === "shotty") gunIMG.src = gunIdleSh.src;
                     if (gun === "snipe") gunIMG.src = gunFireSn.src;
+                    updateAmmo()
                 }
             });
 
@@ -941,6 +981,23 @@
             }
 
         }
+
+        //ammos
+        for (let i = 0; i < 10; i++) {
+            let groupX = 0
+            let groupZ = 0
+            do {
+                groupX = Math.random() * 2000 - 1000
+                groupZ = Math.random() * 2000 - 1000
+            } while (terrainHeight(groupX, groupZ) < -75);
+            const max = 1
+            const min = 1
+            let groupSize = Math.ceil(Math.random() * (max - 1) + min)
+            for (let n = 0; n < groupSize; n++) {
+                dropAmmo(groupX + Math.random() * 200 - 100, groupZ + Math.random() * 200 - 100)
+            }
+
+        }
         function removeBulletsInWalls(bullet) {
 
             const oldPos = bullet.position.clone().sub(
@@ -998,6 +1055,7 @@
 
 
         // GAME LOOP
+        let kills = 0
 
         let maxCooldown = 2.5
         let cooldown = 0
@@ -1049,6 +1107,8 @@
                     if (target) {
                         target.health -= bullet.damage
                         if (target.health <= 0) {
+                            kills += 1
+                            document.getElementById('kills').innerText = `${kills}`
                             scene.remove(target);
 
                             const index = targets.indexOf(target);
@@ -1304,6 +1364,25 @@
 
                     if (index !== -1)
                         list.splice(index, 1);
+                }
+            }
+
+            for (let ammoBox of ammos) {
+                let dist = Math.cbrt(
+                    (player.x - ammoBox.position.x) ** 2 +
+                    (player.z - ammoBox.position.z) ** 2 +
+                    (player.y - ammoBox.position.y) ** 2
+                );
+
+                if (dist < 5) {
+                    ammo.assult += 100;
+                    ammo.snipe += 4;
+                    ammo.shotty += 5;
+
+                    scene.remove(ammoBox);
+                    ammos.splice(ammos.indexOf(ammoBox), 1);
+
+                    updateAmmo();
                 }
             }
 
