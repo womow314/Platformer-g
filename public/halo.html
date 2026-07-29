@@ -133,7 +133,7 @@
             90,
             innerWidth / innerHeight,
             0.25,
-            2000
+            800
         );
 
 
@@ -198,6 +198,7 @@
             );
 
         }
+        
 
 
 
@@ -303,9 +304,7 @@
 
             ammos.push(p);
         };
-        let p = new THREE.Mesh(new THREE.BoxGeometry(10000, 100, 10000), waterMat);
-        p.position.set(0, -100, 0)
-        scene.add(p)
+
         let p1 = new THREE.Mesh(new THREE.BoxGeometry(10000, 1, 10000), waterMat);
         p1.position.set(0, -50, 0)
         scene.add(p1)
@@ -479,8 +478,8 @@
 
         // TERRAIN
 
-        const size = 3000;
-        const segments = 60;
+        const size = 5000;
+        const segments = 140;
         let gun = "assult"
 
 
@@ -566,60 +565,6 @@
 
         }
 
-        // GRASS INSTANCES
-        gltfLoader.load("Models/grass (1).glb", function (gltf) {
-            return;
-
-            let mesh;
-
-            // find the actual mesh inside the glb
-            gltf.scene.traverse((child) => {
-                if (child.isMesh) {
-                    mesh = child;
-                }
-            });
-
-            if (!mesh) {
-                console.log("No grass mesh found");
-                return;
-            }
-
-            const count = 1500;
-
-            const grassInstances = new THREE.InstancedMesh(
-                mesh.geometry,
-                mesh.material,
-                count
-            );
-
-            const dummy = new THREE.Object3D();
-
-            for (let i = 0; i < count; i++) {
-
-                let x = Math.random() * size - size / 2;
-                let z = Math.random() * size - size / 2;
-
-                dummy.position.set(
-                    x,
-                    terrainHeight(x, z) - 4,
-                    z
-                );
-                dummy.rotation.x = -Math.PI / 2
-
-
-                let s = Math.random() * 0.25 + 0.1;
-                dummy.scale.set(s, s, s);
-
-                dummy.updateMatrix();
-
-                grassInstances.setMatrixAt(i, dummy.matrix);
-            }
-
-            grassInstances.instanceMatrix.needsUpdate = true;
-
-            scene.add(grassInstances);
-
-        });
 
 
 
@@ -935,7 +880,7 @@
         //enemies
         spawnTarget(40, groundAt + 61, -210, 1, true)
 
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 60; i++) {
             let groupX = 0
             let groupZ = 0
 
@@ -945,7 +890,7 @@
             spawnPlatform(groupX, terrainHeight(groupX, groupZ) - 35, groupZ, Math.random() * 50 + 5, Math.random() * 50 + 35, Math.random() * 50 + 5, true)
         }
 
-        for (let i = 0; i < 13; i++) {
+        for (let i = 0; i < 20; i++) {
             let groupX = 0
             let groupZ = 0
             do {
@@ -961,7 +906,7 @@
         }
 
         //trees
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 14; i++) {
             let groupX = 0
             let groupZ = 0
             do {
@@ -1219,6 +1164,7 @@
             }
             for (let target of targets) {
                 let dist = Math.sqrt((player.x - target.position.x) * (player.x - target.position.x) + (player.z - target.position.z) * (player.z - target.position.z))
+                if (dist > 800) continue;
                 let dx = player.x - target.position.x
                 let dz = player.z - target.position.z
                 let dy = player.y - target.position.y
@@ -1342,7 +1288,7 @@
                     }
 
                 }
-                if (dist > 300) {
+                if (dist > 200) {
                     scene.remove(bullet);
 
                     const list = bullets.includes(bullet)
@@ -1410,6 +1356,9 @@
             const colliders = [...platforms, ...treeColliders];
 
             for (let obj of colliders) {
+                //let dist = Math.sqrt((player.x - obj.position.x) * (player.x - obj.position.x) + (player.z - obj.position.z) * (player.z - obj.position.z))
+                //if (dist > 10) continue;
+
 
                 if (isInWall(obj, cnx, player.z))
                     blockedX = true;
