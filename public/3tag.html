@@ -82,6 +82,17 @@
         });
 
         const socket = io();
+
+        let playerName = localStorage.getItem("playerName");
+
+        if (!playerName) {
+            playerName = prompt("Enter your name:") || "Player";
+            localStorage.setItem("playerName", playerName);
+        }
+
+        socket.on("connect", () => {
+            socket.emit("setName", playerName);
+        });
         socket.emit("joinTag3", "");
 
         function ban(name) {
@@ -91,14 +102,19 @@
         socket.on("connect", () => {
 
             console.log("Connected!");
-            let playerName = prompt("Enter your name:");
 
-            if (!playerName || playerName.trim() === "") {
-                playerName = "Player";
-            }
+        });
 
-            socket.emit("setName", playerName);
+        socket.on("connect", () => {
+            console.log("Connected", socket.id);
+        });
 
+        socket.on("disconnect", reason => {
+            console.log("Disconnected:", reason);
+        });
+
+        socket.io.on("reconnect_attempt", () => {
+            console.log("Trying to reconnect...");
         });
 
         socket.on("playerMove", (data) => {

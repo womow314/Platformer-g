@@ -19,6 +19,8 @@ let fullMap = false
 
 let tagCooldown = 0
 
+
+
 setInterval(() => {
     tagCooldown -= 1
 }, 300);
