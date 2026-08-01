@@ -81,7 +81,16 @@
             color: 0xffffff
         });
 
-        const socket = io();
+        const socket = io({
+            transports: ["websocket"]
+        });
+        socket.on("connect", () => {
+            console.log("Connected via", socket.io.engine.transport.name);
+
+            socket.io.engine.on("upgrade", () => {
+                console.log("Upgraded to", socket.io.engine.transport.name);
+            });
+        });
 
         let playerName = localStorage.getItem("playerName");
 
@@ -104,6 +113,15 @@
             console.log("Connected!");
 
         });
+
+        setInterval(() => {
+            console.log(
+                "connected:",
+                socket.connected,
+                "transport:",
+                socket.io.engine?.transport?.name
+            );
+        }, 1000);
 
         socket.on("connect", () => {
             console.log("Connected", socket.id);
