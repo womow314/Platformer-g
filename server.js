@@ -398,6 +398,14 @@ io.on("connection", (socket) => {
             console.log(`Player disconnected: ${socket.id}`);
 
         });
+        socket.on("disconnect", (reason) => {
+            console.log(
+                "Disconnected",
+                socket.id,
+                "reason:",
+                reason
+            );
+        });
     })
 
 });
