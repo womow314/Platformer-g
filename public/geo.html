@@ -141,7 +141,7 @@
 
         const death = new Image();
 
-        death.src = "images/pixil-frame-0%20(5).png";
+        death.src = "images/pixil-frame-0%20(77).png";
 
         const water = new Image();
 
@@ -289,9 +289,9 @@
             portals.push({ x: cx, y: cy, changeX: dx, changeY: dy })
         }
 
-        addPlatform(0, 380, 8000, 20)
-        addPlatform(0, 360, 8000, 20)
-        addPlatform(0, 340, 8000, 20)
+        addPlatform(0, 380, 80000, 20)
+        addPlatform(0, 360, 80000, 20)
+        addPlatform(0, 340, 80000, 20)
         for (let i = 0; i < 300; i++) {
 
             const numOfLevels = 2
@@ -509,8 +509,8 @@
 
 
             dangers.forEach(plat => {
-                for (let b = 0; b < plat.width; b += 10) {
-                    ctx.drawImage(death, plat.x + b, plat.y, 10, plat.height);
+                for (let b = 0; b < plat.width; b += 20) {
+                    ctx.drawImage(death, plat.x + b, plat.y, 20, plat.height);
                 }
             });
             ctx.fillStyle = '#f4a261';
