@@ -19,6 +19,8 @@ let fullMap = false
 
 let tagCooldown = 0
 
+
+
 setInterval(() => {
     tagCooldown -= 1
 }, 300);
@@ -395,6 +397,14 @@ io.on("connection", (socket) => {
 
             console.log(`Player disconnected: ${socket.id}`);
 
+        });
+        socket.on("disconnect", (reason) => {
+            console.log(
+                "Disconnected",
+                socket.id,
+                "reason:",
+                reason
+            );
         });
     })
 
