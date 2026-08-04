@@ -339,9 +339,14 @@
                 currentX += 300
             }
         }
+        let countFPS = 0
+        setTimeout(() => {
+            console.log(`FPS: ${countFPS/10}`)
+        }, 10000);
 
 
         function update() {
+            countFPS += 1
             const framesPerSecond = 65
             player.x += 10.4 / framesPerSecond * 20
 
