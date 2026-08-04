@@ -91,7 +91,6 @@ io.on("connection", (socket) => {
             flatPlayers[socket.id].x = data.x;
             flatPlayers[socket.id].y = data.y;
 
-            // Check for tagging
             for (const id in flatPlayers) {
 
                 if (id === socket.id) continue;
@@ -135,7 +134,6 @@ io.on("connection", (socket) => {
 
             delete flatPlayers[socket.id];
 
-            // If IT left, make another player IT
             if (wasIt) {
 
                 const ids = Object.keys(flatPlayers);
@@ -199,7 +197,6 @@ io.on("connection", (socket) => {
             gravityPlayers[socket.id].x = data.x;
             gravityPlayers[socket.id].y = data.y;
 
-            // Check for tagging
             for (const id in gravityPlayers) {
 
                 if (id === socket.id) continue;
@@ -243,7 +240,6 @@ io.on("connection", (socket) => {
 
             delete gravityPlayers[socket.id];
 
-            // If IT left, make another player IT
             if (wasIt) {
 
                 const ids = Object.keys(gravityPlayers);
@@ -303,12 +299,10 @@ io.on("connection", (socket) => {
 
         socket.on("fellOff", () => {
 
-            // Nobody is it
             for (const id in players3d) {
                 players3d[id].it = false;
             }
 
-            // Player who fell becomes it
             players3d[socket.id].it = true;
 
             io.emit("players", players3d);
@@ -338,7 +332,6 @@ io.on("connection", (socket) => {
             players3d[socket.id].y = data.y;
             players3d[socket.id].z = data.z;
 
-            // Check for tagging
             for (const id in players3d) {
 
                 if (id === socket.id) continue;
@@ -382,7 +375,6 @@ io.on("connection", (socket) => {
 
             delete players3d[socket.id];
 
-            // If IT left, make another player IT
             if (wasIt) {
 
                 const ids = Object.keys(players3d);
