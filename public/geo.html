@@ -13,9 +13,9 @@
         <br>Lava is death <br>Slime is bouncy platform <br>Water is reverse gravity
     </div>
     <canvas id="gameCanvas" height="400" width="800"></canvas>
+    <button onclick="home()" id="home">Home</button>
     <div id="stuff" style="display: none;">
         <p id="cord">x: 0, y: 0</p>
-        <button onclick="home()" id="home">Home</button>
         <button onclick="changeBackground()" id="background">Sky</button>
     </div>
     <div id="mobileControls" style="display: block;">
@@ -283,7 +283,12 @@
                 addPlatform(currentX + gap * 2, 280, 30, 20)
                 addPlatform(currentX + gap * 3, 260, 30, 20)
                 addPlatform(currentX + gap * 4, 240, 30, 20)
-                addPlatform(currentX + 20, 320, gap * 4, 20, true)
+                addPlatform(currentX + 20, 320, roll1 < 0.4 ? gap * 3 : gap * 4, 20, true)
+                if (roll1 < 0.4) {
+                    addPlatform(currentX + gap * 4 + 5, 200, 20, 40, true)
+                    addPlatform(currentX + gap * 4 + 65, 320, 20, 20, true)
+                    addPlatform(currentX + gap * 4 + 85, 320, 20, 20, true)
+                }
 
                 currentX += Math.random() * 140 + 500
             } else if (roll === 3) { //Twin towers
@@ -314,6 +319,10 @@
                 addPlatform(currentX + 300, 300, 100, 20)
                 addPlatform(currentX + 220, 280, 20, 20)
                 addPlatform(currentX + 220, 240, 20, 40, true)
+                let roll2 = Math.random()
+                if (roll2 < 0.5) addPlatform(currentX + 160, 280, 20, 20, true)
+                if (roll2 < 0.1) addPlatform(currentX + 140, 280, 20, 20, true)
+
                 if (roll1 < 0.8) addPlatform(currentX + 380, 280, 20, 20, true)
                 if (roll1 < 0.5) addPlatform(currentX + 364, 280, 20, 20, true)
                 if (roll1 < 0.1) addPlatform(currentX + 348, 280, 20, 20, true)
@@ -328,7 +337,7 @@
                 addPlatform(currentX + 100, 310, 20, 10)
                 addPlatform(currentX + 20, 320, 140, 20, true)
                 currentX += 340
-            } else if (roll === 8) {
+            } else if (roll === 8) { //Xstep
                 addPlatform(currentX, 320, 120, 20)
                 addPlatform(currentX + 80, 300, 20, 20, false, true)
                 addPlatform(currentX + 100, 300, 20, 20, true)
@@ -337,20 +346,43 @@
                 addPlatform(currentX + 120, 160, 20, 20)
                 addPlatform(currentX + 120, 180, 20, 20)
                 currentX += 300
-            } else if (roll === 9) {
-                addPlatform(currentX, 320, 800,20, true)
-                let currentY = 300 
+            } else if (roll === 9) { //Overhang pass
+                addPlatform(currentX, 320, 800, 20, true)
+                let currentY = 230
                 let maxX = currentX + 800
+                addPlatform(currentX - 40, 320, 20, 20, false, true)
+                let isFirst = true
                 while (currentX < maxX) {
+
                     let width = Math.random() * 120 + 80
-                    addPlatform (currentX, currentY, width, 20)
-                    let roll2 = Math.random()
-                    if (roll2 < 0.6 && width > 120) {
-                        addPlatform(currentX + width / 2 - 10, currentY - 20, 20, 20, true)
+                    let roll4 = Math.random()
+                    let isDoingXstep = Math.random() < 0.2 && currentY < 290
+                    if (isDoingXstep) {
+                        addPlatform(currentX, currentY, 120, 20)
+                        addPlatform(currentX + 80, currentY - 20, 20, 20, false, true)
+                        addPlatform(currentX + 100, currentY - 20, 20, 20, true)
+                        addPlatform(currentX + 120, currentY - 200, 20, 20)
+                        addPlatform(currentX + 120, currentY - 180, 20, 20)
+                        addPlatform(currentX + 120, currentY - 160, 20, 20)
+                        addPlatform(currentX + 120, currentY - 140, 20, 20)
+                        currentY += 40
+                        width = 100
+                    } else {
+
+                        addPlatform(currentX, currentY, width, 20)
+                        let roll2 = Math.random()
+                        let roll3 = Math.random()
+                        if (roll2 < 0.6 && width > 120 && !isFirst) {
+                            addPlatform(currentX + width / 2 - 10, currentY - 20, 20, 20, true)
+                        }
+                        if (roll3 < 0.2) {
+                            addPlatform(currentX + width - 17.5, currentY - 20, 20, 20, false, true)
+                        }
                     }
-                    currentX += width + Math.random() * 60 + 40
+                    currentX += width + Math.random() * 40 + 30
                     currentY += Math.random() * 40 - 30
-                    
+                    isFirst = false
+
                 }
                 currentX += 80
             }
