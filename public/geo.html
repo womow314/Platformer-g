@@ -264,7 +264,7 @@
 
             const numOfLevels = 8
             let roll = Math.ceil(Math.random() * (numOfLevels + 1))
-            //roll = 8
+            roll = 9
             let roll1 = Math.random()
             if (roll === 1) { // Single spike
                 addPlatform(currentX, 320, 20, 20, true)
@@ -337,6 +337,22 @@
                 addPlatform(currentX + 120, 160, 20, 20)
                 addPlatform(currentX + 120, 180, 20, 20)
                 currentX += 300
+            } else if (roll === 9) {
+                addPlatform(currentX, 320, 800,20, true)
+                let currentY = 300 
+                let maxX = currentX + 800
+                while (currentX < maxX) {
+                    let width = Math.random() * 120 + 80
+                    addPlatform (currentX, currentY, width, 20)
+                    let roll2 = Math.random()
+                    if (roll2 < 0.6 && width > 120) {
+                        addPlatform(currentX + width / 2 - 10, currentY - 20, 20, 20, true)
+                    }
+                    currentX += width + Math.random() * 60 + 40
+                    currentY += Math.random() * 40 - 30
+                    
+                }
+                currentX += 80
             }
         }
         let countFPS = 0
