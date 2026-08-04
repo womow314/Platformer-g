@@ -1882,7 +1882,6 @@
       for (let i = enemies.length - 1; i >= 0; i--) {
         let enemy = enemies[i];
 
-        // Remove dead enemies
         if (enemy.health <= 0) {
           enemies.splice(i, 1);
           kills += 1;
@@ -1890,7 +1889,7 @@
           continue;
         }
 
-        // Move toward player
+
         let dx = player.x - enemy.x;
         let dy = player.y - enemy.y;
 
@@ -1932,7 +1931,7 @@
           }
         }
 
-        // Enemy separation
+
         for (let j = i - 1; j >= 0; j--) {
 
           let other = enemies[j];
@@ -1957,7 +1956,6 @@
           }
         }
 
-        // Force field damage
         if (inRange(player, enemy, forceFieldRange)) {
 
           enemy.health -=
@@ -1971,7 +1969,6 @@
           }
         }
 
-        // Player collision
         if (
           player.x < enemy.x + enemy.size &&
           player.x + 30 > enemy.x &&
@@ -2196,7 +2193,6 @@
 
     function draw() {
 
-      //ctx.drawImage(pausedIMG, 0, 0, canvas.width, canvas.height)
 
       ctx.save();
       if (isPaused) return;
@@ -2211,9 +2207,6 @@
       ctx.drawImage(forceField, player.x - forceFieldRange / 2 + 15, player.y - forceFieldRange / 2 + 15, forceFieldRange, forceFieldRange);
       ctx.drawImage(playerImg, player.x, player.y, 30, 30);
 
-
-      //ctx.fillStyle = '#287271';
-      //ctx.fillRect(20, 20, 40, 40);
 
       walls.forEach(wall => {
         for (let b = 0; b < wall.width; b += 10) {

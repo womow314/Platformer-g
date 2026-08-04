@@ -104,7 +104,6 @@
         import * as THREE from "three";
         import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-        // Put ALL of your JavaScript here.
         const gltfLoader = new GLTFLoader();
         const gunIdleA = new Image();
         gunIdleA.src = "images/pixil-frame-0 (73).png";
@@ -154,7 +153,6 @@
 
 
 
-        // LIGHT
 
         const sun = new THREE.DirectionalLight(
             0xffffff,
@@ -180,7 +178,6 @@
 
 
 
-        // TERRAIN HEIGHT FUNCTION
         const multiply = 5
 
         const m1 = Math.random() * multiply
@@ -210,12 +207,12 @@
             opacity: 0.5
         });
 
-        const waterTexture = waterMat.map; // or whatever texture you use
+        const waterTexture = waterMat.map; 
 
         waterTexture.wrapS = THREE.RepeatWrapping;
         waterTexture.wrapT = THREE.RepeatWrapping;
 
-        waterTexture.repeat.set(60, 60); // 100 tiles across X and Z
+        waterTexture.repeat.set(60, 60); 
 
         waterTexture.needsUpdate = true;
 
@@ -325,7 +322,7 @@
                 enemy.based = onPlat
                 enemy.timeToUnlock = 0
 
-                enemy.scale.set(0.07, 0.07, 0.07); // adjust size if needed
+                enemy.scale.set(0.07, 0.07, 0.07); 
 
                 scene.add(enemy);
 
@@ -349,12 +346,10 @@
 
                 scene.add(tree);
 
-                // Find the size of the model
                 const box = new THREE.Box3().setFromObject(tree);
                 const size = new THREE.Vector3();
                 box.getSize(size);
 
-                // Trunk collider (about 25% of tree width)
                 const trunkWidth = size.x * 0.25;
                 const trunkDepth = size.z * 0.25;
                 const trunkHeight = size.y;
@@ -402,8 +397,6 @@
         scene.add(camera);
         function checkWater() {
 
-            // water surface is at y = -50
-            // because your water box is 100 tall centered at -100
             const waterLevel = -50;
 
             if (player.y < waterLevel) {
@@ -477,10 +470,8 @@
 
 
 
-        // TERRAIN
-
         const size = 3000;
-        const segments = 80;
+        const segments = 80; 
         let gun = "assult"
 
 
@@ -515,12 +506,12 @@
         const grass = new THREE.MeshStandardMaterial({
             map: loader.load("images/pixil-frame-0 (69).png")
         });
-        const grassTexture = grass.map; // or whatever texture you use
+        const grassTexture = grass.map; 
 
         grassTexture.wrapS = THREE.RepeatWrapping;
         grassTexture.wrapT = THREE.RepeatWrapping;
 
-        grassTexture.repeat.set(500, 500); // 100 tiles across X and Z
+        grassTexture.repeat.set(500, 500); 
 
         grassTexture.needsUpdate = true;
 
@@ -530,8 +521,6 @@
             grass
         );
 
-
-        // keep terrain aligned with collision
 
         terrain.rotation.x = -Math.PI / 2;
 
@@ -566,10 +555,6 @@
 
         }
 
-
-
-
-        // PLAYER
 
         let player = {
 
@@ -705,9 +690,6 @@
         }
 
 
-
-        // MOUSE LOOK
-
         let eBullets = []
 
 
@@ -774,10 +756,6 @@
             });
 
 
-
-        // INPUT
-
-
         let keys = {};
 
 
@@ -818,19 +796,6 @@
             });
 
 
-
-
-
-        // TERRAIN COLLISION
-
-
-
-
-
-
-
-
-
         function canMove(x, z) {
 
             let current =
@@ -846,8 +811,6 @@
                     z
                 );
 
-
-            // prevent walking into cliffs
 
             if (next - current > 2.5)
                 return false;
@@ -1006,7 +969,7 @@
                     bullet.position.y = terrainHeight(
                         bullet.position.x,
                         bullet.position.z
-                    ) + 2; // a little above the ground
+                    ) + 2; 
 
                     const radius = 30;
                     bullet.scale.set(2, 2, 2);
@@ -1028,7 +991,6 @@
                     bullet.dy = 0
                     bullet.dz = 0
 
-                    // damage enemies
                     for (let target of [...targets]) {
 
                         const dist = bullet.position.distanceTo(target.position);
@@ -1122,7 +1084,6 @@
 
                     let target = hits[0].object;
 
-                    // Go up until we find the object stored in targets[]
                     while (target && !targets.includes(target)) {
                         target = target.parent;
                     }
@@ -1249,7 +1210,6 @@
                 const enemyBulletSpeed = 0.08
                 const mobSpeed = 0.16
                 target.timeToUnlock -= 1
-                //dist > 80 && 
                 if (target.timeToUnlock <= 0) {
 
                     if (target.time < 150) {
@@ -1270,9 +1230,7 @@
                         target.time = 0
                     }
                 } else {
-                    //if (dist < 80) { target.timeToUnlock = 100 }
-                    //target.position.x -= dx / dist * mobSpeed * 2.2;
-                    //target.position.z -= dz / dist * mobSpeed * 2.2;
+                    continue
                 }
 
                 if (target.time % 120 < 0.5 && dist < 180) {
@@ -1435,9 +1393,6 @@
             const colliders = [...platforms, ...treeColliders];
 
             for (let obj of colliders) {
-                //let dist = Math.sqrt((player.x - obj.position.x) * (player.x - obj.position.x) + (player.z - obj.position.z) * (player.z - obj.position.z))
-                //if (dist > 10) continue;
-
 
                 if (isInWall(obj, cnx, player.z))
                     blockedX = true;
@@ -1453,13 +1408,10 @@
             if (canMove(player.x, nz) && !blockedZ)
                 player.z = nz;
 
-            // gravity
+
 
             player.velocityY += gravity;
             player.y += player.velocityY;
-
-
-            // terrain collision
 
             updateGround();
 
@@ -1469,7 +1421,6 @@
             checkWater();
 
 
-            // platform collision
 
             [...platforms, ...treeColliders].forEach(p => {
 
@@ -1488,9 +1439,6 @@
 
             });
 
-
-
-            // jump
 
             if (keys.Space && player.grounded) {
 

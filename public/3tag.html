@@ -61,9 +61,7 @@
         }
         const loader = new THREE.TextureLoader();
         const scene = new THREE.Scene();
-        //scene.background = new THREE.Color(0x87CEEB);
         scene.background = new THREE.Color(0x74b0c8);
-        //scene.background = loader.load("images/pixil-frame-0 (3).png")
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -842,7 +840,7 @@
 
 
                     const tag = createNameTag(p.name);
-                    mesh.userData.nameTag = tag; // save reference
+                    mesh.userData.nameTag = tag; 
                     mesh.userData.lastName = p.name;
                     mesh.add(tag);
 
