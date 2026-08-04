@@ -17,9 +17,9 @@
         <p id="cord">x: 0, y: 0</p>
         <button onclick="home()" id="home">Home</button>
         <button onclick="changeBackground()" id="background">Sky</button>
-        <div id="mobileControls">
-            <button id="jump">⤒</button>
-        </div>
+    </div>
+    <div id="mobileControls" style="display: block;">
+        <button id="jump">⤒</button>
     </div>
     <audio id="deathSound" preload="auto">
         <source src="audio/platformer/death.mp3" type="audio/mp3">
@@ -341,7 +341,7 @@
         }
         let countFPS = 0
         setTimeout(() => {
-            console.log(`FPS: ${countFPS/10}`)
+            console.log(`FPS: ${countFPS / 10}`)
         }, 10000);
 
 
