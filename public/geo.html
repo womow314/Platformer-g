@@ -14,7 +14,7 @@
     </div>
     <canvas id="gameCanvas" height="400" width="800"></canvas>
     <button onclick="home()" id="home">Home</button>
-    <div id="stuff" style="display: block;">
+    <div id="stuff" style="display: none;">
         <p id="cord">x: 0, y: 0</p>
         <button onclick="changeBackground()" id="background">Sky</button>
     </div>
@@ -61,7 +61,7 @@
 
 
         const ctx = canvas.getContext('2d');
-        const basegravity = 0.73
+        let basegravity = 0.73
         let gravity = basegravity;
         let isGameOver = false;
         let highScore = 0;
@@ -114,6 +114,10 @@
 
         slime.src = "images/pixil-frame-0%20(11).png"
 
+        const ball = new Image();
+
+        ball.src = "images/guard.png"
+
         let sky = new Image();
 
         sky.src = "images/pixil-frame-0%20(3).png";
@@ -133,6 +137,9 @@
         function playDeathSound() {
             deathSound.currentTime = 0;
             deathSound.play();
+            player.image = playerImg
+            player.type = "cube"
+            basegravity = 0.73
         }
 
         const bounceSound = document.getElementById("bounceSound");
@@ -182,7 +189,9 @@
             dy: 0,
             speed: 7,
             jumpPower: -10.5,
-            grounded: false
+            grounded: false,
+            image: playerImg,
+            type: "cube"
         };
         let scrollX = 0;
         scrollX = player.x - 400;
@@ -231,12 +240,12 @@
             enemys.push({ x: px, y: py })
         }
 
-        function addPlatform(px, py, w, h, danger = false, bouncy = false, isWater = false, checkpoint = false) {
+        function addPlatform(px, py, w, h, danger = false, bouncy = false, flipSpike = false, isWater = false, checkpoint = false) {
             let add = 0
             if (currentX < returnToNormalHeightX) add = increasedHeight
             if (bouncy) py += 10
             if (!danger) platforms.push({ x: px, y: py + add, width: w, height: h, b: bouncy, water: isWater, check: checkpoint })
-            else dangers.push({ x: px, y: py + add, width: w, height: h })
+            else dangers.push({ x: px, y: py + add, width: w, height: h, isFlipped: flipSpike })
         }
 
 
@@ -250,8 +259,8 @@
                 bullets.push({ x: enemy.x, y: enemy.y })
             }
         }, 4000);
-        function addPortal(cx, cy, dx, dy) {
-            portals.push({ x: cx, y: cy, changeX: dx, changeY: dy })
+        function addPortal(cx, cy, type) {
+            portals.push({ x: cx, y: cy, type: type })
         }
         let returnToNormalHeightX = 0
         let increasedHeight = -20
@@ -262,9 +271,9 @@
 
         for (let i = 0; i < 300; i++) {
 
-            const numOfLevels = 8
-            let roll = Math.ceil(Math.random() * (numOfLevels + 1))
-            //roll = 9
+            const numOfLevels = 10
+            let roll = Math.ceil(Math.random() * (numOfLevels))
+            //roll = 10
             let roll1 = Math.random()
             if (roll === 1) { // Single spike
                 addPlatform(currentX, 320, 20, 20, true)
@@ -385,6 +394,39 @@
 
                 }
                 currentX += 80
+            } else if (roll === 10) {
+                addPlatform(currentX, 300, 20, 20)
+                addPlatform(currentX, 280, 20, 20)
+                addPlatform(currentX, 260, 20, 20)
+                addPlatform(currentX, 240, 20, 20)
+                addPlatform(currentX, 220, 20, 20)
+                addPlatform(currentX, 200, 20, 20)
+                addPlatform(currentX + 1000, 300, 20, 20)
+                addPlatform(currentX + 1000, 280, 20, 20)
+                addPlatform(currentX + 1000, 260, 20, 20)
+                addPlatform(currentX + 1000, 240, 20, 20)
+                addPlatform(currentX + 1000, 220, 20, 20)
+                addPlatform(currentX + 1000, 200, 20, 20)
+                addPlatform(currentX, 200, 1000, 20)
+                addPortal(currentX, 320, "ball")
+                addPortal(currentX + 1000, 320, "cube")
+                let maxX = currentX + 940
+                currentX += 120
+                let isOnFloor = true
+                while (currentX < maxX) {
+                    let roll5 = Math.random()
+                    let roll6 = Math.random()
+                    let length = (Math.ceil(Math.random() * 5) + 1) * 20
+                    if (roll6 > 0.8) {
+                        length += 60
+                        addPlatform(currentX + length / 2 - 20, !isOnFloor ? 320 : 220, 20, 20, true, false, isOnFloor)
+                    }
+                    addPlatform(currentX, isOnFloor ? 320 : 220, length, 20, roll6 < 0.8, false, !isOnFloor)
+                    
+                    currentX += length + Math.random() * 100
+                    isOnFloor = !isOnFloor
+                }
+                currentX += 250
             }
         }
         let countFPS = 0
@@ -425,9 +467,14 @@
             }
 
             if ((keys['ArrowUp'] || keys['Space'] || keys['KeyW']) && player.grounded) {
-                if (gravity > 0) player.dy = player.jumpPower;
-                else player.dy = player.dy = -player.jumpPower / 1.3;
-                player.grounded = false;
+                if (player.type === "cube") {
+                    if (gravity > 0) player.dy = player.jumpPower;
+                    else player.dy = player.dy = -player.jumpPower / 1.3;
+                    player.grounded = false;
+                } else {
+                    basegravity = -basegravity
+                    player.y += basegravity
+                }
             }
 
             if (!isGameOver) {
@@ -503,9 +550,14 @@
                     player.x + player.width > portal.x &&
                     player.y < portal.y + 20 &&
                     player.y + player.height > portal.y) {
-
-                    player.x += portal.changeX;
-                    player.y += portal.changeY;
+                    if (portal.type === "ball") {
+                        player.image = ball
+                        player.type = "ball"
+                    }
+                    if (portal.type === "cube") {
+                        player.image = playerImg
+                        player.type = "cube"
+                    }
                 }
             }
 
@@ -547,43 +599,56 @@
             );
 
             ctx.fillStyle = '#287271';
-            nope = false
+            nope = false;
             platforms.forEach(plat => {
 
                 if (plat.b) {
                     for (let b = 0; b < plat.width; b += 20) {
                         ctx.drawImage(slime, plat.x + b, plat.y, 20, plat.height);
                     }
-                    nope = true
+                    nope = true;
+
                 } else if (plat.water) {
                     for (let b = 0; b < plat.width; b += 20) {
                         for (let k = 0; k < plat.height; k += 160) {
                             ctx.drawImage(water, plat.x + b, plat.y + k, 20, 160);
                         }
                     }
-                    nope = true
+                    nope = true;
+
                 } else if (plat.check) {
                     ctx.fillStyle = '#87CEEB';
-                    nope = false
+                    nope = false;
+
                 } else {
-                    nope = true
+                    nope = true;
                     if (plat.height > 60) {
-                        nope = false
+                        nope = false;
                         ctx.fillStyle = '#6792e0';
                     }
                     for (let b = 0; b < plat.width; b += 10) {
-                        if (nope) ctx.drawImage(brick, plat.x + b, plat.y, 10, plat.height);
+                        if (nope) {
+                            ctx.drawImage(brick, plat.x + b, plat.y, 10, plat.height);
+                        }
                     }
-
                 }
             });
-
 
             dangers.forEach(plat => {
                 for (let b = 0; b < plat.width; b += 20) {
-                    ctx.drawImage(death, plat.x + b, plat.y, 20, plat.height);
+
+                    if (plat.isFlipped) {
+                        ctx.save();
+                        ctx.translate(plat.x + b + 10, plat.y + 10);
+                        ctx.scale(1, -1);
+                        ctx.drawImage(death, -10, -10, 20, 20);
+                        ctx.restore();
+                    } else {
+                        ctx.drawImage(death, plat.x + b, plat.y, 20, plat.height);
+                    }
                 }
             });
+
             ctx.fillStyle = '#f4a261';
             enemys.forEach(enemy => {
                 ctx.drawImage(cannon, enemy.x, enemy.y, 30, 30);
@@ -598,8 +663,7 @@
                 ctx.drawImage(portalIMG, portal.x, portal.y - 30, 60, 60);
             });
 
-            ctx.drawImage(playerImg, player.x, player.y, player.width, player.height);
-            ctx.fillStyle = '#00ffff';
+            ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
 
             ctx.restore();
         }
