@@ -703,7 +703,12 @@
                 scene.background = new THREE.Color(0x74b0c8);
             }
             if (keys['KeyQ'] && isOwner) {
-                gravity = 0
+                gravity = -0.0075
+            }
+            if (keys['KeyE'] && isOwner) {
+                player.position.x = save.x;
+                player.position.y = save.y;
+                player.position.z = save.z;
             }
 
             platforms.forEach(p => {
@@ -840,7 +845,7 @@
 
 
                     const tag = createNameTag(p.name);
-                    mesh.userData.nameTag = tag; 
+                    mesh.userData.nameTag = tag;
                     mesh.userData.lastName = p.name;
                     mesh.add(tag);
 
