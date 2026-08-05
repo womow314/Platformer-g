@@ -260,7 +260,9 @@
             }
         }, 4000);
         function addPortal(cx, cy, type) {
-            portals.push({ x: cx, y: cy, type: type })
+            let add = 0
+            if (currentX < returnToNormalHeightX) add = increasedHeight
+            portals.push({ x: cx, y: cy + add, type: type })
         }
         let returnToNormalHeightX = 0
         let increasedHeight = -20
@@ -273,7 +275,7 @@
 
             const numOfLevels = 10
             let roll = Math.ceil(Math.random() * (numOfLevels))
-            //roll = 10
+            roll = 7
             let roll1 = Math.random()
             if (roll === 1) { // Single spike
                 addPlatform(currentX, 320, 20, 20, true)
@@ -410,7 +412,7 @@
                 addPlatform(currentX, 200, 1000, 20)
                 addPortal(currentX, 320, "ball")
                 addPortal(currentX + 1000, 320, "cube")
-                let maxX = currentX + 940
+                let maxX = currentX + 900
                 currentX += 120
                 let isOnFloor = true
                 while (currentX < maxX) {
@@ -420,9 +422,16 @@
                     if (roll6 > 0.8) {
                         length += 60
                         addPlatform(currentX + length / 2 - 20, !isOnFloor ? 320 : 220, 20, 20, true, false, isOnFloor)
+                        addPlatform(currentX + length - 20, isOnFloor ? 300 : 240, 20, 20, true, false, !isOnFloor)
+                    }
+                    if (Math.random() < 0.3 && roll6 < 0.8) {
+                        currentX += 20
+                        addPlatform(currentX - 20, isOnFloor ? 320 : 210, 20, 20, false, true)
                     }
                     addPlatform(currentX, isOnFloor ? 320 : 220, length, 20, roll6 < 0.8, false, !isOnFloor)
                     
+                    currentX += (roll6 > 0.8) ? 20 : 0
+
                     currentX += length + Math.random() * 100
                     isOnFloor = !isOnFloor
                 }
@@ -465,6 +474,12 @@
                     bullets.splice(i, 1);
                 }
             }
+            if (!isGameOver) {
+                player.dy += gravity;
+            } else {
+                player.dy = 0;
+                player.dx = 0;
+            }
 
             if ((keys['ArrowUp'] || keys['Space'] || keys['KeyW']) && player.grounded) {
                 if (player.type === "cube") {
@@ -474,15 +489,11 @@
                 } else {
                     basegravity = -basegravity
                     player.y += basegravity
+                    player.dy = basegravity * 5
                 }
             }
 
-            if (!isGameOver) {
-                player.dy += gravity;
-            } else {
-                player.dy = 0;
-                player.dx = 0;
-            }
+
             player.y += player.dy;
 
             player.grounded = false;
@@ -660,7 +671,7 @@
             });
 
             portals.forEach(portal => {
-                ctx.drawImage(portalIMG, portal.x, portal.y - 30, 60, 60);
+                ctx.drawImage(portalIMG, portal.x - 20, portal.y - 20, 60, 60);
             });
 
             ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
