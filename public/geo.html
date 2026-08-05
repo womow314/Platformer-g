@@ -110,9 +110,17 @@
         water.src = "images/pixil-frame-0%20(6).png";
 
 
-        const slime = new Image();
+        const yellowBouncyPad = new Image();
 
-        slime.src = "images/pixil-frame-0%20(11).png"
+        yellowBouncyPad.src = "images/pixil-frame-0%20(79).png"
+
+        const pinkBouncyPad = new Image();
+
+        pinkBouncyPad.src = "images/pixil-frame-0%20(78).png"
+
+        const redBouncyPad = new Image();
+
+        redBouncyPad.src = "images/pixil-frame-0%20(80).png"
 
         const ball = new Image();
 
@@ -240,11 +248,30 @@
             enemys.push({ x: px, y: py })
         }
 
-        function addPlatform(px, py, w, h, danger = false, bouncy = false, flipSpike = false, isWater = false, checkpoint = false) {
+        function addPlatform(
+            px, py, w, h,
+            danger = false,
+            bouncy = false,
+            flipSpike = false,
+            isWater = false,
+            checkpoint = false,
+            flipBounce = false
+        ) {
             let add = 0
             if (currentX < returnToNormalHeightX) add = increasedHeight
             if (bouncy) py += 10
-            if (!danger) platforms.push({ x: px, y: py + add, width: w, height: h, b: bouncy, water: isWater, check: checkpoint })
+            if (!danger) {
+                platforms.push({
+                    x: px,
+                    y: py + add,
+                    width: w,
+                    height: h,
+                    b: bouncy,
+                    water: isWater,
+                    check: checkpoint,
+                    flipBounce: flipBounce
+                });
+            }
             else dangers.push({ x: px, y: py + add, width: w, height: h, isFlipped: flipSpike })
         }
 
@@ -275,7 +302,7 @@
 
             const numOfLevels = 10
             let roll = Math.ceil(Math.random() * (numOfLevels))
-            roll = 7
+            //roll = 10
             let roll1 = Math.random()
             if (roll === 1) { // Single spike
                 addPlatform(currentX, 320, 20, 20, true)
@@ -361,7 +388,7 @@
                 addPlatform(currentX, 320, 800, 20, true)
                 let currentY = 230
                 let maxX = currentX + 800
-                addPlatform(currentX - 40, 320, 20, 20, false, true)
+                addPlatform(currentX - 40, 320, 20, 20, false, 2)
                 let isFirst = true
                 while (currentX < maxX) {
 
@@ -370,7 +397,7 @@
                     let isDoingXstep = Math.random() < 0.2 && currentY < 290
                     if (isDoingXstep) {
                         addPlatform(currentX, currentY, 120, 20)
-                        addPlatform(currentX + 80, currentY - 20, 20, 20, false, true)
+                        addPlatform(currentX + 80, currentY - 20, 20, 20, false, 2)
                         addPlatform(currentX + 100, currentY - 20, 20, 20, true)
                         addPlatform(currentX + 120, currentY - 200, 20, 20)
                         addPlatform(currentX + 120, currentY - 180, 20, 20)
@@ -387,7 +414,7 @@
                             addPlatform(currentX + width / 2 - 10, currentY - 20, 20, 20, true)
                         }
                         if (roll3 < 0.2) {
-                            addPlatform(currentX + width - 17.5, currentY - 20, 20, 20, false, true)
+                            addPlatform(currentX + width - 17.5, currentY - 20, 20, 20, false, 2)
                         }
                     }
                     currentX += width + Math.random() * 40 + 30
@@ -412,27 +439,28 @@
                 addPlatform(currentX, 200, 1000, 20)
                 addPortal(currentX, 320, "ball")
                 addPortal(currentX + 1000, 320, "cube")
-                let maxX = currentX + 900
+                let maxX = currentX + 860
                 currentX += 120
                 let isOnFloor = true
                 while (currentX < maxX) {
                     let roll5 = Math.random()
                     let roll6 = Math.random()
-                    let length = (Math.ceil(Math.random() * 5) + 1) * 20
+                    let length = (Math.ceil(Math.random() * 6) ) * 20
                     if (roll6 > 0.8) {
                         length += 60
-                        addPlatform(currentX + length / 2 - 20, !isOnFloor ? 320 : 220, 20, 20, true, false, isOnFloor)
-                        addPlatform(currentX + length - 20, isOnFloor ? 300 : 240, 20, 20, true, false, !isOnFloor)
+                        addPlatform(currentX + length / 2 - 20, !isOnFloor ? 320 : 220, 20, 20, true, 0, isOnFloor)
+                        addPlatform(currentX + length - 20, isOnFloor ? 300 : 240, 20, 20, true, 0, !isOnFloor)
                     }
-                    if (Math.random() < 0.3 && roll6 < 0.8) {
+                    if (Math.random() < 0.8 && roll6 < 0.8 && length <= 40) {
                         currentX += 20
-                        addPlatform(currentX - 20, isOnFloor ? 320 : 210, 20, 20, false, true)
+                        addPlatform(currentX - 20, isOnFloor ? 320 : 210, 20, 20, false, 1, false, false, false, !isOnFloor )
+                        addPlatform(currentX, !isOnFloor ? 320 : 220, length, 20, roll6 < 0.8, false, isOnFloor)                     
                     }
                     addPlatform(currentX, isOnFloor ? 320 : 220, length, 20, roll6 < 0.8, false, !isOnFloor)
-                    
+
                     currentX += (roll6 > 0.8) ? 20 : 0
 
-                    currentX += length + Math.random() * 100
+                    currentX += length + Math.random() * 30 + 40
                     isOnFloor = !isOnFloor
                 }
                 currentX += 250
@@ -507,15 +535,23 @@
                     player.y < plat.y + plat.height &&
                     player.y + player.height > plat.y && !keys['ArrowDown']) {
                     if (plat.b) {
+                        let force = -15
+                        if (plat.b === 1) {
+                            force = -11
+                        }
+                        if (plat.b === 3) {
+                            force = -17
+                        }
                         if (gravity > 0) {
                             if (true) {
-                                player.dy = -15;
+
+                                player.dy = force;
                                 playBounceSound();
                                 continue;
                             }
                             continue;
                         }
-                        player.dy = 15;
+                        player.dy = -force/ 1.2;
                         playBounceSound();
                         continue;
 
@@ -615,7 +651,18 @@
 
                 if (plat.b) {
                     for (let b = 0; b < plat.width; b += 20) {
-                        ctx.drawImage(slime, plat.x + b, plat.y, 20, plat.height);
+                        let bouncyImage = yellowBouncyPad
+                        if (plat.b === 1) bouncyImage = pinkBouncyPad
+                        if (plat.b === 3) bouncyImage = redBouncyPad
+                        if (plat.flipBounce) {
+                            ctx.save();
+                            ctx.translate(plat.x + b + 10, plat.y + 10);
+                            ctx.scale(1, -1);
+                            ctx.drawImage(bouncyImage, -10, -10, 20, plat.height);
+                            ctx.restore();
+                        } else {
+                            ctx.drawImage(bouncyImage, plat.x + b, plat.y - 10, 20, plat.height);
+                        }
                     }
                     nope = true;
 
