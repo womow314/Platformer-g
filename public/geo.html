@@ -18,7 +18,12 @@
         <p id="cord">x: 0, y: 0</p>
         <button onclick="changeBackground()" id="background">Sky</button>
     </div>
-    <div id="mobileControls" style="display: block;">
+    <h1 id="announcement" style="display: none;"></h1>
+    <div id="progressContainer">
+        <div id="progressBarMax"></div>
+        <div id="progressBar"></div>
+    </div>
+    <div id="mobileControls" style="display: none;">
         <button id="jump">⤒</button>
     </div>
     <audio id="deathSound" preload="auto">
@@ -73,20 +78,19 @@
         }, { passive: false });
 
         function bindButton(id, key) {
-            const btn = document.getElementById(id);
 
-            btn.addEventListener('touchstart', (e) => {
+            document.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 keys[key] = true;
             }, { passive: false });
 
-            btn.addEventListener('touchend', (e) => {
+            document.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 keys[key] = false;
             });
 
-            btn.addEventListener('mousedown', () => keys[key] = true);
-            btn.addEventListener('mouseup', () => keys[key] = false);
+            document.addEventListener('mousedown', () => keys[key] = true);
+            document.addEventListener('mouseup', () => keys[key] = false);
         }
 
 
@@ -148,6 +152,7 @@
             player.image = playerImg
             player.type = "cube"
             basegravity = 0.73
+            highScoreBoxX = highScore
         }
 
         const bounceSound = document.getElementById("bounceSound");
@@ -297,12 +302,18 @@
         addPlatform(0, 380, 80000, 20)
         addPlatform(0, 360, 80000, 20)
         addPlatform(0, 340, 80000, 20)
+        let hasIncreasedLevel = false
+
+        localStorage.setItem('geoLevel', localStorage.getItem('geoLevel') || '1')
+        let geoLevel = Number(localStorage.getItem('geoLevel'))
 
         for (let i = 0; i < 300; i++) {
-
-            const numOfLevels = 10
+            let numOfLevels;
+            if (geoLevel === 1) numOfLevels = 10
+            if (geoLevel === 2) numOfLevels = 10
+            if (geoLevel >= 3) numOfLevels = 12
             let roll = Math.ceil(Math.random() * (numOfLevels))
-            //roll = 10
+            //roll = 12
             let roll1 = Math.random()
             if (roll === 1) { // Single spike
                 addPlatform(currentX, 320, 20, 20, true)
@@ -310,12 +321,12 @@
                     addPlatform(currentX + 20, 320, 20, 20, true)
                 }
 
-                if (roll1 < 0.15) {
+                if (roll1 < 0.15 && geoLevel >= 2) {
                     addPlatform(currentX + 40, 320, 20, 20, true)
                 }
                 currentX += Math.random() * 140 + 150
             } else if (roll === 2) { // Platforms over lava
-                const gap = 80
+                const gap = 86
                 addPlatform(currentX - 40, 320, 60, 20)
                 addPlatform(currentX + gap, 300, 30, 20)
                 addPlatform(currentX + gap * 2, 280, 30, 20)
@@ -345,7 +356,7 @@
                 addPlatform(currentX + 160, 280, 80, 20, true)
                 if (roll1 < 0.8) addPlatform(currentX + 400, 280, 20, 20, true)
                 if (roll1 < 0.5) addPlatform(currentX + 380, 280, 20, 20, true)
-                if (roll1 < 0.1) addPlatform(currentX + 360, 280, 20, 20, true)
+                if (roll1 < 0.1 && geoLevel >= 2) addPlatform(currentX + 360, 280, 20, 20, true)
                 addPlatform(currentX + 180, 260, 40, 20)
 
                 currentX += Math.random() * 140 + 500
@@ -359,11 +370,11 @@
                 addPlatform(currentX + 220, 240, 20, 40, true)
                 let roll2 = Math.random()
                 if (roll2 < 0.5) addPlatform(currentX + 160, 280, 20, 20, true)
-                if (roll2 < 0.1) addPlatform(currentX + 140, 280, 20, 20, true)
+                if (roll2 < 0.1 && geoLevel >= 2) addPlatform(currentX + 140, 280, 20, 20, true)
 
                 if (roll1 < 0.8) addPlatform(currentX + 380, 280, 20, 20, true)
                 if (roll1 < 0.5) addPlatform(currentX + 364, 280, 20, 20, true)
-                if (roll1 < 0.1) addPlatform(currentX + 348, 280, 20, 20, true)
+                if (roll1 < 0.1 && geoLevel >= 2) addPlatform(currentX + 348, 280, 20, 20, true)
                 currentX += Math.random() * 140 + 500
             } else if (roll === 6) { //Heighten 1
                 if (currentX < returnToNormalHeightX) continue
@@ -386,6 +397,7 @@
                 currentX += 300
             } else if (roll === 9) { //Overhang pass
                 addPlatform(currentX, 320, 800, 20, true)
+                addPlatform(currentX, 340, 800, 20)
                 let currentY = 230
                 let maxX = currentX + 800
                 addPlatform(currentX - 40, 320, 20, 20, false, 2)
@@ -405,6 +417,7 @@
                         addPlatform(currentX + 120, currentY - 140, 20, 20)
                         currentY += 40
                         width = 100
+                        currentX -= 40
                     } else {
 
                         addPlatform(currentX, currentY, width, 20)
@@ -419,11 +432,15 @@
                     }
                     currentX += width + Math.random() * 40 + 30
                     currentY += Math.random() * 40 - 30
+                    currentY = Math.min(currentY, 300)
                     isFirst = false
 
                 }
                 currentX += 80
             } else if (roll === 10) {
+                currentX += 200
+                let maxX = currentX + 840
+                returnToNormalHeightX = currentX + 1000
                 addPlatform(currentX, 300, 20, 20)
                 addPlatform(currentX, 280, 20, 20)
                 addPlatform(currentX, 260, 20, 20)
@@ -437,26 +454,31 @@
                 addPlatform(currentX + 1000, 220, 20, 20)
                 addPlatform(currentX + 1000, 200, 20, 20)
                 addPlatform(currentX, 200, 1000, 20)
+                addPlatform(currentX - 200, 340, 1200, 20)
                 addPortal(currentX, 320, "ball")
                 addPortal(currentX + 1000, 320, "cube")
-                let maxX = currentX + 860
+
                 currentX += 120
                 let isOnFloor = true
+
                 while (currentX < maxX) {
                     let roll5 = Math.random()
                     let roll6 = Math.random()
-                    let length = (Math.ceil(Math.random() * 6) ) * 20
-                    if (roll6 > 0.8) {
+                    let length = (Math.ceil(Math.random() * 6)) * 20
+                    if (roll6 > 0.8 && geoLevel >= 2) {
                         length += 60
                         addPlatform(currentX + length / 2 - 20, !isOnFloor ? 320 : 220, 20, 20, true, 0, isOnFloor)
                         addPlatform(currentX + length - 20, isOnFloor ? 300 : 240, 20, 20, true, 0, !isOnFloor)
                     }
-                    if (Math.random() < 0.8 && roll6 < 0.8 && length <= 40) {
+                    if (Math.random() < 0.8 && roll6 < 0.8 && length <= 40 && geoLevel >= 2) {
                         currentX += 20
-                        addPlatform(currentX - 20, isOnFloor ? 320 : 210, 20, 20, false, 1, false, false, false, !isOnFloor )
-                        addPlatform(currentX, !isOnFloor ? 320 : 220, length, 20, roll6 < 0.8, false, isOnFloor)                     
+                        addPlatform(currentX - 20, isOnFloor ? 320 : 210, 20, 20, false, 1, false, false, false, !isOnFloor)
+                        addPlatform(currentX, !isOnFloor ? 320 : 220, length, 20, roll6 < 0.8, false, isOnFloor)
                     }
                     addPlatform(currentX, isOnFloor ? 320 : 220, length, 20, roll6 < 0.8, false, !isOnFloor)
+                    if (Math.random() < 0.8 && roll6 < 0.8 && length <= 40 && geoLevel >= 2) {
+                        currentX += 60
+                    }
 
                     currentX += (roll6 > 0.8) ? 20 : 0
 
@@ -464,19 +486,61 @@
                     isOnFloor = !isOnFloor
                 }
                 currentX += 250
+            } else if (roll === 11) {
+                addPlatform(currentX, 320, 60, 20, true)
+                addPlatform(currentX + 60, 320, 20, 20)
+                addPlatform(currentX+80, 320, 80, 20, true)
+                addPlatform(currentX + 160, 320, 20, 20)
+                if (roll1 > 0.3) {
+                    addPlatform(currentX + 160, 300, 20, 20, false, 2)
+                }
+                addPlatform(currentX + 180, 320, roll1 > 0.3 ? 100 : 60, 20, true)
+                currentX += 360
+            } else if (roll === 12) {
+                addPlatform(currentX, 320, 20, 20, false, 3)
+                addPlatform(currentX + 60, 160, 180, 20)
+                
+                if (roll1 > 0.5) {
+                    addPlatform(currentX + 220, 80, 20, 80, true)
+                } else {
+                    addPlatform(currentX + 80, 260, 20, 80, true)
+                    addPlatform(currentX + 220, 100, 20, 60, true)
+                }
+                addPlatform(currentX + 80, 280, 20, 60, true)
+                currentX += 380
             }
         }
+        let highScoreBoxX = -40
         let countFPS = 0
         setTimeout(() => {
             console.log(`FPS: ${countFPS / 10}`)
         }, 10000);
+        let annouceBox = document.getElementById('announcement')
+        annouceBox.style.display = 'block'
+        annouceBox.innerText = `Current Level: ${geoLevel}`
 
 
         function update() {
+            const goal = 11000
+            let progressPercent = (player.x / goal) * 100;
+            let maxProgress = (highScore / goal) * 100;
+            document.getElementById("progressBar").style.width = `${progressPercent}%`;
+            document.getElementById("progressBarMax").style.width = `${maxProgress}%`;
+            if (player.x > goal && !hasIncreasedLevel) {
+                localStorage.setItem("geoLevel", String(geoLevel + 1))
+                let annouceBox = document.getElementById('announcement')
+                annouceBox.style.display = 'block'
+                annouceBox.innerText = `Level complete! Next level: ${geoLevel + 1}`
+            }
             countFPS += 1
             const framesPerSecond = 65
             player.x += 10.4 / framesPerSecond * 20
-
+            if (keys['KeyM']) {
+                localStorage.setItem('geoLevel', '1')
+            }
+            if (keys['KeyL']) {
+                localStorage.setItem('geoLevel', String(geoLevel + 1))
+            }
             localStorage.setItem('Score', highScore);
             localStorage.setItem('Deaths', deathNum);
             localStorage.setItem('Time', time)
@@ -551,7 +615,7 @@
                             }
                             continue;
                         }
-                        player.dy = -force/ 1.2;
+                        player.dy = -force / 1.2;
                         playBounceSound();
                         continue;
 
@@ -593,9 +657,9 @@
             }
             for (let portal of portals) {
                 if (portal.x > player.x + 300) { continue; }
-                if (player.x < portal.x + 20 &&
+                if (player.x < portal.x + 40 &&
                     player.x + player.width > portal.x &&
-                    player.y < portal.y + 20 &&
+                    player.y < portal.y + 40 &&
                     player.y + player.height > portal.y) {
                     if (portal.type === "ball") {
                         player.image = ball
@@ -691,6 +755,9 @@
                     }
                 }
             });
+
+            ctx.fillStyle = '#ffffff'
+            ctx.fillRect(highScoreBoxX + 14, -500, 3, 1000)
 
             dangers.forEach(plat => {
                 for (let b = 0; b < plat.width; b += 20) {
