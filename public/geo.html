@@ -126,6 +126,20 @@
 
         redBouncyPad.src = "images/pixil-frame-0%20(80).png"
 
+        const yellowPortal = new Image();
+        yellowPortal.src = "images/pixil-frame-0%20(83).png"
+
+        const greenPortal = new Image();
+        greenPortal.src = "images/pixil-frame-0%20(84).png"
+
+        const redPortal = new Image();
+        redPortal.src = "images/pixil-frame-0%20(85).png"
+
+        const lightBluePortal = new Image();
+        lightBluePortal.src = "images/pixil-frame-0%20(86).png"
+
+
+
         const ball = new Image();
 
         ball.src = "images/guard.png"
@@ -513,7 +527,7 @@
                 addPlatform(currentX, 120, 800, 20)
                 addPlatform(currentX, 140, 800, 20, true, false, true)
                 addPortal(currentX, 320, "gravUp")
-                
+
                 addPlatform(currentX + 40, 160, 80, 20)
                 let maxX = currentX + 740
                 while (currentX < maxX) {
@@ -815,7 +829,18 @@
             });
 
             portals.forEach(portal => {
-                ctx.drawImage(portalIMG, portal.x - 20, portal.y - 20, 60, 60);
+                let image;
+                if (portal.type === "ball") {
+                    image = redPortal
+                } else if (portal.type === "cube") {
+                    image = greenPortal
+                } else if (portal.type === "gravUp") {
+                    image = yellowPortal
+                } else if (portal.type === "gravDown") {
+                    image = lightBluePortal
+                } 
+
+                ctx.drawImage(image, portal.x - 20, portal.y - 20, 40, 40);
             });
 
             ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
