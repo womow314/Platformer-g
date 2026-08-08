@@ -114,6 +114,9 @@
         const gunIdleSh = new Image();
         gunIdleSh.src = "images/pixil-frame-0 (75).png";
 
+        const gunIdleR = new Image();
+        gunIdleR.src = "images/pixil-frame-0 (82).png";
+
         const gunFireSh = new Image();
         gunFireSh.src = "images/pixil-frame-0 (76).png";
 
@@ -207,12 +210,12 @@
             opacity: 0.5
         });
 
-        const waterTexture = waterMat.map; 
+        const waterTexture = waterMat.map;
 
         waterTexture.wrapS = THREE.RepeatWrapping;
         waterTexture.wrapT = THREE.RepeatWrapping;
 
-        waterTexture.repeat.set(60, 60); 
+        waterTexture.repeat.set(60, 60);
 
         waterTexture.needsUpdate = true;
 
@@ -322,7 +325,7 @@
                 enemy.based = onPlat
                 enemy.timeToUnlock = 0
 
-                enemy.scale.set(0.07, 0.07, 0.07); 
+                enemy.scale.set(0.07, 0.07, 0.07);
 
                 scene.add(enemy);
 
@@ -471,7 +474,7 @@
 
 
         const size = 3000;
-        const segments = 80; 
+        const segments = 80;
         let gun = "assult"
 
 
@@ -506,12 +509,12 @@
         const grass = new THREE.MeshStandardMaterial({
             map: loader.load("images/pixil-frame-0 (69).png")
         });
-        const grassTexture = grass.map; 
+        const grassTexture = grass.map;
 
         grassTexture.wrapS = THREE.RepeatWrapping;
         grassTexture.wrapT = THREE.RepeatWrapping;
 
-        grassTexture.repeat.set(500, 500); 
+        grassTexture.repeat.set(500, 500);
 
         grassTexture.needsUpdate = true;
 
@@ -532,7 +535,7 @@
 
 
             raycaster.set(
-                new THREE.Vector3(x,600, z),
+                new THREE.Vector3(x, 600, z),
                 new THREE.Vector3(0, -1, 0)
             );
 
@@ -783,6 +786,7 @@
                     if (gun === "assult") gunIMG.src = gunIdleA.src;
                     if (gun === "shotty") gunIMG.src = gunIdleSh.src;
                     if (gun === "snipe") gunIMG.src = gunFireSn.src;
+                    if (gun === "rocket") gunIMG.src = gunIdleR.src;
                     updateAmmo()
                 }
             });
@@ -969,7 +973,7 @@
                     bullet.position.y = terrainHeight(
                         bullet.position.x,
                         bullet.position.z
-                    ) + 2; 
+                    ) + 2;
 
                     const radius = 30;
                     bullet.scale.set(2, 2, 2);

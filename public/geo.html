@@ -307,13 +307,13 @@
         localStorage.setItem('geoLevel', localStorage.getItem('geoLevel') || '1')
         let geoLevel = Number(localStorage.getItem('geoLevel'))
 
-        for (let i = 0; i < 300; i++) {
+        for (let i = 0; i < 250; i++) {
             let numOfLevels;
             if (geoLevel === 1) numOfLevels = 10
             if (geoLevel === 2) numOfLevels = 10
-            if (geoLevel >= 3) numOfLevels = 12
+            if (geoLevel >= 3) numOfLevels = 13
             let roll = Math.ceil(Math.random() * (numOfLevels))
-            //roll = 12
+            //roll = 13
             let roll1 = Math.random()
             if (roll === 1) { // Single spike
                 addPlatform(currentX, 320, 20, 20, true)
@@ -489,7 +489,7 @@
             } else if (roll === 11) {
                 addPlatform(currentX, 320, 60, 20, true)
                 addPlatform(currentX + 60, 320, 20, 20)
-                addPlatform(currentX+80, 320, 80, 20, true)
+                addPlatform(currentX + 80, 320, 80, 20, true)
                 addPlatform(currentX + 160, 320, 20, 20)
                 if (roll1 > 0.3) {
                     addPlatform(currentX + 160, 300, 20, 20, false, 2)
@@ -499,7 +499,7 @@
             } else if (roll === 12) {
                 addPlatform(currentX, 320, 20, 20, false, 3)
                 addPlatform(currentX + 60, 160, 180, 20)
-                
+
                 if (roll1 > 0.5) {
                     addPlatform(currentX + 220, 80, 20, 80, true)
                 } else {
@@ -508,6 +508,28 @@
                 }
                 addPlatform(currentX + 80, 280, 20, 60, true)
                 currentX += 380
+            } else if (roll === 13) {
+                let currentY = 140
+                addPlatform(currentX, 120, 800, 20)
+                addPlatform(currentX, 140, 800, 20, true, false, true)
+                addPortal(currentX, 320, "gravUp")
+                
+                addPlatform(currentX + 40, 160, 80, 20)
+                let maxX = currentX + 740
+                while (currentX < maxX) {
+                    let roll5 = Math.random() < 0.5
+                    if ((roll5 || currentY <= 160) && currentY < 240) {
+                        currentX += 76
+                        currentY += 20
+                    } else {
+                        currentX += 60
+                        currentY -= 20
+                    }
+                    addPlatform(currentX, currentY, 30, 20)
+
+                }
+                addPortal(currentX + 40, currentY + 20, "gravDown")
+                currentX += 180
             }
         }
         let highScoreBoxX = -40
@@ -668,6 +690,14 @@
                     if (portal.type === "cube") {
                         player.image = playerImg
                         player.type = "cube"
+                    }
+                    if (portal.type === "gravUp") {
+                        basegravity = -0.73
+                        player.y -= 1
+                    }
+                    if (portal.type === "gravDown") {
+                        basegravity = 0.73
+                        player.y += 1
                     }
                 }
             }
