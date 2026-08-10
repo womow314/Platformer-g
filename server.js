@@ -14,6 +14,7 @@ app.use(express.static(path.join(__dirname, "public")));
 const flatPlayers = {};
 const gravityPlayers = {};
 const players3d = {};
+let minedBlocks = new Set();
 let fullMap = false
 
 
@@ -258,6 +259,13 @@ io.on("connection", (socket) => {
     })
 
     socket.on("joinTag3", (dir) => {
+        socket.emit("mapState", {
+            minedBlocks: Array.from(minedBlocks).map(key => {
+                const [x, y, z] = key.split(",").map(Number);
+
+                return { x, y, z };
+            })
+        });
         socket.on("setName", (name) => {
             if (players3d[socket.id]) {
                 players3d[socket.id].name = name.substring(0, 15);
@@ -291,6 +299,9 @@ io.on("connection", (socket) => {
             timeIT: 0,
             name: "Player"
         };
+        socket.on("reset", () => {
+            minedBlocks = new Set();
+        })
 
         socket.on("makeMap", (bool) => {
             fullMap = bool;
@@ -323,6 +334,28 @@ io.on("connection", (socket) => {
                 }
             }
         });
+
+        socket.on("mineBlock", (data) => {
+            if (
+                typeof data.x !== "number" ||
+                typeof data.y !== "number" ||
+                typeof data.z !== "number"
+            ) {
+                return;
+            }
+
+            const key = `${data.x},${data.y},${data.z}`;
+
+            minedBlocks.add(key);
+
+            io.emit("blockMined", {
+                x: data.x,
+                y: data.y,
+                z: data.z
+            });
+        });
+
+
 
         socket.on("move", (data) => {
 
