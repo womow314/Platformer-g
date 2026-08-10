@@ -374,8 +374,8 @@
 
 
 
-
-        const playerGeo = new THREE.BoxGeometry(1, 2, 1);
+        const playerHitBoxSize = 0.7
+        const playerGeo = new THREE.BoxGeometry(playerHitBoxSize, playerHitBoxSize * 2, playerHitBoxSize);
 
 
         const playerMat = [
@@ -497,10 +497,11 @@
 
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
+        
         function playerHitsPlatform(p) {
             if (!p.visible || !p.parent.visible) return false;
-            const withinX = player.position.x >= p.position.x - p.width / 2 - 0.5 && player.position.x <= p.position.x + p.width / 2 + 0.5;
-            const withinZ = player.position.z >= p.position.z - p.depth / 2 - 0.5 && player.position.z <= p.position.z + p.depth / 2 + 0.5;
+            const withinX = player.position.x >= p.position.x - p.width / 2 - playerHitBoxSize / 2 && player.position.x <= p.position.x + p.width / 2 + playerHitBoxSize / 2;
+            const withinZ = player.position.z >= p.position.z - p.depth / 2 - playerHitBoxSize / 2 && player.position.z <= p.position.z + p.depth / 2 + playerHitBoxSize / 2;
 
             const topOfPlatform = p.position.y + p.height / 2 + 1;
             const bottomOfPlatform = p.position.y - p.height / 2 - 1;
