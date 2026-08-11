@@ -310,6 +310,7 @@ io.on("connection", (socket) => {
         };
         socket.on("reset", () => {
             minedBlocks = new Set();
+            placedBlocks = new Set();
         })
 
         socket.on("makeMap", (bool) => {
