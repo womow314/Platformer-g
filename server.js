@@ -356,6 +356,7 @@ io.on("connection", (socket) => {
             const key = `${data.x},${data.y},${data.z}`;
 
             minedBlocks.add(key);
+            placedBlocks.delete(key);
 
             io.emit("blockMined", {
                 x: data.x,
