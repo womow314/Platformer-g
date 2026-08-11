@@ -65,7 +65,7 @@
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x74b0c8);
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
@@ -666,8 +666,8 @@
             }
 
             platforms.forEach(p => {
-                const topOfPlatform = p.position.y + p.height / 2 + 1;
-                const bottomOfPlatform = p.position.y - p.height / 2 - 1;
+                const topOfPlatform = p.position.y + p.height / 2 + 1-0.3;
+                const bottomOfPlatform = p.position.y - p.height / 2 - 1-0.3;
                 if (playerHitsPlatform(p)) {
                     if (gravity < 0) {
                         if (justEnteredWater === 0) {
