@@ -376,7 +376,7 @@ io.on("connection", (socket) => {
                 return;
             }
 
-            const key = `${data.x},${data.y},${data.z} `;
+            const key = `${data.x},${data.y},${data.z}`;
 
             placedBlocks.add(key);
 
