@@ -16,6 +16,7 @@ const gravityPlayers = {};
 const players3d = {};
 let minedBlocks = new Set();
 let fullMap = false
+let placedBlocks = new Set();
 
 
 let tagCooldown = 0
@@ -266,6 +267,14 @@ io.on("connection", (socket) => {
                 return { x, y, z };
             })
         });
+
+        socket.emit("mapStatePlaced", {
+            placedBlocks: Array.from(placedBlocks).map(key => {
+                const [x, y, z] = key.split(",").map(Number);
+
+                return { x, y, z };
+            })
+        });
         socket.on("setName", (name) => {
             if (players3d[socket.id]) {
                 players3d[socket.id].name = name.substring(0, 15);
@@ -354,6 +363,30 @@ io.on("connection", (socket) => {
                 z: data.z
             });
         });
+
+
+        socket.on("placeBlock", (data) => {
+            if (
+                typeof data.x !== "number" ||
+                typeof data.y !== "number" ||
+                typeof data.z !== "number"
+            ) {
+                console.log("Invalid placeBlock data:", data);
+                return;
+            }
+
+            const key = `${data.x},${data.y},${data.z} `;
+
+            placedBlocks.add(key);
+
+            io.emit("blockPlaced", {
+                x: data.x,
+                y: data.y,
+                z: data.z
+            });
+        });
+
+
 
 
 

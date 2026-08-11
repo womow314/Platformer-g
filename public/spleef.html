@@ -65,7 +65,7 @@
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x74b0c8);
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
@@ -155,6 +155,20 @@
             transparent: true,
             opacity: 0.5
         });
+        socket.on("mapStatePlaced", (data) => {
+            data.placedBlocks.forEach(block => {
+                spawnPlatform(
+                    group1,
+                    block.x,
+                    block.y,
+                    block.z,
+                    1,
+                    1,
+                    1
+                );
+            });
+        });
+
         socket.on("mapState", (data) => {
             data.minedBlocks.forEach(block => {
                 removeMinedBlock(
@@ -164,6 +178,8 @@
                 );
             });
         });
+
+
 
         function createNameTag(name) {
             const canvas = document.createElement("canvas");
@@ -396,7 +412,7 @@
         let pyVelocity = 0;
         let gravity = -0.015;
         let gravityBool = 1
-        const jumpForce = 0.4;
+        let jumpForce = 0.2;
         let speed = 0.15;
         let currentSpeed = speed
         let isGrounded = true;
@@ -433,11 +449,69 @@
         }
 
         window.addEventListener("mousedown", (e) => {
+            if (e.button === 2) {
+                return;
+            }
             if (e.button !== 0) return;
             if (e.target !== renderer.domElement) return;
             if (!isFirstPerson) return;
             isTouching = true
+            miningCooldown = 0
 
+
+        });
+
+        window.addEventListener("mousedown", (e) => {
+            if (e.button !== 2) return;
+
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+
+            const hits = raycaster.intersectObjects(platforms, false);
+
+            if (hits.length !== 0) {
+                const hit = hits[0];
+                const block = hit.object;
+
+                const distance = camera.position.distanceTo(block.position);
+
+                if (distance < mineRange) {
+                    const x = block.position.x;
+                    const y = block.position.y;
+                    const z = block.position.z;
+
+                    // The face that was clicked
+                    const normal = hit.face.normal.clone();
+
+                    // Convert face normal to world direction
+                    normal.transformDirection(block.matrixWorld);
+
+                    // Round because blocks are on a grid
+                    const newX = x + Math.round(normal.x);
+                    const newY = y + Math.round(normal.y);
+                    const newZ = z + Math.round(normal.z);
+
+                    // Don't place if a block already exists there
+                    const occupied = platforms.some(p =>
+                        Math.abs(p.position.x - newX) < 0.01 &&
+                        Math.abs(p.position.y - newY) < 0.01 &&
+                        Math.abs(p.position.z - newZ) < 0.01
+                    );
+
+                    if (!occupied) {
+                        spawnPlatform(
+                            group1,
+                            newX,
+                            newY,
+                            newZ,
+                            1,
+                            1,
+                            1
+                        );
+                        socket.emit("placeBlock", { x: newX, y: newY, z: newZ });
+                    }
+
+                }
+            }
         });
 
         window.addEventListener("mouseup", (e) => {
@@ -452,18 +526,24 @@
         socket.on("blockMined", (data) => {
             removeMinedBlock(data.x, data.y, data.z);
         });
+        socket.on("blockPlaced", (data) => {
+            spawnPlatform(group1, data.x, data.y, data.z, 1, 1, 1);
+        });
 
 
         renderer.domElement.addEventListener("click", () => {
             renderer.domElement.requestPointerLock();
             isFirstPerson = true
+            player.visible = false
 
         });
         document.addEventListener("pointerlockchange", () => {
             if (document.pointerLockElement === renderer.domElement) {
                 isFirstPerson = true;
+                player.visible = false
             } else {
                 isFirstPerson = false;
+                player.visible = true
                 cameraLookY = 0;
             }
         });
@@ -494,10 +574,11 @@
         window.addEventListener("touchend", () => {
             lastTouchX = null;
         });
+        let miningCooldown = 0
 
         window.addEventListener('keydown', e => keys[e.code] = true);
         window.addEventListener('keyup', e => keys[e.code] = false);
-        
+
         function playerHitsPlatform(p) {
             if (!p.visible || !p.parent.visible) return false;
             const withinX = player.position.x >= p.position.x - p.width / 2 - playerHitBoxSize / 2 && player.position.x <= p.position.x + p.width / 2 + playerHitBoxSize / 2;
@@ -507,6 +588,35 @@
             const bottomOfPlatform = p.position.y - p.height / 2 - 1;
             const hittingTop = player.position.y < topOfPlatform && player.position.y > bottomOfPlatform;
             return withinX && withinZ && hittingTop
+        }
+
+        function isInWall(p, x, y, z) {
+            const halfPlayerX = playerHitBoxSize / 2;
+            const halfPlayerY = (playerHitBoxSize * 2) / 2;
+            const halfPlayerZ = playerHitBoxSize / 2;
+
+            const playerMinX = x - halfPlayerX;
+            const playerMaxX = x + halfPlayerX;
+            const playerMinY = y - halfPlayerY;
+            const playerMaxY = y + halfPlayerY;
+            const playerMinZ = z - halfPlayerZ;
+            const playerMaxZ = z + halfPlayerZ;
+
+            const blockMinX = p.position.x - p.width / 2;
+            const blockMaxX = p.position.x + p.width / 2;
+            const blockMinY = p.position.y - p.height / 2;
+            const blockMaxY = p.position.y + p.height / 2;
+            const blockMinZ = p.position.z - p.depth / 2;
+            const blockMaxZ = p.position.z + p.depth / 2;
+
+            return (
+                playerMaxX > blockMinX &&
+                playerMinX < blockMaxX &&
+                playerMaxY > blockMinY &&
+                playerMinY < blockMaxY &&
+                playerMaxZ > blockMinZ &&
+                playerMinZ < blockMaxZ
+            );
         }
         let isInWater = false;
         let wasInWater = false;
@@ -543,7 +653,9 @@
         function animate() {
 
             requestAnimationFrame(animate);
-            if (isTouching) {
+            miningCooldown -= 1
+
+            if (isTouching && miningCooldown < 0) {
                 raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 
                 const hits = raycaster.intersectObjects(platforms, false);
@@ -571,6 +683,7 @@
                         });
                     }
                 }
+                miningCooldown = 16
             }
 
             if (keys.KeyT) {
@@ -602,13 +715,16 @@
             const forwardX = Math.sin(cameraAngle);
             const forwardZ = Math.cos(cameraAngle);
 
+            let dx = 0
+            let dz = 0
+
             if (keys.ArrowUp || keys.KeyW) {
-                player.position.x -= forwardX * currentSpeed;
-                player.position.z -= forwardZ * currentSpeed;
+                dx = -forwardX * currentSpeed;
+                dz = -forwardZ * currentSpeed;
             }
             if (keys.ArrowDown || keys.KeyS) {
-                player.position.x += forwardX * currentSpeed;
-                player.position.z += forwardZ * currentSpeed;
+                dx = forwardX * currentSpeed;
+                dz = forwardZ * currentSpeed;
             }
 
             const status = document.getElementById("itStatus");
@@ -664,30 +780,81 @@
                 player.position.y = save.y;
                 player.position.z = save.z;
             }
+            let canMove = true
+
 
             platforms.forEach(p => {
-                const topOfPlatform = p.position.y + p.height / 2 + 1-0.3;
-                const bottomOfPlatform = p.position.y - p.height / 2 - 1-0.3;
+                const topOfPlatform = p.position.y + p.height / 2 + 1 - 0.3;
+                const bottomOfPlatform = p.position.y - p.height / 2 - 1 - 0.3;
                 if (playerHitsPlatform(p)) {
-                    if (gravity < 0) {
+
+                    // Falling normally: land on top
+                    if (gravity < 0 && pyVelocity <= 0) {
                         if (justEnteredWater === 0) {
-                            if (pyVelocity === 0) return
                             player.position.y = topOfPlatform;
-                        }
-                    } else {
-                        if (justEnteredWater === 0) {
-                            player.position.y = bottomOfPlatform;
+                            pyVelocity = 0;
+                            isGrounded = true;
                         }
                     }
 
-                    pyVelocity = 0;
-                    isGrounded = true;
+                    // Falling upward / inverted gravity
+                    else if (gravity > 0 && pyVelocity >= 0) {
+                        if (justEnteredWater === 0) {
+                            player.position.y = bottomOfPlatform;
+                            pyVelocity = 0;
+                            isGrounded = true;
+                        }
+                    }
+
                     if (p.crack) {
                         p.position.y -= 0.03 * gravityBool;
                         player.position.y -= 0.03 * gravityBool;
                     }
                 }
+
+                if (isInWall(p, player.position.x + dx, player.position.y, player.position.z + dz)) {
+                    canMove = false
+                }
             });
+            // Move X independently
+            if (dx !== 0) {
+                let blockedX = false;
+
+                platforms.forEach(p => {
+                    if (isInWall(
+                        p,
+                        player.position.x + dx,
+                        player.position.y,
+                        player.position.z
+                    )) {
+                        blockedX = true;
+                    }
+                });
+
+                if (!blockedX) {
+                    player.position.x += dx;
+                }
+            }
+
+            // Move Z independently
+            if (dz !== 0) {
+                let blockedZ = false;
+
+                platforms.forEach(p => {
+                    if (isInWall(
+                        p,
+                        player.position.x,
+                        player.position.y,
+                        player.position.z + dz
+                    )) {
+                        blockedZ = true;
+                    }
+                });
+
+                if (!blockedZ) {
+                    player.position.z += dz;
+                }
+            }
             bouncies.forEach(p => {
                 const topOfPlatform = p.position.y + p.height / 2 + 1;
                 const bottomOfPlatform = p.position.y - p.height / 2 - 1;
@@ -813,7 +980,7 @@
                     p.y,
                     p.z
                 );
-                otherPlayers[id].material =  playerMat;
+                otherPlayers[id].material = playerMat;
 
                 if (otherPlayers[id].userData.lastName !== p.name) {
                     otherPlayers[id].remove(otherPlayers[id].userData.nameTag);
