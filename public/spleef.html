@@ -36,10 +36,12 @@
         <button id="up">ꜛ</button>
         <button id="jump">⤒</button>
     </div>
-    <select id="levelSelect">
-        <option value="1">Brick</option>
-        <option value="2">Wool</option>
-    </select>
+    <div id="stuff">
+        <select id="levelSelect">
+            <option value="1">Brick</option>
+            <option value="2">Wool</option>
+        </select>
+    </div>
     <h2 id="itStatus" style="display: none"></h2>
     <div id="playerList">
         <h3>Players Online (<span id="playerCount">0</span>)</h3>
@@ -511,9 +513,9 @@
                             1,
                             1,
                             1,
-                            block === 1 ? platMat : woolMAT
+                            block === "1" ? platMat : woolMAT
                         );
-                        socket.emit("placeBlock", { x: newX, y: newY, z: newZ });
+                        socket.emit("placeBlock", { x: newX, y: newY, z: newZ, texture: (block === "1" ? platMat : woolMAT) });
                     }
 
                 }
@@ -533,7 +535,7 @@
             removeMinedBlock(data.x, data.y, data.z);
         });
         socket.on("blockPlaced", (data) => {
-            spawnPlatform(group1, data.x, data.y, data.z, 1, 1, 1);
+            spawnPlatform(group1, data.x, data.y, data.z, 1, 1, 1, data.texture);
         });
 
 

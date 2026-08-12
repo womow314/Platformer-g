@@ -384,7 +384,8 @@ io.on("connection", (socket) => {
             io.emit("blockPlaced", {
                 x: data.x,
                 y: data.y,
-                z: data.z
+                z: data.z,
+                texture: data.texture
             });
         });
 
