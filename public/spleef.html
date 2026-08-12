@@ -36,6 +36,10 @@
         <button id="up">ꜛ</button>
         <button id="jump">⤒</button>
     </div>
+    <select id="levelSelect">
+        <option value="1">Brick</option>
+        <option value="2">Wool</option>
+    </select>
     <h2 id="itStatus" style="display: none"></h2>
     <div id="playerList">
         <h3>Players Online (<span id="playerCount">0</span>)</h3>
@@ -155,6 +159,10 @@
             transparent: true,
             opacity: 0.5
         });
+
+        const woolMAT = new THREE.MeshStandardMaterial({
+            map: loader.load("images/pixil-frame-0 (90).png")
+        });
         socket.on("mapStatePlaced", (data) => {
             data.placedBlocks.forEach(block => {
                 spawnPlatform(
@@ -263,14 +271,10 @@
         scene.add(group2);
         scene.add(group3);
         scene.add(group4);
-        const spawnPlatform = (group, x, y, z, width = 5, height = 1, depth = 5, crack = false) => {
+        const spawnPlatform = (group, x, y, z, width = 5, height = 1, depth = 5, texture = platMat) => {
             let p;
 
-            if (!crack) {
-                p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMat);
-            } else {
-                p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), platMatCrack);
-            }
+            p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), texture);
 
             p.position.set(x, y, z);
 
@@ -279,7 +283,7 @@
             p.width = width;
             p.height = height;
             p.depth = depth;
-            p.crack = crack;
+            p.crack = false;
 
             platforms.push(p);
         };
@@ -498,6 +502,7 @@
                     );
 
                     if (!occupied) {
+                        let block = document.getElementById('levelSelect').value
                         spawnPlatform(
                             group1,
                             newX,
@@ -505,7 +510,8 @@
                             newZ,
                             1,
                             1,
-                            1
+                            1,
+                            block === 1 ? platMat : woolMAT
                         );
                         socket.emit("placeBlock", { x: newX, y: newY, z: newZ });
                     }
