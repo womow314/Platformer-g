@@ -167,6 +167,10 @@
         });
         socket.on("mapStatePlaced", (data) => {
             data.placedBlocks.forEach(block => {
+                const material = block.texture === "wool"
+                    ? woolMAT
+                    : platMat;
+
                 spawnPlatform(
                     group1,
                     block.x,
@@ -175,7 +179,7 @@
                     1,
                     1,
                     1,
-                    block.texture
+                    material
                 );
             });
         });
@@ -264,6 +268,11 @@
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
         ];
         const platforms = [];
+        const platformMap = new Map();
+
+        function blockKey(x, y, z) {
+            return `${Math.round(x)},${Math.round(y)},${Math.round(z)}`;
+        }
 
         const group1 = new THREE.Group();
         const group2 = new THREE.Group();
@@ -274,21 +283,34 @@
         scene.add(group2);
         scene.add(group3);
         scene.add(group4);
-        const spawnPlatform = (group, x, y, z, width = 5, height = 1, depth = 5, texture = platMat) => {
-            let p;
-
-            p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), texture);
+        const spawnPlatform = (
+            group,
+            x,
+            y,
+            z,
+            width = 1,
+            height = 1,
+            depth = 1,
+            texture = platMat
+        ) => {
+            const p = new THREE.Mesh(
+                new THREE.BoxGeometry(width, height, depth),
+                texture
+            );
 
             p.position.set(x, y, z);
-
-            group.add(p);       // instead of scene.add(p)
 
             p.width = width;
             p.height = height;
             p.depth = depth;
             p.crack = false;
 
+            group.add(p);
             platforms.push(p);
+
+            platformMap.set(blockKey(x, y, z), p);
+
+            return p;
         };
         lavas = []
         const spawnLava = (group, x, y, z, width = 1, height = 1, depth = 1) => {
@@ -436,22 +458,46 @@
         const raycaster = new THREE.Raycaster();
         const mineRange = 6;
 
-        function removeMinedBlock(x, y, z) {
-            for (let i = platforms.length - 1; i >= 0; i--) {
-                const block = platforms[i];
+        function getNearbyPlatforms(x, y, z, radius = 2) {
+            const result = [];
 
-                if (
-                    Math.abs(block.position.x - x) < 0.01 &&
-                    Math.abs(block.position.y - y) < 0.01 &&
-                    Math.abs(block.position.z - z) < 0.01
-                ) {
-                    if (block.parent) {
-                        block.parent.remove(block);
+            const minX = Math.floor(x - radius);
+            const maxX = Math.floor(x + radius);
+            const minY = Math.floor(y - radius);
+            const maxY = Math.floor(y + radius);
+            const minZ = Math.floor(z - radius);
+            const maxZ = Math.floor(z + radius);
+
+            for (let bx = minX; bx <= maxX; bx++) {
+                for (let by = minY; by <= maxY; by++) {
+                    for (let bz = minZ; bz <= maxZ; bz++) {
+                        const block = platformMap.get(blockKey(bx, by, bz));
+
+                        if (block) {
+                            result.push(block);
+                        }
                     }
-
-                    platforms.splice(i, 1);
-                    return;
                 }
+            }
+
+            return result;
+        }
+
+        function removeMinedBlock(x, y, z) {
+            const key = blockKey(x, y, z);
+            const block = platformMap.get(key);
+
+            if (!block) return;
+
+            if (block.parent) {
+                block.parent.remove(block);
+            }
+
+            platformMap.delete(key);
+
+            const index = platforms.indexOf(block);
+            if (index !== -1) {
+                platforms.splice(index, 1);
             }
         }
 
@@ -506,6 +552,8 @@
 
                     if (!occupied) {
                         let block = document.getElementById('levelSelect').value
+                        const texture = block === "1" ? "brick" : "wool";
+
                         spawnPlatform(
                             group1,
                             newX,
@@ -514,9 +562,15 @@
                             1,
                             1,
                             1,
-                            block === "1" ? platMat : woolMAT
+                            texture === "brick" ? platMat : woolMAT
                         );
-                        socket.emit("placeBlock", { x: newX, y: newY, z: newZ, texture: (block === "1" ? platMat : woolMAT) });
+
+                        socket.emit("placeBlock", {
+                            x: newX,
+                            y: newY,
+                            z: newZ,
+                            texture
+                        });
                     }
 
                 }
@@ -536,7 +590,29 @@
             removeMinedBlock(data.x, data.y, data.z);
         });
         socket.on("blockPlaced", (data) => {
-            spawnPlatform(group1, data.x, data.y, data.z, 1, 1, 1, data.texture);
+            const material = data.texture === "wool"
+                ? woolMAT
+                : platMat;
+
+            // Don't create a duplicate if this is our own block.
+            const alreadyExists = platforms.some(p =>
+                Math.abs(p.position.x - data.x) < 0.01 &&
+                Math.abs(p.position.y - data.y) < 0.01 &&
+                Math.abs(p.position.z - data.z) < 0.01
+            );
+
+            if (alreadyExists) return;
+
+            spawnPlatform(
+                group1,
+                data.x,
+                data.y,
+                data.z,
+                1,
+                1,
+                1,
+                material
+            );
         });
 
 
@@ -791,8 +867,15 @@
             }
             let canMove = true
 
+            const nearbyPlatforms = getNearbyPlatforms(
+                player.position.x,
+                player.position.y,
+                player.position.z,
+                2
+            );
 
-            platforms.forEach(p => {
+
+            nearbyPlatforms.forEach(p => {
                 const topOfPlatform = p.position.y + p.height / 2 + 1 - 0.3;
                 const bottomOfPlatform = p.position.y - p.height / 2 - 1 - 0.3;
                 if (playerHitsPlatform(p)) {

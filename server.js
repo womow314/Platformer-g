@@ -15,9 +15,8 @@ const flatPlayers = {};
 const gravityPlayers = {};
 const players3d = {};
 let minedBlocks = new Set();
-let fullMap = false
-let placedBlocks = new Set();
-
+let fullMap = false;
+let placedBlocks = new Map();
 
 let tagCooldown = 0
 
@@ -269,10 +268,15 @@ io.on("connection", (socket) => {
         });
 
         socket.emit("mapStatePlaced", {
-            placedBlocks: Array.from(placedBlocks).map(key => {
+            placedBlocks: Array.from(placedBlocks.entries()).map(([key, texture]) => {
                 const [x, y, z] = key.split(",").map(Number);
 
-                return { x, y, z };
+                return {
+                    x,
+                    y,
+                    z,
+                    texture
+                };
             })
         });
         socket.on("setName", (name) => {
@@ -310,8 +314,10 @@ io.on("connection", (socket) => {
         };
         socket.on("reset", () => {
             minedBlocks = new Set();
-            placedBlocks = new Set();
-        })
+            placedBlocks = new Map();
+
+            io.emit("mapReset");
+        });
 
         socket.on("makeMap", (bool) => {
             fullMap = bool;
@@ -347,16 +353,21 @@ io.on("connection", (socket) => {
 
         socket.on("mineBlock", (data) => {
             if (
+                !data ||
                 typeof data.x !== "number" ||
                 typeof data.y !== "number" ||
                 typeof data.z !== "number"
             ) {
+                console.log("Invalid mineBlock data:", data);
                 return;
             }
 
             const key = `${data.x},${data.y},${data.z}`;
 
+            // Mark the block as mined.
             minedBlocks.add(key);
+
+            // If it was a player-placed block, remove it from placed blocks.
             placedBlocks.delete(key);
 
             io.emit("blockMined", {
@@ -369,9 +380,11 @@ io.on("connection", (socket) => {
 
         socket.on("placeBlock", (data) => {
             if (
+                !data ||
                 typeof data.x !== "number" ||
                 typeof data.y !== "number" ||
-                typeof data.z !== "number"
+                typeof data.z !== "number" ||
+                typeof data.texture !== "string"
             ) {
                 console.log("Invalid placeBlock data:", data);
                 return;
@@ -379,7 +392,11 @@ io.on("connection", (socket) => {
 
             const key = `${data.x},${data.y},${data.z}`;
 
-            placedBlocks.add(key);
+            // A newly placed block is no longer mined.
+            minedBlocks.delete(key);
+
+            // Store its texture as a simple string.
+            placedBlocks.set(key, data.texture);
 
             io.emit("blockPlaced", {
                 x: data.x,
