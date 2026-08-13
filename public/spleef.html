@@ -567,21 +567,24 @@
                     );
 
                     if (!occupied) {
-                        let block = document.getElementById('levelSelect').value
-                        let material
+                        const block = document.getElementById("levelSelect").value;
+
+                        let material;
+                        let textureName;
 
                         if (block === "1") {
-                            material = platMat
+                            material = platMat;
+                            textureName = "brick";
                         } else if (block === "2") {
-                            material = woolMAT
+                            material = woolMAT;
+                            textureName = "wool";
+                        } else if (block === "3") {
+                            material = lavalMat;
+                            textureName = "lava";
+                        } else if (block === "4") {
+                            material = ironMAT;
+                            textureName = "iron";
                         }
-                        else if (block === "3") {
-                            material = lavalMat
-                        }
-                        else if (block === "4") {
-                            material = ironMAT
-                        }
-
 
                         spawnPlatform(
                             group1,
@@ -598,7 +601,7 @@
                             x: newX,
                             y: newY,
                             z: newZ,
-                            texture: material
+                            texture: textureName
                         });
                     }
 
