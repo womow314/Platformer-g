@@ -40,6 +40,8 @@
         <select id="levelSelect">
             <option value="1">Brick</option>
             <option value="2">Wool</option>
+            <option value="3">Lava</option>
+            <option value="4">Metal</option>
         </select>
     </div>
     <h2 id="itStatus" style="display: none"></h2>
@@ -165,11 +167,24 @@
         const woolMAT = new THREE.MeshStandardMaterial({
             map: loader.load("images/pixil-frame-0 (90).png")
         });
+        const ironMAT = new THREE.MeshStandardMaterial({
+            map: loader.load("images/pixil-frame-0 (70).png")
+        });
         socket.on("mapStatePlaced", (data) => {
             data.placedBlocks.forEach(block => {
-                const material = block.texture === "wool"
-                    ? woolMAT
-                    : platMat;
+                let material
+
+                if (block.texture === "brick") {
+                    material = platMat
+                } else if (block.texture === "wool") {
+                    material = woolMAT
+                }
+                else if (block.texture === "lava") {
+                    material = lavalMat
+                }
+                else if (block.texture === "lava") {
+                    material = lavalMat
+                }
 
                 spawnPlatform(
                     group1,
@@ -309,6 +324,7 @@
             platforms.push(p);
 
             platformMap.set(blockKey(x, y, z), p);
+            console.log(`platformSpawned. Texture: ${texture}`)
 
             return p;
         };
@@ -552,7 +568,20 @@
 
                     if (!occupied) {
                         let block = document.getElementById('levelSelect').value
-                        const texture = block === "1" ? "brick" : "wool";
+                        let material
+
+                        if (block === "1") {
+                            material = platMat
+                        } else if (block === "2") {
+                            material = woolMAT
+                        }
+                        else if (block === "3") {
+                            material = lavalMat
+                        }
+                        else if (block === "4") {
+                            material = ironMAT
+                        }
+
 
                         spawnPlatform(
                             group1,
@@ -562,14 +591,14 @@
                             1,
                             1,
                             1,
-                            texture === "brick" ? platMat : woolMAT
+                            material
                         );
 
                         socket.emit("placeBlock", {
                             x: newX,
                             y: newY,
                             z: newZ,
-                            texture
+                            texture: material
                         });
                     }
 
@@ -590,9 +619,19 @@
             removeMinedBlock(data.x, data.y, data.z);
         });
         socket.on("blockPlaced", (data) => {
-            const material = data.texture === "wool"
-                ? woolMAT
-                : platMat;
+            let material
+
+            if (data.texture === "brick") {
+                material = platMat
+            } else if (data.texture === "wool") {
+                material = woolMAT
+            }
+            else if (data.texture === "lava") {
+                material = lavalMat
+            }
+            else if (data.texture === "iron") {
+                material = ironMAT
+            }
 
             // Don't create a duplicate if this is our own block.
             const alreadyExists = platforms.some(p =>

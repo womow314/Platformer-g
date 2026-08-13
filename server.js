@@ -358,7 +358,7 @@ io.on("connection", (socket) => {
                 typeof data.y !== "number" ||
                 typeof data.z !== "number"
             ) {
-                console.log("Invalid mineBlock data:", data);
+                
                 return;
             }
 
@@ -386,7 +386,7 @@ io.on("connection", (socket) => {
                 typeof data.z !== "number" ||
                 typeof data.texture !== "string"
             ) {
-                console.log("Invalid placeBlock data:", data);
+                
                 return;
             }
 
