@@ -182,8 +182,8 @@
                 else if (block.texture === "lava") {
                     material = lavalMat
                 }
-                else if (block.texture === "lava") {
-                    material = lavalMat
+                else if (block.texture === "iron") {
+                    material = ironMAT
                 }
 
                 spawnPlatform(
@@ -597,6 +597,8 @@
                             material
                         );
 
+                        console.log(textureName)
+
                         socket.emit("placeBlock", {
                             x: newX,
                             y: newY,
@@ -635,6 +637,7 @@
             else if (data.texture === "iron") {
                 material = ironMAT
             }
+            console.log(data.texture)
 
             // Don't create a duplicate if this is our own block.
             const alreadyExists = platforms.some(p =>
