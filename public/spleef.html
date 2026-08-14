@@ -67,7 +67,17 @@
         Jump: Spacebar
     </div>
 
-    <script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/loaders/GLTFLoader.js";
         function home() {
             window.location.href = "index.html";
         }
@@ -92,26 +102,31 @@
             color: 0xffffff
         });
 
-        function addScafolding(x,y,z) {
+        let scafoldings = []
+
+        function addScafolding(x, y, z) {
             gltfLoader.load("Models/scafo.glb", function (gltf) {
+                x -= 1
+                y -= 0.5
+                z += 0.5
 
                 const enemy = gltf.scene;
 
                 enemy.position.set(x, y, z);
                 enemy.rotation.y = Math.PI / 2
-                enemy.health = 1
-                enemy.time = time
-                enemy.based = onPlat
-                enemy.timeToUnlock = 0
+                
+                const scale = 1/20
 
-                enemy.scale.set(0.07, 0.07, 0.07);
+                enemy.scale.set(scale, scale, scale);
 
                 scene.add(enemy);
 
-                targets.push(enemy);
+                scafoldings.push(enemy);
 
             });
         }
+
+        
 
         const socket = io({
             transports: ["websocket"]
@@ -373,7 +388,7 @@
 
             return p;
         };
-        lavas = []
+        let lavas = []
         const spawnLava = (group, x, y, z, width = 1, height = 1, depth = 1) => {
             const p = new THREE.Mesh(
                 new THREE.BoxGeometry(width, height, depth),
@@ -389,7 +404,7 @@
 
             lavas.push(p);
         };
-        bouncies = []
+        let bouncies = []
         const spawnBounce = (group, x, y, z, width = 5, height = 1, depth = 5) => {
             const p = new THREE.Mesh(
                 new THREE.BoxGeometry(width, height, depth),
@@ -405,7 +420,7 @@
 
             bouncies.push(p);
         };
-        waters = []
+        let waters = []
         const spawnWater = (group, x, y, z, width = 1, height = 1, depth = 1) => {
             const borderSize = 0.1;
 
@@ -461,7 +476,7 @@
         bindButton("right", "ArrowRight");
         bindButton("up", "ArrowUp");
         bindButton("jump", "Space");
-        checkpoints = []
+        let checkpoints = []
 
         let players3d = {}
 
@@ -497,6 +512,7 @@
 
 
         const keys = {}
+
 
 
         let pyVelocity = 0;
