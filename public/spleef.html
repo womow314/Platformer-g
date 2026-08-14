@@ -42,6 +42,8 @@
             <option value="2">Wool</option>
             <option value="3">Lava</option>
             <option value="4">Metal</option>
+            <option value="5">Grass</option>
+            <option value="6">Glass</option>
         </select>
     </div>
     <h2 id="itStatus" style="display: none"></h2>
@@ -164,6 +166,12 @@
             opacity: 0.5
         });
 
+        const glassMAT = new THREE.MeshStandardMaterial({
+            map: loader.load("images/pixil-frame-0 (90).png"),
+            transparent: true,
+            opacity: 0.2
+        });
+
         const woolMAT = new THREE.MeshStandardMaterial({
             map: loader.load("images/pixil-frame-0 (90).png")
         });
@@ -184,6 +192,12 @@
                 }
                 else if (block.texture === "iron") {
                     material = ironMAT
+                }
+                else if (block.texture === "grass") {
+                    material = grassMAT
+                }
+                else if (block.texture === "glass") {
+                    material = glassMAT
                 }
 
                 spawnPlatform(
@@ -266,6 +280,15 @@
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
         ];
+
+        const grassMAT = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (91).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (91).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (92).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (93).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (91).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (91).png") }),
+        ];
         const bouncy = [
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
             new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
@@ -306,7 +329,7 @@
             width = 1,
             height = 1,
             depth = 1,
-            texture = platMat
+            texture = grassMAT
         ) => {
             const p = new THREE.Mesh(
                 new THREE.BoxGeometry(width, height, depth),
@@ -584,6 +607,12 @@
                         } else if (block === "4") {
                             material = ironMAT;
                             textureName = "iron";
+                        } else if (block === "5") {
+                            material = grassMAT;
+                            textureName = "grass";
+                        } else if (block === "6") {
+                            material = glassMAT;
+                            textureName = "glass";
                         }
 
                         spawnPlatform(
@@ -636,6 +665,12 @@
             }
             else if (data.texture === "iron") {
                 material = ironMAT
+            }
+            else if (data.texture === "grass") {
+                material = grassMAT
+            }
+            else if (data.texture === "glass") {
+                material = glassMAT
             }
             console.log(data.texture)
 
