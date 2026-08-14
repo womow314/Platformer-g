@@ -14,8 +14,9 @@ app.use(express.static(path.join(__dirname, "public")));
 const flatPlayers = {};
 const gravityPlayers = {};
 const players3d = {};
-let fullMap = false
-
+let minedBlocks = new Set();
+let fullMap = false;
+let placedBlocks = new Map();
 
 let tagCooldown = 0
 
@@ -258,6 +259,26 @@ io.on("connection", (socket) => {
     })
 
     socket.on("joinTag3", (dir) => {
+        socket.emit("mapState", {
+            minedBlocks: Array.from(minedBlocks).map(key => {
+                const [x, y, z] = key.split(",").map(Number);
+
+                return { x, y, z };
+            })
+        });
+
+        socket.emit("mapStatePlaced", {
+            placedBlocks: Array.from(placedBlocks.entries()).map(([key, texture]) => {
+                const [x, y, z] = key.split(",").map(Number);
+
+                return {
+                    x,
+                    y,
+                    z,
+                    texture
+                };
+            })
+        });
         socket.on("setName", (name) => {
             if (players3d[socket.id]) {
                 players3d[socket.id].name = name.substring(0, 15);
@@ -291,6 +312,12 @@ io.on("connection", (socket) => {
             timeIT: 0,
             name: "Player"
         };
+        socket.on("reset", () => {
+            minedBlocks = new Set();
+            placedBlocks = new Map();
+
+            io.emit("mapReset");
+        });
 
         socket.on("makeMap", (bool) => {
             fullMap = bool;
@@ -323,6 +350,65 @@ io.on("connection", (socket) => {
                 }
             }
         });
+
+        socket.on("mineBlock", (data) => {
+            if (
+                !data ||
+                typeof data.x !== "number" ||
+                typeof data.y !== "number" ||
+                typeof data.z !== "number"
+            ) {
+                
+                return;
+            }
+
+            const key = `${data.x},${data.y},${data.z}`;
+
+            // Mark the block as mined.
+            minedBlocks.add(key);
+
+            // If it was a player-placed block, remove it from placed blocks.
+            placedBlocks.delete(key);
+
+            io.emit("blockMined", {
+                x: data.x,
+                y: data.y,
+                z: data.z
+            });
+        });
+
+
+        socket.on("placeBlock", (data) => {
+            if (
+                !data ||
+                typeof data.x !== "number" ||
+                typeof data.y !== "number" ||
+                typeof data.z !== "number" ||
+                typeof data.texture !== "string"
+            ) {
+                
+                return;
+            }
+
+            const key = `${data.x},${data.y},${data.z}`;
+
+            // A newly placed block is no longer mined.
+            minedBlocks.delete(key);
+
+            // Store its texture as a simple string.
+            placedBlocks.set(key, data.texture);
+
+            io.emit("blockPlaced", {
+                x: data.x,
+                y: data.y,
+                z: data.z,
+                texture: data.texture
+            });
+        });
+
+
+
+
 
         socket.on("move", (data) => {
 

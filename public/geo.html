@@ -126,6 +126,28 @@
 
         redBouncyPad.src = "images/pixil-frame-0%20(80).png"
 
+        const yellowPortal = new Image();
+        yellowPortal.src = "images/pixil-frame-0%20(83).png"
+
+        const greenPortal = new Image();
+        greenPortal.src = "images/pixil-frame-0%20(84).png"
+
+        const redPortal = new Image();
+        redPortal.src = "images/pixil-frame-0%20(85).png"
+
+        const yellowOrb = new Image();
+        yellowOrb.src = "images/pixil-frame-0%20(87).png"
+
+        const redOrb = new Image();
+        redOrb.src = "images/pixil-frame-0%20(88).png"
+
+        const pinkOrb = new Image();
+        pinkOrb.src = "images/pixil-frame-0%20(89).png"
+        const lightBluePortal = new Image();
+        lightBluePortal.src = "images/pixil-frame-0%20(86).png"
+
+
+
         const ball = new Image();
 
         ball.src = "images/guard.png"
@@ -253,6 +275,12 @@
             enemys.push({ x: px, y: py })
         }
 
+        let orbs = []
+
+        function spawnOrb(px, py, strength) {
+            orbs.push({ x: px, y: py + (currentX < returnToNormalHeightX ? -20 : 0), strength })
+        }
+
         function addPlatform(
             px, py, w, h,
             danger = false,
@@ -311,9 +339,10 @@
             let numOfLevels;
             if (geoLevel === 1) numOfLevels = 10
             if (geoLevel === 2) numOfLevels = 10
-            if (geoLevel >= 3) numOfLevels = 13
+            if (geoLevel === 3) numOfLevels = 13
+            if (geoLevel >= 4) numOfLevels = 16
             let roll = Math.ceil(Math.random() * (numOfLevels))
-            //roll = 13
+            //roll = 10
             let roll1 = Math.random()
             if (roll === 1) { // Single spike
                 addPlatform(currentX, 320, 20, 20, true)
@@ -462,28 +491,37 @@
                 let isOnFloor = true
 
                 while (currentX < maxX) {
-                    let roll5 = Math.random()
-                    let roll6 = Math.random()
-                    let length = (Math.ceil(Math.random() * 6)) * 20
-                    if (roll6 > 0.8 && geoLevel >= 2) {
-                        length += 60
-                        addPlatform(currentX + length / 2 - 20, !isOnFloor ? 320 : 220, 20, 20, true, 0, isOnFloor)
-                        addPlatform(currentX + length - 20, isOnFloor ? 300 : 240, 20, 20, true, 0, !isOnFloor)
-                    }
-                    if (Math.random() < 0.8 && roll6 < 0.8 && length <= 40 && geoLevel >= 2) {
-                        currentX += 20
-                        addPlatform(currentX - 20, isOnFloor ? 320 : 210, 20, 20, false, 1, false, false, false, !isOnFloor)
-                        addPlatform(currentX, !isOnFloor ? 320 : 220, length, 20, roll6 < 0.8, false, isOnFloor)
-                    }
-                    addPlatform(currentX, isOnFloor ? 320 : 220, length, 20, roll6 < 0.8, false, !isOnFloor)
-                    if (Math.random() < 0.8 && roll6 < 0.8 && length <= 40 && geoLevel >= 2) {
-                        currentX += 60
-                    }
+                    let roll7 = Math.random() < 0.2
+                    if (!roll7) {
+                        let roll5 = Math.random()
+                        let roll6 = Math.random()
+                        let length = (Math.ceil(Math.random() * 6)) * 20
+                        if (roll6 > 0.8 && geoLevel >= 2) {
+                            length += 60
+                            addPlatform(currentX + length / 2 - 20, !isOnFloor ? 320 : 220, 20, 20, true, 0, isOnFloor)
+                            addPlatform(currentX + length - 20, isOnFloor ? 300 : 240, 20, 20, true, 0, !isOnFloor)
+                        }
+                        if (Math.random() < 0.8 && roll6 < 0.8 && length <= 40 && geoLevel >= 2) {
+                            currentX += 20
+                            addPlatform(currentX - 20, isOnFloor ? 320 : 210, 20, 20, false, 1, false, false, false, !isOnFloor)
+                            addPlatform(currentX, !isOnFloor ? 320 : 220, length, 20, roll6 < 0.8, false, isOnFloor)
+                        }
+                        addPlatform(currentX, isOnFloor ? 320 : 220, length, 20, roll6 < 0.8, false, !isOnFloor)
+                        if (Math.random() < 0.8 && roll6 < 0.8 && length <= 40 && geoLevel >= 2) {
+                            currentX += 60
+                        }
 
-                    currentX += (roll6 > 0.8) ? 20 : 0
+                        currentX += (roll6 > 0.8) ? 20 : 0
 
-                    currentX += length + Math.random() * 30 + 40
-                    isOnFloor = !isOnFloor
+                        currentX += length + Math.random() * 30 + 40
+                        isOnFloor = !isOnFloor
+                    } else {
+                        spawnOrb(currentX, isOnFloor ? 320 : 220, 1)
+                        spawnOrb(currentX + 60, isOnFloor ? 300 : 240, 1)
+                        spawnOrb(currentX + 120, isOnFloor ? 280 : 260, 1)
+                        addPlatform(currentX + 20, isOnFloor ? 320 : 220, 120, 20, true, false, !isOnFloor)
+                        currentX += 230
+                    }
                 }
                 currentX += 250
             } else if (roll === 11) {
@@ -513,7 +551,7 @@
                 addPlatform(currentX, 120, 800, 20)
                 addPlatform(currentX, 140, 800, 20, true, false, true)
                 addPortal(currentX, 320, "gravUp")
-                
+
                 addPlatform(currentX + 40, 160, 80, 20)
                 let maxX = currentX + 740
                 while (currentX < maxX) {
@@ -530,6 +568,28 @@
                 }
                 addPortal(currentX + 40, currentY + 20, "gravDown")
                 currentX += 180
+            } else if (roll === 14) {
+                addPlatform(currentX, 320, 290, 20, true)
+                spawnOrb(currentX + 30, 280, 2)
+                spawnOrb(currentX + 115, 280, 2)
+                spawnOrb(currentX + 210, 280, 2)
+                currentX += 380
+            } else if (roll === 15) { //Twin towers
+                addPlatform(currentX, 320, 20, 20)
+                addPlatform(currentX, 300, 20, 20)
+                addPlatform(currentX + 20, 320, 280, 20, true)
+                addPlatform(currentX + 300, 320, 20, 20)
+                addPlatform(currentX + 300, 300, 20, 20)
+                spawnOrb(currentX + 100, 260, 2)
+                spawnOrb(currentX + 180, 260, 2)
+                currentX += Math.random() * 140 + 350
+            } else if (roll === 16) {
+                addPlatform(currentX, 160, 200, 20)
+                addPlatform(currentX, 180, 200, 20, true, false, true)
+                addPlatform(currentX, 320, 20, 20, false, true)
+                addPlatform(currentX + 80, 320, 20, 20, false, true)
+                addPlatform(currentX + 160, 320, 20, 20, false, true)
+                currentX += 340
             }
         }
         let highScoreBoxX = -40
@@ -593,6 +653,24 @@
             } else {
                 player.dy = 0;
                 player.dx = 0;
+            }
+            for (let orb of orbs) {
+                let dist = Math.sqrt((orb.x - player.x) ** 2 + (orb.y - player.y) ** 2)
+                if (dist < 20 && (keys['ArrowUp'] || keys['Space'] || keys['KeyW'])) {
+                    switch (orb.strength) {
+                        case 1:
+                            player.dy = 1.3 * basegravity * -7.5;
+                            break
+                        case 2:
+                            player.dy = 1.3 * basegravity * -10.5;
+                            break
+                        case 3:
+                            player.dy = 1.3 * basegravity * -12;
+                            break
+                    }
+                    player.y -= basegravity * 2
+                    player.grounded = false
+                }
             }
 
             if ((keys['ArrowUp'] || keys['Space'] || keys['KeyW']) && player.grounded) {
@@ -815,9 +893,32 @@
             });
 
             portals.forEach(portal => {
-                ctx.drawImage(portalIMG, portal.x - 20, portal.y - 20, 60, 60);
+                let image;
+                if (portal.type === "ball") {
+                    image = redPortal
+                } else if (portal.type === "cube") {
+                    image = greenPortal
+                } else if (portal.type === "gravUp") {
+                    image = yellowPortal
+                } else if (portal.type === "gravDown") {
+                    image = lightBluePortal
+                }
+
+                ctx.drawImage(image, portal.x - 20, portal.y - 20, 40, 40);
             });
 
+            orbs.forEach(orb => {
+                let image;
+                if (orb.strength === 1) {
+                    image = pinkOrb
+                } else if (orb.strength === 2) {
+                    image = yellowOrb
+                } else if (orb.strength === 3) {
+                    image = redOrb
+                }
+
+                ctx.drawImage(image, orb.x, orb.y, 20, 20);
+            });
             ctx.drawImage(player.image, player.x, player.y, player.width, player.height);
 
             ctx.restore();
