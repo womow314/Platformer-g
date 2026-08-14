@@ -73,6 +73,7 @@
         }
         const loader = new THREE.TextureLoader();
         const scene = new THREE.Scene();
+        const gltfLoader = new GLTFLoader();
         scene.background = new THREE.Color(0x74b0c8);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -90,6 +91,27 @@
         const white = new THREE.MeshBasicMaterial({
             color: 0xffffff
         });
+
+        function addScafolding(x,y,z) {
+            gltfLoader.load("Models/scafolding.glb", function (gltf) {
+
+                const enemy = gltf.scene;
+
+                enemy.position.set(x, y, z);
+                enemy.rotation.y = Math.PI / 2
+                enemy.health = 1
+                enemy.time = time
+                enemy.based = onPlat
+                enemy.timeToUnlock = 0
+
+                enemy.scale.set(0.07, 0.07, 0.07);
+
+                scene.add(enemy);
+
+                targets.push(enemy);
+
+            });
+        }
 
         const socket = io({
             transports: ["websocket"]
