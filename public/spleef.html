@@ -361,6 +361,16 @@
         scene.add(group4);
         let lavas = [];
 
+        const textureNames = new Map([
+            [platMat, "platMat"],
+            [woolMAT, "woolMAT"],
+            [lavalMat, "lavalMat"],
+            [ironMAT, "ironMAT"],
+            [grassMAT, "grassMAT"],
+            [glassMAT, "glassMAT"],
+            [bouncy, "bouncy"],
+        ]);
+
         const spawnPlatform = (
             group,
             x,
@@ -382,6 +392,7 @@
             );
 
             p.position.set(x, y, z);
+            p.texture = textureNames.get(texture) || "unknown";
 
             p.width = width;
             p.height = height;
@@ -910,6 +921,282 @@
             z: 0
         };
 
+        function setPreset(x) {
+            for (const p of [...platforms]) {
+                if (p.parent) {
+                    p.parent.remove(p);
+                }
+                platformMap.delete(
+                    blockKey(
+                        p.position.x,
+                        p.position.y,
+                        p.position.z
+                    )
+                );
+                const lavaIndex = lavas.indexOf(p);
+                if (lavaIndex !== -1) {
+                    lavas.splice(lavaIndex, 1);
+                }
+            }
+            platforms.length = 0;
+            platformMap.clear();
+            if (x === 1) {
+                spawnPlatform(group1, 0, 0, 0, 1, 1, 1, platMat)
+            } else if (x === 2) {
+                const size = 10
+                for (let r = 0; r < size; r++) {
+                    for (let c = 0; c < size; c++) {
+                        spawnPlatform(group1, r, 0, c, 1, 1, 1, platMat)
+                    }
+                }
+            } else if (x === 3) {
+                spawnPlatform(group1, 0, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 1, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 1, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 2, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 1, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 2, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 3, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 4, 9, 1, 1, 1, woolMAT)
+                spawnPlatform(group1, 9, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 9, 1, 1, 1, lavalMat)
+
+
+
+            }
+        }
+        let isUpdating = false
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
         function animate() {
 
             requestAnimationFrame(animate);
@@ -945,6 +1232,7 @@
                 }
                 miningCooldown = 16
             }
+
             lavas.forEach(p => {
                 if (isInWall(
                     p,
@@ -960,6 +1248,28 @@
 
             if (keys.KeyT) {
                 socket.emit("reset")
+            }
+
+            if (keys.KeyR && !isUpdating) {
+                isUpdating = true;
+
+                keys.KeyR = false;
+
+                const select = Number(prompt("What preset?"));
+
+                if (!Number.isNaN(select)) {
+                    setPreset(select);
+                }
+
+                isUpdating = false;
+            }
+
+            if (keys.KeyP) {
+                let string = ""
+                for (let plat of platforms) {
+                    string += `spawnPlatform(group1, ${plat.position.x}, ${plat.position.y}, ${plat.position.z}, 1, 1, 1, ${plat.texture}) \n `
+                }
+                console.log(string)
             }
 
             currentSpeed = speed
