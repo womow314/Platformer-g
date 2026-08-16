@@ -104,29 +104,27 @@
 
         let scafoldings = []
 
-        function addScafolding(x, y, z) {
-            gltfLoader.load("Models/scafo.glb", function (gltf) {
-                x -= 1
-                y -= 0.5
-                z += 0.5
+        function removeMinedScaffolding(x, y, z) {
+            const scaffold = scafoldings.find(s =>
+                Math.abs(s.userData.blockX - x) < 0.01 &&
+                Math.abs(s.userData.blockY - y) < 0.01 &&
+                Math.abs(s.userData.blockZ - z) < 0.01
+            );
 
-                const enemy = gltf.scene;
+            if (!scaffold) return;
 
-                enemy.position.set(x, y, z);
-                enemy.rotation.y = Math.PI / 2
-                
-                const scale = 1/20
+            if (scaffold.parent) {
+                scaffold.parent.remove(scaffold);
+            }
 
-                enemy.scale.set(scale, scale, scale);
+            const index = scafoldings.indexOf(scaffold);
 
-                scene.add(enemy);
-
-                scafoldings.push(enemy);
-
-            });
+            if (index !== -1) {
+                scafoldings.splice(index, 1);
+            }
         }
 
-        
+
 
         const socket = io({
             transports: ["websocket"]
@@ -235,6 +233,9 @@
                 }
                 else if (block.texture === "glass") {
                     material = glassMAT
+                }
+                else if (block.texture === "scafo") {
+                    material = "scafo"
                 }
 
                 spawnPlatform(
@@ -358,6 +359,8 @@
         scene.add(group2);
         scene.add(group3);
         scene.add(group4);
+        let lavas = [];
+
         const spawnPlatform = (
             group,
             x,
@@ -368,6 +371,11 @@
             depth = 1,
             texture = grassMAT
         ) => {
+            if (texture === "scafo") {
+                addScafolding(x, y, z);
+                return;
+            }
+
             const p = new THREE.Mesh(
                 new THREE.BoxGeometry(width, height, depth),
                 texture
@@ -380,15 +388,19 @@
             p.depth = depth;
             p.crack = false;
 
+            // IMPORTANT
+            if (texture === lavalMat) {
+                p.isLava = true;
+                lavas.push(p);
+            }
+
             group.add(p);
             platforms.push(p);
 
             platformMap.set(blockKey(x, y, z), p);
-            console.log(`platformSpawned. Texture: ${texture}`)
 
             return p;
         };
-        let lavas = []
         const spawnLava = (group, x, y, z, width = 1, height = 1, depth = 1) => {
             const p = new THREE.Mesh(
                 new THREE.BoxGeometry(width, height, depth),
@@ -576,6 +588,12 @@
             if (index !== -1) {
                 platforms.splice(index, 1);
             }
+
+            // Remove lava from the lava collision list too
+            const lavaIndex = lavas.indexOf(block);
+            if (lavaIndex !== -1) {
+                lavas.splice(lavaIndex, 1);
+            }
         }
 
         window.addEventListener("mousedown", (e) => {
@@ -596,11 +614,36 @@
 
             raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 
-            const hits = raycaster.intersectObjects(platforms, false);
+            const hits = raycaster.intersectObjects(
+                [...platforms, ...scafoldings],
+                true
+            );
 
             if (hits.length !== 0) {
                 const hit = hits[0];
                 const block = hit.object;
+
+                let scaffold = scafoldings.find(s => s === block || s.getObjectById(block.id));
+
+                if (scaffold) {
+                    const distance = camera.position.distanceTo(scaffold.position);
+
+                    if (distance < mineRange) {
+                        const x = scaffold.position.x;
+                        const y = scaffold.position.y;
+                        const z = scaffold.position.z;
+
+                        removeMinedScaffolding(x, y, z);
+
+                        socket.emit("mineBlock", {
+                            x: x,
+                            y: y,
+                            z: z
+                        });
+                    }
+
+                    return;
+                }
 
                 const distance = camera.position.distanceTo(block.position);
 
@@ -620,12 +663,17 @@
                     const newY = y + Math.round(normal.y);
                     const newZ = z + Math.round(normal.z);
 
-                    // Don't place if a block already exists there
-                    const occupied = platforms.some(p =>
-                        Math.abs(p.position.x - newX) < 0.01 &&
-                        Math.abs(p.position.y - newY) < 0.01 &&
-                        Math.abs(p.position.z - newZ) < 0.01
-                    );
+                    const occupied =
+                        platforms.some(p =>
+                            Math.abs(p.position.x - newX) < 0.01 &&
+                            Math.abs(p.position.y - newY) < 0.01 &&
+                            Math.abs(p.position.z - newZ) < 0.01
+                        ) ||
+                        scafoldings.some(s =>
+                            Math.abs(s.userData.blockX - newX) < 0.01 &&
+                            Math.abs(s.userData.blockY - newY) < 0.01 &&
+                            Math.abs(s.userData.blockZ - newZ) < 0.01
+                        );
 
                     if (!occupied) {
                         const block = document.getElementById("levelSelect").value;
@@ -651,6 +699,10 @@
                         } else if (block === "6") {
                             material = glassMAT;
                             textureName = "glass";
+                        }
+                        else if (block === "7") {
+                            material = "scafo";
+                            textureName = "scafo";
                         }
 
                         spawnPlatform(
@@ -689,6 +741,7 @@
         // Receive mined blocks from other players
         socket.on("blockMined", (data) => {
             removeMinedBlock(data.x, data.y, data.z);
+            removeMinedScaffolding(data.x, data.y, data.z);
         });
         socket.on("blockPlaced", (data) => {
             let material
@@ -709,6 +762,9 @@
             }
             else if (data.texture === "glass") {
                 material = glassMAT
+            }
+            else if (data.texture === "scafo") {
+                material = "scafo"
             }
             console.log(data.texture)
 
@@ -847,6 +903,7 @@
         player.position.set(save.x, save.y, save.z);
         scene.add(player);
         let basegravity = gravity
+        let isClimbingScaffolding = false
         let lastSent = {
             x: 0,
             y: 0,
@@ -888,6 +945,18 @@
                 }
                 miningCooldown = 16
             }
+            lavas.forEach(p => {
+                if (isInWall(
+                    p,
+                    player.position.x,
+                    player.position.y,
+                    player.position.z
+                )) {
+                    player.position.set(save.x, save.y, save.z);
+                    pyVelocity = 0;
+                    socket.emit("fellOff");
+                }
+            });
 
             if (keys.KeyT) {
                 socket.emit("reset")
@@ -930,26 +999,25 @@
                 dz = forwardZ * currentSpeed;
             }
 
-            const status = document.getElementById("itStatus");
-
-            if (players3d[socket.id]?.it) {
-                status.textContent = "YOU ARE IT!";
-            } else {
-                let name;
-                for (const id in players3d) {
-                    if (players3d[id].it) {
-                        name = players3d[id].name
-                    }
-                }
-                status.textContent = `${name} is it!`;
-            }
-
 
             pyVelocity += gravity;
             player.position.y += pyVelocity;
             isGrounded = false;
             wasInWater = isInWater;
             isInWater = false;
+
+            isClimbingScaffolding = false;
+
+            for (let scafo of scafoldings) {
+                if (isInWall(
+                    scafo,
+                    player.position.x,
+                    player.position.y,
+                    player.position.z
+                )) {
+                    isClimbingScaffolding = true;
+                }
+            }
 
             waters.forEach(w => {
                 if (playerHitsPlatform(w)) {
@@ -996,9 +1064,14 @@
             nearbyPlatforms.forEach(p => {
                 const topOfPlatform = p.position.y + p.height / 2 + 1 - 0.3;
                 const bottomOfPlatform = p.position.y - p.height / 2 - 1 - 0.3;
-                if (playerHitsPlatform(p)) {
 
-                    // Falling normally: land on top
+                if (playerHitsPlatform(p)) {
+                    if (p.isLava) {
+                        player.position.set(save.x, save.y, save.z);
+                        pyVelocity = 0;
+                        socket.emit("fellOff");
+                    }
+
                     if (gravity < 0 && pyVelocity <= 0) {
                         if (justEnteredWater === 0) {
                             player.position.y = topOfPlatform;
@@ -1007,7 +1080,6 @@
                         }
                     }
 
-                    // Falling upward / inverted gravity
                     else if (gravity > 0 && pyVelocity >= 0) {
                         if (justEnteredWater === 0) {
                             player.position.y = bottomOfPlatform;
@@ -1078,14 +1150,7 @@
                     pyVelocity = jumpForce * 2 * gravityBool;
                 }
             });
-            lavas.forEach(p => {
-                if (playerHitsPlatform(p)) {
-                    player.position.x = save.x
-                    player.position.y = save.y
-                    player.position.z = save.z
-                    socket.emit("fellOff");
-                }
-            });
+
             checkpoints.forEach(p => {
                 if (playerHitsPlatform(p)) {
                     save.x = player.position.x
@@ -1096,7 +1161,7 @@
                 }
             });
 
-            if (keys["Space"] && isGrounded) {
+            if (keys["Space"] && (isGrounded || isClimbingScaffolding)) {
                 pyVelocity = jumpForce * gravityBool;
                 isGrounded = false;
             }
