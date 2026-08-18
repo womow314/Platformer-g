@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D | Games.io</title>
+    <link rel="stylesheet" href="styles1.css" />
+    <link rel="icon" type="image/png" href="images/tag.png">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #instructions {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: sans-serif;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+    <button onclick="home()" id="home">Home</button>
+    <div id="mobileControls">
+        <button id="left">←</button>
+        <button id="right">→</button>
+        <button id="up">ꜛ</button>
+        <button id="jump">⤒</button>
+    </div>
+    <div id="stuff">
+        <select id="levelSelect">
+            <option value="1">Brick</option>
+            <option value="2">Wool</option>
+            <option value="3">Lava</option>
+            <option value="4">Metal</option>
+            <option value="5">Grass</option>
+            <option value="6">Glass</option>
+        </select>
+    </div>
+    <h2 id="itStatus" style="display: none"></h2>
+    <div id="playerList">
+        <h3>Players Online (<span id="playerCount">0</span>)</h3>
+        <ul id="playersOnline"></ul>
+    </div>
+
+    <span id="plus" style="position: absolute; left: 50; top: 50; transform: translate(-50%, -50%);">+</span>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+
+<body>
+
+    <div id="instructions">
+        <strong>Controls:</strong><br>
+        Move: Up arrow/Down<br>
+        Turn: Left/right arrow
+        Jump: Spacebar
+    </div>
+
+    <script>
+        function home() {
+            window.location.href = "index.html";
+        }
+        const loader = new THREE.TextureLoader();
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x74b0c8);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 15);
+        scene.add(dirLight);
+
+        const white = new THREE.MeshBasicMaterial({
+            color: 0xffffff
+        });
+
+        const socket = io({
+            transports: ["websocket"]
+        });
+        socket.on("connect", () => {
+            console.log("Connected via", socket.io.engine.transport.name);
+
+            socket.io.engine.on("upgrade", () => {
+                console.log("Upgraded to", socket.io.engine.transport.name);
+            });
+        });
+
+        let playerName = localStorage.getItem("playerName");
+
+        if (!playerName) {
+            playerName = prompt("Enter your name:") || "Player";
+            localStorage.setItem("playerName", playerName);
+        }
+
+        socket.on("connect", () => {
+            socket.emit("setName", playerName);
+        });
+        socket.emit("joinTag3", "");
+
+        function ban(name) {
+            socket.emit("ban", name)
+        }
+
+        socket.on("connect", () => {
+
+            console.log("Connected!");
+
+        });
+
+        setInterval(() => {
+            console.log(
+                "connected:",
+                socket.connected,
+                "transport:",
+                socket.io.engine?.transport?.name
+            );
+        }, 1000);
+
+        socket.on("connect", () => {
+            console.log("Connected", socket.id);
+        });
+
+        socket.on("disconnect", reason => {
+            console.log("Disconnected:", reason);
+        });
+
+        socket.io.on("reconnect_attempt", () => {
+            console.log("Trying to reconnect...");
+        });
+
+        socket.on("playerMove", (data) => {
+            if (!players3d[data.id]) return;
+
+            players3d[data.id].x = data.x;
+            players3d[data.id].y = data.y;
+            players3d[data.id].z = data.z;
+            players3d[data.id].it = data.it;
+        });
+        socket.on("kicked", () => {
+            alert("You have been kicked from the game. Please rejoin.");
+            window.location.href = "index.html";
+        });
+
+        const otherPlayers = {};
+
+        const waterMat = new THREE.MeshStandardMaterial({
+            map: loader.load("images/pixil-frame-0 (6).png"),
+            transparent: true,
+            opacity: 0.5
+        });
+
+        const glassMAT = new THREE.MeshStandardMaterial({
+            map: loader.load("images/pixil-frame-0 (90).png"),
+            transparent: true,
+            opacity: 0.2
+        });
+
+        const woolMAT = new THREE.MeshStandardMaterial({
+            map: loader.load("images/pixil-frame-0 (90).png")
+        });
+        const ironMAT = new THREE.MeshStandardMaterial({
+            map: loader.load("images/pixil-frame-0 (70).png")
+        });
+        socket.on("mapStatePlaced", (data) => {
+            data.placedBlocks.forEach(block => {
+                let material
+
+                if (block.texture === "brick") {
+                    material = platMat
+                } else if (block.texture === "wool") {
+                    material = woolMAT
+                }
+                else if (block.texture === "lava") {
+                    material = lavalMat
+                }
+                else if (block.texture === "iron") {
+                    material = ironMAT
+                }
+                else if (block.texture === "grass") {
+                    material = grassMAT
+                }
+                else if (block.texture === "glass") {
+                    material = glassMAT
+                }
+
+                spawnPlatform(
+                    group1,
+                    block.x,
+                    block.y,
+                    block.z,
+                    1,
+                    1,
+                    1,
+                    material
+                );
+            });
+        });
+
+        socket.on("mapState", (data) => {
+            data.minedBlocks.forEach(block => {
+                removeMinedBlock(
+                    block.x,
+                    block.y,
+                    block.z
+                );
+            });
+        });
+
+
+
+        function createNameTag(name) {
+            const canvas = document.createElement("canvas");
+            canvas.width = 256;
+            canvas.height = 64;
+
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = "bold 28px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 5;
+            ctx.fillStyle = "white";
+
+            ctx.strokeText(name, 128, 32);
+            ctx.fillText(name, 128, 32);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+
+            const material = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true,
+                depthTest: false
+            });
+
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(3, 0.75, 1);
+            sprite.position.set(0, 2.2, 0);
+
+            return sprite;
+        }
+
+        const itMat = new THREE.MeshStandardMaterial({
+            color: 0xff0000
+        });
+        const platMat = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (52).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (53).png") }),
+        ];
+        const platMatCrack = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (56).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (56).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (4).png") }),
+        ];
+
+        const grassMAT = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (91).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (91).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (92).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (93).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (91).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (91).png") }),
+        ];
+        const bouncy = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (54).png") }),
+        ];
+        const lavalMat = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (5).png") }),
+        ];
+        const platforms = [];
+        const platformMap = new Map();
+
+        function blockKey(x, y, z) {
+            return `${Math.round(x)},${Math.round(y)},${Math.round(z)}`;
+        }
+
+        const group1 = new THREE.Group();
+        const group2 = new THREE.Group();
+        const group3 = new THREE.Group();
+        const group4 = new THREE.Group();
+
+        scene.add(group1);
+        scene.add(group2);
+        scene.add(group3);
+        scene.add(group4);
+        const spawnPlatform = (
+            group,
+            x,
+            y,
+            z,
+            width = 1,
+            height = 1,
+            depth = 1,
+            texture = grassMAT
+        ) => {
+            const p = new THREE.Mesh(
+                new THREE.BoxGeometry(width, height, depth),
+                texture
+            );
+
+            p.position.set(x, y, z);
+
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
+            p.crack = false;
+
+            group.add(p);
+            platforms.push(p);
+
+            platformMap.set(blockKey(x, y, z), p);
+            console.log(`platformSpawned. Texture: ${texture}`)
+
+            return p;
+        };
+        lavas = []
+        const spawnLava = (group, x, y, z, width = 1, height = 1, depth = 1) => {
+            const p = new THREE.Mesh(
+                new THREE.BoxGeometry(width, height, depth),
+                lavalMat
+            );
+
+            p.position.set(x, y, z);
+            group.add(p);
+
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
+
+            lavas.push(p);
+        };
+        bouncies = []
+        const spawnBounce = (group, x, y, z, width = 5, height = 1, depth = 5) => {
+            const p = new THREE.Mesh(
+                new THREE.BoxGeometry(width, height, depth),
+                bouncy
+            );
+
+            p.position.set(x, y, z);
+            group.add(p);
+
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
+
+            bouncies.push(p);
+        };
+        waters = []
+        const spawnWater = (group, x, y, z, width = 1, height = 1, depth = 1) => {
+            const borderSize = 0.1;
+
+            let p = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), waterMat);
+            p.position.set(x, y, z);
+            group.add(p);
+
+            let p1 = new THREE.Mesh(new THREE.BoxGeometry(borderSize, height, depth), waterMat);
+            p1.position.set(x - width / 2 - borderSize / 2, y, z);
+            group.add(p1);
+
+            let p2 = new THREE.Mesh(new THREE.BoxGeometry(borderSize, height, depth), waterMat);
+            p2.position.set(x + width / 2 + borderSize / 2, y, z);
+            group.add(p2);
+
+            let p3 = new THREE.Mesh(new THREE.BoxGeometry(width, height, borderSize), waterMat);
+            p3.position.set(x, y, z + depth / 2 + borderSize / 2);
+            group.add(p3);
+
+            let p4 = new THREE.Mesh(new THREE.BoxGeometry(width, height, borderSize), waterMat);
+            p4.position.set(x, y, z - depth / 2 - borderSize / 2);
+            group.add(p4);
+
+            p.width = width;
+            p.height = height;
+            p.depth = depth;
+
+            waters.push(p);
+        };
+
+        let px = 0
+        let py = 2
+        let pz = -10
+        let lastWaterWallZ = 1000
+        let hasSpawnedWater = false
+        function bindButton(id, key) {
+            const btn = document.getElementById(id);
+
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys[key] = true;
+            }, { passive: false });
+
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[key] = false;
+            });
+
+            btn.addEventListener('mousedown', () => keys[key] = true);
+            btn.addEventListener('mouseup', () => keys[key] = false);
+        }
+        bindButton("left", "ArrowLeft");
+        bindButton("right", "ArrowRight");
+        bindButton("up", "ArrowUp");
+        bindButton("jump", "Space");
+        checkpoints = []
+
+        let players3d = {}
+
+        socket.on("players", (data) => {
+
+            players3d = data;
+
+        });
+        // Group 1
+        const size = 30
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                spawnPlatform(group1, r, 0, c, 1, 1, 1)
+            }
+        }
+
+
+
+        const playerHitBoxSize = 0.7
+        const playerGeo = new THREE.BoxGeometry(playerHitBoxSize, playerHitBoxSize * 2, playerHitBoxSize);
+
+
+        const playerMat = [
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (51).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (51).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (50).png") }),
+            new THREE.MeshStandardMaterial({ map: loader.load("images/pixil-frame-0 (49).png") }),
+        ];
+        const player = new THREE.Mesh(playerGeo, playerMat);
+        const sensitivity = 0.002
+
+
+        const keys = {}
+
+
+        let pyVelocity = 0;
+        let gravity = -0.015;
+        let gravityBool = 1
+        let jumpForce = 0.2;
+        let speed = 0.15;
+        let currentSpeed = speed
+        let isGrounded = true;
+
+        let cameraAngle = 0;
+        let cameraLookY = 0
+        const cameraRadius = 10;
+        const rotationSpeed = 0.03;
+
+        let isFirstPerson = false
+        let isTouching = false
+
+        // ===== LEFT CLICK MINING =====
+        const raycaster = new THREE.Raycaster();
+        const mineRange = 6;
+
+        function getNearbyPlatforms(x, y, z, radius = 2) {
+            const result = [];
+
+            const minX = Math.floor(x - radius);
+            const maxX = Math.floor(x + radius);
+            const minY = Math.floor(y - radius);
+            const maxY = Math.floor(y + radius);
+            const minZ = Math.floor(z - radius);
+            const maxZ = Math.floor(z + radius);
+
+            for (let bx = minX; bx <= maxX; bx++) {
+                for (let by = minY; by <= maxY; by++) {
+                    for (let bz = minZ; bz <= maxZ; bz++) {
+                        const block = platformMap.get(blockKey(bx, by, bz));
+
+                        if (block) {
+                            result.push(block);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        function removeMinedBlock(x, y, z) {
+            const key = blockKey(x, y, z);
+            const block = platformMap.get(key);
+
+            if (!block) return;
+
+            if (block.parent) {
+                block.parent.remove(block);
+            }
+
+            platformMap.delete(key);
+
+            const index = platforms.indexOf(block);
+            if (index !== -1) {
+                platforms.splice(index, 1);
+            }
+        }
+
+        window.addEventListener("mousedown", (e) => {
+            if (e.button === 2) {
+                return;
+            }
+            if (e.button !== 0) return;
+            if (e.target !== renderer.domElement) return;
+            if (!isFirstPerson) return;
+            isTouching = true
+            miningCooldown = 0
+
+
+        });
+
+        window.addEventListener("mousedown", (e) => {
+            if (e.button !== 2) return;
+
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+
+            const hits = raycaster.intersectObjects(platforms, false);
+
+            if (hits.length !== 0) {
+                const hit = hits[0];
+                const block = hit.object;
+
+                const distance = camera.position.distanceTo(block.position);
+
+                if (distance < mineRange) {
+                    const x = block.position.x;
+                    const y = block.position.y;
+                    const z = block.position.z;
+
+                    // The face that was clicked
+                    const normal = hit.face.normal.clone();
+
+                    // Convert face normal to world direction
+                    normal.transformDirection(block.matrixWorld);
+
+                    // Round because blocks are on a grid
+                    const newX = x + Math.round(normal.x);
+                    const newY = y + Math.round(normal.y);
+                    const newZ = z + Math.round(normal.z);
+
+                    // Don't place if a block already exists there
+                    const occupied = platforms.some(p =>
+                        Math.abs(p.position.x - newX) < 0.01 &&
+                        Math.abs(p.position.y - newY) < 0.01 &&
+                        Math.abs(p.position.z - newZ) < 0.01
+                    );
+
+                    if (!occupied) {
+                        const block = document.getElementById("levelSelect").value;
+
+                        let material;
+                        let textureName;
+
+                        if (block === "1") {
+                            material = platMat;
+                            textureName = "brick";
+                        } else if (block === "2") {
+                            material = woolMAT;
+                            textureName = "wool";
+                        } else if (block === "3") {
+                            material = lavalMat;
+                            textureName = "lava";
+                        } else if (block === "4") {
+                            material = ironMAT;
+                            textureName = "iron";
+                        } else if (block === "5") {
+                            material = grassMAT;
+                            textureName = "grass";
+                        } else if (block === "6") {
+                            material = glassMAT;
+                            textureName = "glass";
+                        }
+
+                        spawnPlatform(
+                            group1,
+                            newX,
+                            newY,
+                            newZ,
+                            1,
+                            1,
+                            1,
+                            material
+                        );
+
+                        console.log(textureName)
+
+                        socket.emit("placeBlock", {
+                            x: newX,
+                            y: newY,
+                            z: newZ,
+                            texture: textureName
+                        });
+                    }
+
+                }
+            }
+        });
+
+        window.addEventListener("mouseup", (e) => {
+            if (e.button !== 0) return;
+            if (e.target !== renderer.domElement) return;
+            if (!isFirstPerson) return;
+            isTouching = false
+
+        });
+
+        // Receive mined blocks from other players
+        socket.on("blockMined", (data) => {
+            removeMinedBlock(data.x, data.y, data.z);
+        });
+        socket.on("blockPlaced", (data) => {
+            let material
+
+            if (data.texture === "brick") {
+                material = platMat
+            } else if (data.texture === "wool") {
+                material = woolMAT
+            }
+            else if (data.texture === "lava") {
+                material = lavalMat
+            }
+            else if (data.texture === "iron") {
+                material = ironMAT
+            }
+            else if (data.texture === "grass") {
+                material = grassMAT
+            }
+            else if (data.texture === "glass") {
+                material = glassMAT
+            }
+            console.log(data.texture)
+
+            // Don't create a duplicate if this is our own block.
+            const alreadyExists = platforms.some(p =>
+                Math.abs(p.position.x - data.x) < 0.01 &&
+                Math.abs(p.position.y - data.y) < 0.01 &&
+                Math.abs(p.position.z - data.z) < 0.01
+            );
+
+            if (alreadyExists) return;
+
+            spawnPlatform(
+                group1,
+                data.x,
+                data.y,
+                data.z,
+                1,
+                1,
+                1,
+                material
+            );
+        });
+
+
+        renderer.domElement.addEventListener("click", () => {
+            renderer.domElement.requestPointerLock();
+            isFirstPerson = true
+            player.visible = false
+
+        });
+        document.addEventListener("pointerlockchange", () => {
+            if (document.pointerLockElement === renderer.domElement) {
+                isFirstPerson = true;
+                player.visible = false
+            } else {
+                isFirstPerson = false;
+                player.visible = true
+                cameraLookY = 0;
+            }
+        });
+        window.addEventListener("mousemove", (e) => {
+            if (document.pointerLockElement !== renderer.domElement) return;
+
+            cameraAngle -= e.movementX * sensitivity;
+            cameraLookY -= e.movementY * sensitivity;
+
+            cameraLookY = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraLookY));
+        });
+        let lastTouchX = null;
+
+        window.addEventListener("touchstart", (e) => {
+            lastTouchX = e.touches[0].clientX;
+        });
+
+        window.addEventListener("touchmove", (e) => {
+
+            const touch = e.touches[0];
+            const dx = touch.clientX - lastTouchX;
+
+            cameraAngle -= dx * sensitivity * 2;
+
+            lastTouchX = touch.clientX;
+        });
+
+        window.addEventListener("touchend", () => {
+            lastTouchX = null;
+        });
+        let miningCooldown = 0
+
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        function playerHitsPlatform(p) {
+            if (!p.visible || !p.parent.visible) return false;
+            const withinX = player.position.x >= p.position.x - p.width / 2 - playerHitBoxSize / 2 && player.position.x <= p.position.x + p.width / 2 + playerHitBoxSize / 2;
+            const withinZ = player.position.z >= p.position.z - p.depth / 2 - playerHitBoxSize / 2 && player.position.z <= p.position.z + p.depth / 2 + playerHitBoxSize / 2;
+
+            const topOfPlatform = p.position.y + p.height / 2 + 1;
+            const bottomOfPlatform = p.position.y - p.height / 2 - 1;
+            const hittingTop = player.position.y < topOfPlatform && player.position.y > bottomOfPlatform;
+            return withinX && withinZ && hittingTop
+        }
+
+        function isInWall(p, x, y, z) {
+            const halfPlayerX = playerHitBoxSize / 2;
+            const halfPlayerY = (playerHitBoxSize * 2) / 2;
+            const halfPlayerZ = playerHitBoxSize / 2;
+
+            const playerMinX = x - halfPlayerX;
+            const playerMaxX = x + halfPlayerX;
+            const playerMinY = y - halfPlayerY;
+            const playerMaxY = y + halfPlayerY;
+            const playerMinZ = z - halfPlayerZ;
+            const playerMaxZ = z + halfPlayerZ;
+
+            const blockMinX = p.position.x - p.width / 2;
+            const blockMaxX = p.position.x + p.width / 2;
+            const blockMinY = p.position.y - p.height / 2;
+            const blockMaxY = p.position.y + p.height / 2;
+            const blockMinZ = p.position.z - p.depth / 2;
+            const blockMaxZ = p.position.z + p.depth / 2;
+
+            return (
+                playerMaxX > blockMinX &&
+                playerMinX < blockMaxX &&
+                playerMaxY > blockMinY &&
+                playerMinY < blockMaxY &&
+                playerMaxZ > blockMinZ &&
+                playerMinZ < blockMaxZ
+            );
+        }
+        let isInWater = false;
+        let wasInWater = false;
+        let justEnteredWater = 0;
+        let save = {
+            x: 0,
+            y: 6,
+            z: 0
+        }
+        let isOwner = false;
+        let fullMap = false;
+
+        function makeMap(bool) {
+            socket.emit("makeMap", bool)
+        }
+
+        socket.on("mapMod", (bool) => {
+            fullMap = bool
+        })
+
+        socket.on("ownerStatus", (value) => {
+            isOwner = value;
+        });
+
+        player.position.set(save.x, save.y, save.z);
+        scene.add(player);
+        let basegravity = gravity
+        let lastSent = {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+
+        function animate() {
+
+            requestAnimationFrame(animate);
+            miningCooldown -= 1
+
+            if (isTouching && miningCooldown < 0) {
+                raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+
+                const hits = raycaster.intersectObjects(platforms, false);
+
+                if (hits.length !== 0) {
+
+                    const block = hits[0].object;
+
+                    const distance = camera.position.distanceTo(block.position);
+
+                    if (distance < mineRange) {
+
+                        const x = block.position.x;
+                        const y = block.position.y;
+                        const z = block.position.z;
+
+                        // Remove it immediately for this player
+                        removeMinedBlock(x, y, z);
+
+                        // Tell the server which block was mined
+                        socket.emit("mineBlock", {
+                            x: x,
+                            y: y,
+                            z: z
+                        });
+                    }
+                }
+                miningCooldown = 16
+            }
+
+            if (keys.KeyT) {
+                socket.emit("reset")
+            }
+
+            currentSpeed = speed
+            const playerNames = document.getElementById("playersOnline");
+            let playerCount = document.getElementById("playerCount");
+
+            playerNames.innerHTML = "";
+
+            for (const id in players3d) {
+                const li = document.createElement("li");
+                li.textContent = players3d[id].name;
+                playerNames.appendChild(li);
+            }
+
+            playerCount.textContent = Object.keys(players3d).length;
+            let playerCountNum = Object.keys(players3d).length;
+            if (keys['ShiftRight'] || keys['ShiftLeft']) {
+                currentSpeed = speed * 2
+            }
+
+
+            if (keys.ArrowLeft || keys.KeyA) cameraAngle += rotationSpeed;
+            if (keys.ArrowRight || keys.KeyD) cameraAngle -= rotationSpeed;
+
+            const forwardX = Math.sin(cameraAngle);
+            const forwardZ = Math.cos(cameraAngle);
+
+            let dx = 0
+            let dz = 0
+
+            if (keys.ArrowUp || keys.KeyW) {
+                dx = -forwardX * currentSpeed;
+                dz = -forwardZ * currentSpeed;
+            }
+            if (keys.ArrowDown || keys.KeyS) {
+                dx = forwardX * currentSpeed;
+                dz = forwardZ * currentSpeed;
+            }
+
+            const status = document.getElementById("itStatus");
+
+            if (players3d[socket.id]?.it) {
+                status.textContent = "YOU ARE IT!";
+            } else {
+                let name;
+                for (const id in players3d) {
+                    if (players3d[id].it) {
+                        name = players3d[id].name
+                    }
+                }
+                status.textContent = `${name} is it!`;
+            }
+
+
+            pyVelocity += gravity;
+            player.position.y += pyVelocity;
+            isGrounded = false;
+            wasInWater = isInWater;
+            isInWater = false;
+
+            waters.forEach(w => {
+                if (playerHitsPlatform(w)) {
+                    isInWater = true;
+                }
+            });
+
+            if (isInWater && !wasInWater) {
+                justEnteredWater = 15;
+            }
+            if (!isInWater && wasInWater) {
+                justEnteredWater = 15;
+            }
+
+            if (justEnteredWater > 0) justEnteredWater--;
+            if (isInWater) {
+                gravity = -basegravity
+                player.position.y += 0.01
+                gravityBool = -1
+                scene.background = new THREE.Color(0x0000ff);
+            } else {
+                gravity = basegravity
+                gravityBool = 1
+                scene.background = new THREE.Color(0x74b0c8);
+            }
+            if (keys['KeyQ'] && isOwner) {
+                gravity = -0.0075
+            }
+            if (keys['KeyE'] && isOwner) {
+                player.position.x = save.x;
+                player.position.y = save.y;
+                player.position.z = save.z;
+            }
+            let canMove = true
+
+            const nearbyPlatforms = getNearbyPlatforms(
+                player.position.x,
+                player.position.y,
+                player.position.z,
+                2
+            );
+
+
+            nearbyPlatforms.forEach(p => {
+                const topOfPlatform = p.position.y + p.height / 2 + 1 - 0.3;
+                const bottomOfPlatform = p.position.y - p.height / 2 - 1 - 0.3;
+                if (playerHitsPlatform(p)) {
+
+                    // Falling normally: land on top
+                    if (gravity < 0 && pyVelocity <= 0) {
+                        if (justEnteredWater === 0) {
+                            player.position.y = topOfPlatform;
+                            pyVelocity = 0;
+                            isGrounded = true;
+                        }
+                    }
+
+                    // Falling upward / inverted gravity
+                    else if (gravity > 0 && pyVelocity >= 0) {
+                        if (justEnteredWater === 0) {
+                            player.position.y = bottomOfPlatform;
+                            pyVelocity = 0;
+                            isGrounded = true;
+                        }
+                    }
+
+                    if (p.crack) {
+                        p.position.y -= 0.03 * gravityBool;
+                        player.position.y -= 0.03 * gravityBool;
+                    }
+                }
+
+                if (isInWall(p, player.position.x + dx, player.position.y, player.position.z + dz)) {
+                    canMove = false
+                }
+            });
+            // Move X independently
+            if (dx !== 0) {
+                let blockedX = false;
+
+                platforms.forEach(p => {
+                    if (isInWall(
+                        p,
+                        player.position.x + dx,
+                        player.position.y,
+                        player.position.z
+                    )) {
+                        blockedX = true;
+                    }
+                });
+
+                if (!blockedX) {
+                    player.position.x += dx;
+                }
+            }
+
+            // Move Z independently
+            if (dz !== 0) {
+                let blockedZ = false;
+
+                platforms.forEach(p => {
+                    if (isInWall(
+                        p,
+                        player.position.x,
+                        player.position.y,
+                        player.position.z + dz
+                    )) {
+                        blockedZ = true;
+                    }
+                });
+
+                if (!blockedZ) {
+                    player.position.z += dz;
+                }
+            }
+            bouncies.forEach(p => {
+                const topOfPlatform = p.position.y + p.height / 2 + 1;
+                const bottomOfPlatform = p.position.y - p.height / 2 - 1;
+                if (playerHitsPlatform(p)) {
+                    if (gravity < 0) {
+                        player.position.y = topOfPlatform;
+                    }
+                    else {
+                        player.position.y = bottomOfPlatform;
+                    }
+                    pyVelocity = jumpForce * 2 * gravityBool;
+                }
+            });
+            lavas.forEach(p => {
+                if (playerHitsPlatform(p)) {
+                    player.position.x = save.x
+                    player.position.y = save.y
+                    player.position.z = save.z
+                    socket.emit("fellOff");
+                }
+            });
+            checkpoints.forEach(p => {
+                if (playerHitsPlatform(p)) {
+                    save.x = player.position.x
+                    save.y = player.position.y
+                    save.z = player.position.z
+                    checkpoints.splice(checkpoints.indexOf(p), 1)
+                    scene.remove(p)
+                }
+            });
+
+            if (keys["Space"] && isGrounded) {
+                pyVelocity = jumpForce * gravityBool;
+                isGrounded = false;
+            }
+
+
+
+            if (player.position.y < -50 || player.position.y > 800) {
+
+                socket.emit("fellOff");
+
+                player.position.x = save.x;
+                player.position.y = save.y;
+                player.position.z = save.z;
+                pyVelocity = 0;
+            }
+
+            if (!isFirstPerson) {
+                const camX = player.position.x + Math.sin(cameraAngle) * cameraRadius;
+                const camZ = player.position.z + Math.cos(cameraAngle) * cameraRadius;
+                let camY = player.position.y + 6;
+                if (gravityBool === -1) {
+                    camY = player.position.y - 6;
+                }
+                camera.position.set(camX, camY, camZ);
+                camera.lookAt(player.position)
+
+            } else {
+                const camX = player.position.x;
+                const camY = player.position.y + 0.8;
+                const camZ = player.position.z;
+
+                camera.position.set(camX, camY, camZ);
+
+                const dirX = -Math.sin(cameraAngle) * Math.cos(cameraLookY);
+                const dirY = Math.sin(cameraLookY);
+                const dirZ = -Math.cos(cameraAngle) * Math.cos(cameraLookY);
+
+                camera.rotation.order = "YXZ";
+                camera.rotation.y = cameraAngle;
+                camera.rotation.x = cameraLookY;
+            }
+
+
+            if (
+                player.position.x !== lastSent.x ||
+                player.position.y !== lastSent.y ||
+                player.position.z !== lastSent.z
+            ) {
+                socket.emit("move", {
+                    x: player.position.x,
+                    y: player.position.y,
+                    z: player.position.z
+                });
+
+                lastSent.x = player.position.x;
+                lastSent.y = player.position.y;
+                lastSent.z = player.position.z;
+            }
+
+            for (const id in players3d) {
+
+                if (id === socket.id) continue;
+
+                const p = players3d[id];
+
+                if (!otherPlayers[id]) {
+
+
+                    let mesh;
+                    if (p.it) {
+                        mesh = new THREE.Mesh(playerGeo, itMat);
+
+                    } else {
+                        mesh = new THREE.Mesh(playerGeo, playerMat);
+
+                    }
+
+
+                    const tag = createNameTag(p.name);
+                    mesh.userData.nameTag = tag;
+                    mesh.userData.lastName = p.name;
+                    mesh.add(tag);
+
+                    scene.add(mesh);
+                    otherPlayers[id] = mesh;
+
+                }
+
+                otherPlayers[id].position.set(
+                    p.x,
+                    p.y,
+                    p.z
+                );
+                otherPlayers[id].material = playerMat;
+
+                if (otherPlayers[id].userData.lastName !== p.name) {
+                    otherPlayers[id].remove(otherPlayers[id].userData.nameTag);
+
+                    const newTag = createNameTag(p.name);
+
+                    otherPlayers[id].add(newTag);
+
+                    otherPlayers[id].userData.nameTag = newTag;
+                    otherPlayers[id].userData.lastName = p.name;
+                }
+
+
+            }
+
+            for (const id in otherPlayers) {
+
+                if (!players3d[id]) {
+                    scene.remove(otherPlayers[id]);
+                    delete otherPlayers[id];
+                }
+
+            }
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+
+</html>

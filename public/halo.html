@@ -573,6 +573,10 @@
 
             velocityY: 0,
 
+            dx: 0,
+
+            dz: 0,
+
             grounded: false
 
         };
@@ -1016,6 +1020,15 @@
                         scene.remove(bullet);
                         bullets.splice(bullets.indexOf(bullet), 1);
                     }, 200);
+
+                    const dist = bullet.position.distanceTo(player)
+                    if (dist < 30) {
+                        player.velocityY = jump * 2.5
+                        const diffX = player.x - bullet.position.x
+                        const diffZ = player.z - bullet.position.z
+                        player.dx = 30 - diffX
+                        player.dz = 30 - diffZ
+                    }
                 } else {
                     scene.remove(bullet);
 
@@ -1442,7 +1455,12 @@
                 }
 
             });
-
+            player.x += player.dx / 40
+            player.z += player.dz / 40
+            if (player.grounded) {
+                player.dx = 0
+                player.dz = 0
+            }
 
             if (keys.Space && player.grounded) {
 
