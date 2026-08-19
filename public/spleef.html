@@ -67,12 +67,23 @@
         Jump: Spacebar
     </div>
 
-    <script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/loaders/GLTFLoader.js";
         function home() {
             window.location.href = "index.html";
         }
         const loader = new THREE.TextureLoader();
         const scene = new THREE.Scene();
+        const gltfLoader = new GLTFLoader();
         scene.background = new THREE.Color(0x74b0c8);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -90,6 +101,30 @@
         const white = new THREE.MeshBasicMaterial({
             color: 0xffffff
         });
+
+        let scafoldings = []
+
+        function removeMinedScaffolding(x, y, z) {
+            const scaffold = scafoldings.find(s =>
+                Math.abs(s.userData.blockX - x) < 0.01 &&
+                Math.abs(s.userData.blockY - y) < 0.01 &&
+                Math.abs(s.userData.blockZ - z) < 0.01
+            );
+
+            if (!scaffold) return;
+
+            if (scaffold.parent) {
+                scaffold.parent.remove(scaffold);
+            }
+
+            const index = scafoldings.indexOf(scaffold);
+
+            if (index !== -1) {
+                scafoldings.splice(index, 1);
+            }
+        }
+
+
 
         const socket = io({
             transports: ["websocket"]
@@ -198,6 +233,9 @@
                 }
                 else if (block.texture === "glass") {
                     material = glassMAT
+                }
+                else if (block.texture === "scafo") {
+                    material = "scafo"
                 }
 
                 spawnPlatform(
@@ -321,6 +359,18 @@
         scene.add(group2);
         scene.add(group3);
         scene.add(group4);
+        let lavas = [];
+
+        const textureNames = new Map([
+            [platMat, "platMat"],
+            [woolMAT, "woolMAT"],
+            [lavalMat, "lavalMat"],
+            [ironMAT, "ironMAT"],
+            [grassMAT, "grassMAT"],
+            [glassMAT, "glassMAT"],
+            [bouncy, "bouncy"],
+        ]);
+
         const spawnPlatform = (
             group,
             x,
@@ -331,27 +381,37 @@
             depth = 1,
             texture = grassMAT
         ) => {
+            if (texture === "scafo") {
+                addScafolding(x, y, z);
+                return;
+            }
+
             const p = new THREE.Mesh(
                 new THREE.BoxGeometry(width, height, depth),
                 texture
             );
 
             p.position.set(x, y, z);
+            p.texture = textureNames.get(texture) || "unknown";
 
             p.width = width;
             p.height = height;
             p.depth = depth;
             p.crack = false;
 
+            // IMPORTANT
+            if (texture === lavalMat) {
+                p.isLava = true;
+                lavas.push(p);
+            }
+
             group.add(p);
             platforms.push(p);
 
             platformMap.set(blockKey(x, y, z), p);
-            console.log(`platformSpawned. Texture: ${texture}`)
 
             return p;
         };
-        lavas = []
         const spawnLava = (group, x, y, z, width = 1, height = 1, depth = 1) => {
             const p = new THREE.Mesh(
                 new THREE.BoxGeometry(width, height, depth),
@@ -367,7 +427,7 @@
 
             lavas.push(p);
         };
-        bouncies = []
+        let bouncies = []
         const spawnBounce = (group, x, y, z, width = 5, height = 1, depth = 5) => {
             const p = new THREE.Mesh(
                 new THREE.BoxGeometry(width, height, depth),
@@ -383,7 +443,7 @@
 
             bouncies.push(p);
         };
-        waters = []
+        let waters = []
         const spawnWater = (group, x, y, z, width = 1, height = 1, depth = 1) => {
             const borderSize = 0.1;
 
@@ -439,7 +499,7 @@
         bindButton("right", "ArrowRight");
         bindButton("up", "ArrowUp");
         bindButton("jump", "Space");
-        checkpoints = []
+        let checkpoints = []
 
         let players3d = {}
 
@@ -475,6 +535,7 @@
 
 
         const keys = {}
+
 
 
         let pyVelocity = 0;
@@ -538,6 +599,12 @@
             if (index !== -1) {
                 platforms.splice(index, 1);
             }
+
+            // Remove lava from the lava collision list too
+            const lavaIndex = lavas.indexOf(block);
+            if (lavaIndex !== -1) {
+                lavas.splice(lavaIndex, 1);
+            }
         }
 
         window.addEventListener("mousedown", (e) => {
@@ -558,11 +625,36 @@
 
             raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 
-            const hits = raycaster.intersectObjects(platforms, false);
+            const hits = raycaster.intersectObjects(
+                [...platforms, ...scafoldings],
+                true
+            );
 
             if (hits.length !== 0) {
                 const hit = hits[0];
                 const block = hit.object;
+
+                let scaffold = scafoldings.find(s => s === block || s.getObjectById(block.id));
+
+                if (scaffold) {
+                    const distance = camera.position.distanceTo(scaffold.position);
+
+                    if (distance < mineRange) {
+                        const x = scaffold.position.x;
+                        const y = scaffold.position.y;
+                        const z = scaffold.position.z;
+
+                        removeMinedScaffolding(x, y, z);
+
+                        socket.emit("mineBlock", {
+                            x: x,
+                            y: y,
+                            z: z
+                        });
+                    }
+
+                    return;
+                }
 
                 const distance = camera.position.distanceTo(block.position);
 
@@ -582,12 +674,17 @@
                     const newY = y + Math.round(normal.y);
                     const newZ = z + Math.round(normal.z);
 
-                    // Don't place if a block already exists there
-                    const occupied = platforms.some(p =>
-                        Math.abs(p.position.x - newX) < 0.01 &&
-                        Math.abs(p.position.y - newY) < 0.01 &&
-                        Math.abs(p.position.z - newZ) < 0.01
-                    );
+                    const occupied =
+                        platforms.some(p =>
+                            Math.abs(p.position.x - newX) < 0.01 &&
+                            Math.abs(p.position.y - newY) < 0.01 &&
+                            Math.abs(p.position.z - newZ) < 0.01
+                        ) ||
+                        scafoldings.some(s =>
+                            Math.abs(s.userData.blockX - newX) < 0.01 &&
+                            Math.abs(s.userData.blockY - newY) < 0.01 &&
+                            Math.abs(s.userData.blockZ - newZ) < 0.01
+                        );
 
                     if (!occupied) {
                         const block = document.getElementById("levelSelect").value;
@@ -613,6 +710,10 @@
                         } else if (block === "6") {
                             material = glassMAT;
                             textureName = "glass";
+                        }
+                        else if (block === "7") {
+                            material = "scafo";
+                            textureName = "scafo";
                         }
 
                         spawnPlatform(
@@ -651,6 +752,7 @@
         // Receive mined blocks from other players
         socket.on("blockMined", (data) => {
             removeMinedBlock(data.x, data.y, data.z);
+            removeMinedScaffolding(data.x, data.y, data.z);
         });
         socket.on("blockPlaced", (data) => {
             let material
@@ -671,6 +773,9 @@
             }
             else if (data.texture === "glass") {
                 material = glassMAT
+            }
+            else if (data.texture === "scafo") {
+                material = "scafo"
             }
             console.log(data.texture)
 
@@ -809,11 +914,288 @@
         player.position.set(save.x, save.y, save.z);
         scene.add(player);
         let basegravity = gravity
+        let isClimbingScaffolding = false
         let lastSent = {
             x: 0,
             y: 0,
             z: 0
         };
+
+        function setPreset(x) {
+            for (const p of [...platforms]) {
+                if (p.parent) {
+                    p.parent.remove(p);
+                }
+                platformMap.delete(
+                    blockKey(
+                        p.position.x,
+                        p.position.y,
+                        p.position.z
+                    )
+                );
+                const lavaIndex = lavas.indexOf(p);
+                if (lavaIndex !== -1) {
+                    lavas.splice(lavaIndex, 1);
+                }
+            }
+            platforms.length = 0;
+            platformMap.clear();
+            if (x === 1) {
+                spawnPlatform(group1, 0, 0, 0, 1, 1, 1, platMat)
+            } else if (x === 2) {
+                const size = 10
+                for (let r = 0; r < size; r++) {
+                    for (let c = 0; c < size; c++) {
+                        spawnPlatform(group1, r, 0, c, 1, 1, 1, platMat)
+                    }
+                }
+            } else if (x === 3) {
+                spawnPlatform(group1, 0, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 6, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 4, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 5, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 0, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 1, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 1, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 2, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 1, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 2, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 5, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 7, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 0, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 1, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 2, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 3, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 0, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 1, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 2, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 3, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 3, 6, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 7, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 8, 1, 1, 1, platMat)
+                spawnPlatform(group1, 9, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 8, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 4, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 3, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 2, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 1, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 3, 9, 1, 1, 1, platMat)
+                spawnPlatform(group1, 0, 4, 9, 1, 1, 1, woolMAT)
+                spawnPlatform(group1, 9, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 4, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 0, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 1, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 5, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 2, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 3, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 4, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 6, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 9, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 8, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 7, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 7, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 6, 1, 9, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 8, 1, 1, 1, lavalMat)
+                spawnPlatform(group1, 5, 1, 9, 1, 1, 1, lavalMat)
+
+
+
+            }
+        }
+        let isUpdating = false
+
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         function animate() {
 
@@ -851,8 +1233,43 @@
                 miningCooldown = 16
             }
 
+            lavas.forEach(p => {
+                if (isInWall(
+                    p,
+                    player.position.x,
+                    player.position.y,
+                    player.position.z
+                )) {
+                    player.position.set(save.x, save.y, save.z);
+                    pyVelocity = 0;
+                    socket.emit("fellOff");
+                }
+            });
+
             if (keys.KeyT) {
                 socket.emit("reset")
+            }
+
+            if (keys.KeyR && !isUpdating) {
+                isUpdating = true;
+
+                keys.KeyR = false;
+
+                const select = Number(prompt("What preset?"));
+
+                if (!Number.isNaN(select)) {
+                    setPreset(select);
+                }
+
+                isUpdating = false;
+            }
+
+            if (keys.KeyP) {
+                let string = ""
+                for (let plat of platforms) {
+                    string += `spawnPlatform(group1, ${plat.position.x}, ${plat.position.y}, ${plat.position.z}, 1, 1, 1, ${plat.texture}) \n `
+                }
+                console.log(string)
             }
 
             currentSpeed = speed
@@ -892,26 +1309,25 @@
                 dz = forwardZ * currentSpeed;
             }
 
-            const status = document.getElementById("itStatus");
-
-            if (players3d[socket.id]?.it) {
-                status.textContent = "YOU ARE IT!";
-            } else {
-                let name;
-                for (const id in players3d) {
-                    if (players3d[id].it) {
-                        name = players3d[id].name
-                    }
-                }
-                status.textContent = `${name} is it!`;
-            }
-
 
             pyVelocity += gravity;
             player.position.y += pyVelocity;
             isGrounded = false;
             wasInWater = isInWater;
             isInWater = false;
+
+            isClimbingScaffolding = false;
+
+            for (let scafo of scafoldings) {
+                if (isInWall(
+                    scafo,
+                    player.position.x,
+                    player.position.y,
+                    player.position.z
+                )) {
+                    isClimbingScaffolding = true;
+                }
+            }
 
             waters.forEach(w => {
                 if (playerHitsPlatform(w)) {
@@ -958,9 +1374,14 @@
             nearbyPlatforms.forEach(p => {
                 const topOfPlatform = p.position.y + p.height / 2 + 1 - 0.3;
                 const bottomOfPlatform = p.position.y - p.height / 2 - 1 - 0.3;
-                if (playerHitsPlatform(p)) {
 
-                    // Falling normally: land on top
+                if (playerHitsPlatform(p)) {
+                    if (p.isLava) {
+                        player.position.set(save.x, save.y, save.z);
+                        pyVelocity = 0;
+                        socket.emit("fellOff");
+                    }
+
                     if (gravity < 0 && pyVelocity <= 0) {
                         if (justEnteredWater === 0) {
                             player.position.y = topOfPlatform;
@@ -969,7 +1390,6 @@
                         }
                     }
 
-                    // Falling upward / inverted gravity
                     else if (gravity > 0 && pyVelocity >= 0) {
                         if (justEnteredWater === 0) {
                             player.position.y = bottomOfPlatform;
@@ -1040,14 +1460,7 @@
                     pyVelocity = jumpForce * 2 * gravityBool;
                 }
             });
-            lavas.forEach(p => {
-                if (playerHitsPlatform(p)) {
-                    player.position.x = save.x
-                    player.position.y = save.y
-                    player.position.z = save.z
-                    socket.emit("fellOff");
-                }
-            });
+
             checkpoints.forEach(p => {
                 if (playerHitsPlatform(p)) {
                     save.x = player.position.x
@@ -1058,7 +1471,7 @@
                 }
             });
 
-            if (keys["Space"] && isGrounded) {
+            if (keys["Space"] && (isGrounded || isClimbingScaffolding)) {
                 pyVelocity = jumpForce * gravityBool;
                 isGrounded = false;
             }
